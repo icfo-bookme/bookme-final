@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import SearchField from "./SearchField";
 import SearchButton from "./SearchButton";
 import getDestination from "@/services/hotel/getDestination";
 
 const HotelSearch = () => {
+  const router = useRouter();
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
@@ -38,7 +40,7 @@ const HotelSearch = () => {
   }, ${rooms} Room${rooms > 1 ? "s" : ""}`;
 
   const handleSearch = (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault();
     
     const query = new URLSearchParams({
       checkin: checkinDate,
@@ -49,7 +51,8 @@ const HotelSearch = () => {
       adult: String(adults),
     }).toString();
 
-    window.location.href = `/hotel/list?${query}`;
+    // Use router.push for client-side navigation
+    router.push(`/hotel/list?${query}`);
   };
 
   const handleCheckinChange = (e) => {
