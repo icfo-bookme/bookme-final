@@ -64,7 +64,7 @@ const HotelSearch = () => {
   };
 
   return (
-    <div className="bg-white relative max-w-5xl pb-6 text-blue-950">
+    <div className="bg-white relative max-w-5xl  pb-6 text-blue-950">
       <form onSubmit={handleSearch}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Destination Dropdown */}
