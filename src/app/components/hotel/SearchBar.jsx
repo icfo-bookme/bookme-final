@@ -196,7 +196,7 @@ const SearchBar = ({ initialValues }) => {
           </div>
 
           {/* Search Button */}
-          <div className="w-full md:w-1/5">
+          <div className="w-full mt-2 md:w-1/5">
             <button
               type="submit"
               className="w-full h-14 text-lg px-4 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"

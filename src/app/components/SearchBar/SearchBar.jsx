@@ -15,9 +15,9 @@ const TravelBookingTabs = () => {
   const [activeTab, setActiveTab] = useState("hotel");
 
   return (
-    <div className="max-w-full bg-white shadow-lg border  rounded-lg text-blue-950">
-      {/* Tabs Navigation */}
-      <div className="flex border-b text-center">
+    <div className=" bg-white shadow-lg border rounded-lg text-blue-950">
+      {/* Tabs Navigation - Responsive layout */}
+      <div className="flex lg:w-[50%] border-b">
         <TabButton
           icon={<FaHotel />}
           active={activeTab === "hotel"}
@@ -25,6 +25,7 @@ const TravelBookingTabs = () => {
         >
           Hotel
         </TabButton>
+        
         <TabButton
           icon={<FaPlaneDeparture />}
           active={activeTab === "flight"}
@@ -48,8 +49,8 @@ const TravelBookingTabs = () => {
         </TabButton>
       </div>
 
-      {/* Tab Content */}
-      <div className="p-6 bg-white">
+      {/* Tab Content - Responsive padding */}
+      <div className="p-4 sm:p-6 bg-white">
         {activeTab === "hotel" && <HotelSearch />}
         {activeTab === "flight" && <FlightSearch />}
         {activeTab === "tour" && <TourSearch />}
@@ -62,14 +63,14 @@ const TravelBookingTabs = () => {
 const TabButton = ({ children, active, onClick, icon }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 px-6 py-4 text-base font-semibold transition-colors ${
+    className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm md:text-base font-medium transition-colors ${
       active
         ? "text-blue-950 border-b-2 border-blue-950"
         : "text-gray-500 hover:text-blue-800"
     }`}
   >
-    <span className="text-lg">{icon}</span>
-    {children}
+    <span className="text-lg sm:text-xl">{icon}</span>
+    <span>{children}</span>
   </button>
 );
 
