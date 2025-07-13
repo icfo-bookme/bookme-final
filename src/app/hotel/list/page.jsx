@@ -23,7 +23,7 @@ const HotelListPage = async ({ searchParams }) => {
     const hotels = await res.json();
 
     return (
-        <div className="container mx-auto max-w-6xl p-4 pt-24 bg-white text-blue-950">
+        <div className="container mx-auto max-w-6xl p-4 pt-20 md:pt-24 bg-white text-blue-950">
             {/* Search Bar Component */}
            
             <div className="mb-6 md:mb-8  ">
