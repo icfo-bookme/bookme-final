@@ -112,7 +112,7 @@ const HotelSearch = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Destination - Full width on mobile, first in order */}
           <div className="col-span-2 md:col-span-1 space-y-1">
-            <label className="block text-sm font-medium text-blue-950">
+            <label className="block text-sm font-bold text-blue-950">
               City/Hotel/Resort/Area
             </label>
             <select
@@ -130,7 +130,7 @@ const HotelSearch = () => {
 
           {/* Check In - Half width on mobile, second in order */}
           <div className="sm:col-span-1 space-y-1 relative">
-            <label className="block text-sm font-medium text-blue-950">
+            <label className="block font-bold text-sm  text-blue-950">
               Check In
             </label>
             <div
@@ -154,7 +154,7 @@ const HotelSearch = () => {
 
           {/* Check Out - Half width on mobile, third in order */}
           <div className="sm:col-span-1 space-y-1 relative">
-            <label className="block text-sm font-medium text-blue-950">
+            <label className="block font-bold text-sm  text-blue-950">
               Check Out
             </label>
             <div
@@ -178,7 +178,7 @@ const HotelSearch = () => {
 
           {/* Guests & Rooms - Full width on mobile, fourth in order */}
           <div className="col-span-2 md:col-span-1 space-y-1">
-            <label className="block text-sm font-medium text-blue-950">
+            <label className="block text-sm font-bold text-blue-950">
               Guests & Rooms
             </label>
             <div

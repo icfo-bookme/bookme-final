@@ -47,7 +47,7 @@ export default async function Home() {
 
   return (
     <main className={roboto.className}>
-      <div className="relative w-full min-h-[80vh]">
+      <div className="relative w-full min-h-[67vh]">
       {/* Banner Background */}
       <div className="w-full h-full">
         <Banner />
