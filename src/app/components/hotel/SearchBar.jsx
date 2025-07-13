@@ -10,7 +10,7 @@ const SearchBar = ({ initialValues }) => {
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showCheckinCalendar, setShowCheckinCalendar] = useState(false);
   const [showCheckoutCalendar, setShowCheckoutCalendar] = useState(false);
-  const [showMobileSearchModal, setShowMobileSearchModal] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [adults, setAdults] = useState(initialValues?.adults || 2);
   const [children, setChildren] = useState(0);
   const [rooms, setRooms] = useState(initialValues?.rooms || 1);
@@ -22,7 +22,12 @@ const SearchBar = ({ initialValues }) => {
 
   const checkinRef = useRef(null);
   const checkoutRef = useRef(null);
-  const mobileModalRef = useRef(null);
+
+  // Get destination name by ID
+  const getDestinationNameById = (id) => {
+    const destination = destinations.find(d => d.id === id);
+    return destination ? destination.name : "Edit Search Information";
+  };
 
   // Fetch destination list from API
   useEffect(() => {
@@ -108,9 +113,6 @@ const SearchBar = ({ initialValues }) => {
     if (checkoutRef.current && !checkoutRef.current.contains(e.target)) {
       setShowCheckoutCalendar(false);
     }
-    if (mobileModalRef.current && !mobileModalRef.current.contains(e.target)) {
-      setShowMobileSearchModal(false);
-    }
   };
 
   useEffect(() => {
@@ -122,25 +124,27 @@ const SearchBar = ({ initialValues }) => {
 
   return (
     <div className="bg-white rounded-xl py-4 max-w-6xl mx-auto">
-      {/* Mobile Header - Visible only on small devices */}
-      <div className='grid grid-cols-5 md:hidden mb-4 px-4'>
-        <div className='col-span-3'>
-          <h1 className="text-lg font-semibold text-blue-950 truncate">
-            {selectedDestination?.name || "Select Destination"}
-          </h1>
-          <p className="text-sm text-gray-600">
-            {formatDate(checkinDate)} - {formatDate(checkoutDate)}, {guestText}
-          </p>
+      {/* Mobile Header - Visible only on small devices when search form is collapsed */}
+      {!showMobileSearch && (
+        <div className='grid grid-cols-5 md:hidden mb-4 px-4'>
+          <div className='col-span-3'>
+            <h1 className="text-lg font-semibold text-blue-950 truncate">
+              {getDestinationNameById(selectedLocationId)}
+            </h1>
+            <p className="text-sm text-gray-600">
+              {formatDate(checkinDate)} - {formatDate(checkoutDate)}, {guestText}
+            </p>
+          </div>
+          <div className='col-span-2 flex justify-end items-center'>
+            <button 
+              onClick={() => setShowMobileSearch(true)}
+              className="bg-yellow-500 text-blue-950 px-4 text-sm font-bold py-2 rounded-lg"
+            >
+              Edit
+            </button>
+          </div>
         </div>
-        <div className='col-span-2 flex justify-end items-center'>
-          <button 
-            onClick={() => setShowMobileSearchModal(true)}
-            className="bg-yellow-500 text-blue-950 px-4 text-sm font-bold py-2 rounded-lg"
-          >
-            Edit
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Desktop Search Form - Hidden on mobile */}
       <form onSubmit={handleSearch} className="w-full hidden md:block">
@@ -244,89 +248,99 @@ const SearchBar = ({ initialValues }) => {
         </div>
       </form>
 
-      {/* Mobile Search Modal - Appears when Edit is clicked */}
-      {showMobileSearchModal && (
-        <div className="fixed inset-0 -mt-36 bg-black bg-opacity-40 flex items-center justify-center z-50 md:hidden">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-lg" ref={mobileModalRef}>
-            <h2 className="text-xl font-semibold text-blue-950 mb-4">Edit Search</h2>
-            
-            <form onSubmit={(e) => {
-              handleSearch(e);
-              setShowMobileSearchModal(false);
-            }}>
-              {/* Destination Dropdown */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
-                <select
-                  value={selectedLocationId}
-                  onChange={(e) => {
-                    const selected = destinations.find(d => d.id === e.target.value);
-                    setSelectedLocationId(e.target.value);
-                    setSelectedDestination(selected);
-                  }}
-                  className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 focus:ring-0 transition-colors bg-white w-full text-blue-950"
-                >
-                  {destinations.map((destination) => (
-                    <option key={destination.id} value={destination.id}>
-                      {destination.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+      {/* Mobile Search Form - Visible when showMobileSearch is true */}
+      {showMobileSearch && (
+        <form onSubmit={(e) => {
+          handleSearch(e);
+          setShowMobileSearch(false);
+        }} className="w-full md:hidden px-4">
+          <div className="flex flex-col gap-4">
+            {/* Header with title and close button */}
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-lg font-semibold text-blue-950">Edit Search</h2>
+              <button
+                type="button"
+                onClick={() => setShowMobileSearch(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
 
-              {/* Check In */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Check In</label>
-                <input
-                  type="date"
-                  value={checkinDate}
-                  onChange={handleCheckinChange}
-                  className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 w-full"
-                  min={new Date().toISOString().split('T')[0]}
-                />
-              </div>
+            {/* Destination Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
+              <select
+                value={selectedLocationId}
+                onChange={(e) => {
+                  const selected = destinations.find(d => d.id === e.target.value);
+                  setSelectedLocationId(e.target.value);
+                  setSelectedDestination(selected);
+                }}
+                className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 focus:ring-0 transition-colors bg-white w-full text-blue-950"
+              >
+                {destinations.map((destination) => (
+                  <option key={destination.id} value={destination.id}>
+                    {destination.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              {/* Check Out */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Check Out</label>
-                <input
-                  type="date"
-                  value={checkoutDate}
-                  onChange={handleCheckoutChange}
-                  className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 w-full"
-                  min={checkinDate}
-                />
-              </div>
+            {/* Check In */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Check In</label>
+              <input
+                type="date"
+                value={checkinDate}
+                onChange={handleCheckinChange}
+                className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 w-full"
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
 
-              {/* Guests & Rooms */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Guests & Rooms</label>
-                <div
-                  onClick={() => setShowGuestModal(true)}
-                  className="p-3 h-12 border border-gray-300 rounded-lg bg-white w-full flex items-center cursor-pointer"
-                >
-                  <span className="text-blue-950">{guestText}</span>
-                </div>
-              </div>
+            {/* Check Out */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Check Out</label>
+              <input
+                type="date"
+                value={checkoutDate}
+                onChange={handleCheckoutChange}
+                className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 w-full"
+                min={checkinDate}
+              />
+            </div>
 
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowMobileSearchModal(false)}
-                  className="flex-1 h-12 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 h-12 px-4 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"
-                >
-                  Apply
-                </button>
+            {/* Guests & Rooms */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Guests & Rooms</label>
+              <div
+                onClick={() => setShowGuestModal(true)}
+                className="p-3 h-12 border border-gray-300 rounded-lg bg-white w-full flex items-center cursor-pointer"
+              >
+                <span className="text-blue-950">{guestText}</span>
               </div>
-            </form>
+            </div>
+
+            <div className="flex gap-3 mt-2">
+              <button
+                type="button"
+                onClick={() => setShowMobileSearch(false)}
+                className="flex-1 h-12 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 h-12 px-4 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"
+              >
+                Search
+              </button>
+            </div>
           </div>
-        </div>
+        </form>
       )}
 
       {/* Guest Modal - Shared between desktop and mobile */}
