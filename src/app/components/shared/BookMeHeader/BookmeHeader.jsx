@@ -238,7 +238,7 @@ const BookMeHeader = () => {
               <div className="flex justify-between p-4 border-b border-gray-200">
                 <Link href="/" onClick={() => { handleClick(); closeMobileMenu(); }}>
                   <Image
-                    src="/assets/images/download.png"
+                    src="/assets/images/logo.png"
                     alt="logo"
                     width={150}
                     height={5}
