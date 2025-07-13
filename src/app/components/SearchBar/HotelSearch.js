@@ -112,13 +112,13 @@ const HotelSearch = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Destination - Full width on mobile, first in order */}
           <div className="col-span-2 md:col-span-1 space-y-1">
-            <label className="block text-sm font-bold text-blue-950">
+            <label className="block text-sm  text-blue-950">
               City/Hotel/Resort/Area
             </label>
             <select
               value={selectedLocationId}
               onChange={(e) => setSelectedLocationId(e.target.value)}
-              className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white w-full text-blue-950 text-sm sm:text-base"
+              className="p-3 font-bold border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white w-full text-blue-950 text-sm sm:text-base"
             >
               {destinations.map((destination) => (
                 <option key={destination.id} value={destination.id}>
@@ -130,14 +130,14 @@ const HotelSearch = () => {
 
           {/* Check In - Half width on mobile, second in order */}
           <div className="sm:col-span-1 space-y-1 relative">
-            <label className="block font-bold text-sm  text-blue-950">
+            <label className="block font-medium text-sm  text-blue-950">
               Check In
             </label>
             <div
               onClick={toggleCheckinCalendar}
               className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
             >
-              <div className="font-medium text-blue-950 text-sm sm:text-base">{displayCheckin}</div>
+              <div className=" font-bold text-blue-950 text-sm sm:text-base">{displayCheckin}</div>
             </div>
             {showCheckinCalendar && (
               <div className="absolute z-10 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-2">
@@ -154,14 +154,14 @@ const HotelSearch = () => {
 
           {/* Check Out - Half width on mobile, third in order */}
           <div className="sm:col-span-1 space-y-1 relative">
-            <label className="block font-bold text-sm  text-blue-950">
+            <label className="block  text-sm  text-blue-950">
               Check Out
             </label>
             <div
               onClick={toggleCheckoutCalendar}
-              className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
+              className="p-3 border font-medium border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
             >
-              <div className="font-medium text-blue-950 text-sm sm:text-base">{displayCheckout}</div>
+              <div className=" font-bold text-blue-950 text-sm sm:text-base">{displayCheckout}</div>
             </div>
             {showCheckoutCalendar && (
               <div className="absolute z-10 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-2">
@@ -178,14 +178,14 @@ const HotelSearch = () => {
 
           {/* Guests & Rooms - Full width on mobile, fourth in order */}
           <div className="col-span-2 md:col-span-1 space-y-1">
-            <label className="block text-sm font-bold text-blue-950">
+            <label className="block text-sm font-medium text-blue-950">
               Guests & Rooms
             </label>
             <div
               onClick={() => setShowGuestModal(true)}
               className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
             >
-              <div className="font-medium text-blue-950 text-sm sm:text-base">{guestText}</div>
+              <div className=" font-bold text-blue-950 text-sm sm:text-base">{guestText}</div>
             </div>
           </div>
         </div>

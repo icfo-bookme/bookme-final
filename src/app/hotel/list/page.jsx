@@ -1,6 +1,7 @@
 // app/hotel/list/page.jsx
 import SearchBar from '@/app/components/hotel/SearchBar';
 import Image from 'next/image';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 const HotelListPage = async ({ searchParams }) => {
@@ -125,12 +126,12 @@ const HotelListPage = async ({ searchParams }) => {
 
                                     {/* View Details Button */}
                                     <div className="flex justify-end items-end pt-2 md:pt-0">
-                                        <button style={{
+                                        <Link href={`/hotel/list/details/${hotel.id}`} style={{
                                             background:
                                                 "linear-gradient(90deg, #313881, #0678B4)",
                                         }} className="w-full md:w-auto mt-2 px-4 py-1.5 md:px-3 md:py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors text-sm md:text-sm">
                                             View Details
-                                        </button>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
