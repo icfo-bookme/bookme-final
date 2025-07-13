@@ -47,7 +47,7 @@ export default async function Home() {
 
   return (
     <main className={roboto.className}>
-      <div className="relative w-full min-h-[67vh]">
+      <div className="relative w-full min-h-[67vh] md:min-h-[80vh]">
       {/* Banner Background */}
       <div className="w-full h-full">
         <Banner />
@@ -59,7 +59,7 @@ export default async function Home() {
        
         
         {/* Centered search widget */}
-        <div className="relative z-20 w-[94%] md:w-[70%] mx-auto   lg:top-20">
+        <div className="relative z-20 w-[94%] md:w-[80%] mx-auto   lg:top-20">
           <TravelSearchWidget />
         </div>
       </div>

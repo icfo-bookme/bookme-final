@@ -10,6 +10,7 @@ const SearchBar = ({ initialValues }) => {
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showCheckinCalendar, setShowCheckinCalendar] = useState(false);
   const [showCheckoutCalendar, setShowCheckoutCalendar] = useState(false);
+  const [showMobileSearchModal, setShowMobileSearchModal] = useState(false);
   const [adults, setAdults] = useState(initialValues?.adults || 2);
   const [children, setChildren] = useState(0);
   const [rooms, setRooms] = useState(initialValues?.rooms || 1);
@@ -17,9 +18,11 @@ const SearchBar = ({ initialValues }) => {
   const [selectedLocationId, setSelectedLocationId] = useState(initialValues?.locationID || "");
   const [checkinDate, setCheckinDate] = useState(initialValues?.checkin || "");
   const [checkoutDate, setCheckoutDate] = useState(initialValues?.checkout || "");
+  const [selectedDestination, setSelectedDestination] = useState(null);
 
   const checkinRef = useRef(null);
   const checkoutRef = useRef(null);
+  const mobileModalRef = useRef(null);
 
   // Fetch destination list from API
   useEffect(() => {
@@ -28,8 +31,14 @@ const SearchBar = ({ initialValues }) => {
         const data = await getDestination();
         setDestinations(data);
 
-        if (data.length > 0 && !initialValues?.locationID) {
-          setSelectedLocationId(data[0].id);
+        if (data.length > 0) {
+          if (initialValues?.locationID) {
+            const selected = data.find(d => d.id === initialValues.locationID);
+            setSelectedDestination(selected);
+          } else {
+            setSelectedLocationId(data[0].id);
+            setSelectedDestination(data[0]);
+          }
         }
       } catch (error) {
         console.error("Failed to load destinations:", error);
@@ -99,6 +108,9 @@ const SearchBar = ({ initialValues }) => {
     if (checkoutRef.current && !checkoutRef.current.contains(e.target)) {
       setShowCheckoutCalendar(false);
     }
+    if (mobileModalRef.current && !mobileModalRef.current.contains(e.target)) {
+      setShowMobileSearchModal(false);
+    }
   };
 
   useEffect(() => {
@@ -109,15 +121,40 @@ const SearchBar = ({ initialValues }) => {
   }, []);
 
   return (
-    <div className="bg-white rounded-xl  py-4 max-w-6xl mx-auto">
-      <form onSubmit={handleSearch} className="w-full">
+    <div className="bg-white rounded-xl py-4 max-w-6xl mx-auto">
+      {/* Mobile Header - Visible only on small devices */}
+      <div className='grid grid-cols-5 md:hidden mb-4 px-4'>
+        <div className='col-span-3'>
+          <h1 className="text-lg font-semibold text-blue-950 truncate">
+            {selectedDestination?.name || "Select Destination"}
+          </h1>
+          <p className="text-sm text-gray-600">
+            {formatDate(checkinDate)} - {formatDate(checkoutDate)}, {guestText}
+          </p>
+        </div>
+        <div className='col-span-2 flex justify-end items-center'>
+          <button 
+            onClick={() => setShowMobileSearchModal(true)}
+            className="bg-yellow-500 text-blue-950 px-4 text-sm font-bold py-2 rounded-lg"
+          >
+            Edit
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop Search Form - Hidden on mobile */}
+      <form onSubmit={handleSearch} className="w-full hidden md:block">
         <div className="flex flex-col md:flex-row gap-4 items-center w-full">
           {/* Destination Dropdown */}
           <div className="w-full md:w-2/5">
             <label className="block text-xs font-medium text-gray-500 mb-1 uppercase">CITY/HOTEL/RESORT/AREA</label>
             <select
               value={selectedLocationId}
-              onChange={(e) => setSelectedLocationId(e.target.value)}
+              onChange={(e) => {
+                const selected = destinations.find(d => d.id === e.target.value);
+                setSelectedLocationId(e.target.value);
+                setSelectedDestination(selected);
+              }}
               className="p-3 h-14 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors bg-white w-full text-blue-950 text-lg"
             >
               {destinations.map((destination) => (
@@ -205,51 +242,136 @@ const SearchBar = ({ initialValues }) => {
             </button>
           </div>
         </div>
+      </form>
 
-        {/* Guest Modal */}
-        {showGuestModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-80 space-y-4 shadow-lg">
-              <h2 className="text-lg font-semibold text-blue-950">Guests & Rooms</h2>
-              {[
-                { label: "Adults", count: adults, setter: setAdults, min: 1 },
-                { label: "Children", count: children, setter: setChildren, min: 0 },
-                { label: "Rooms", count: rooms, setter: setRooms, min: 1 }
-              ].map(({ label, count, setter, min }) => (
-                <div key={label} className="flex justify-between items-center">
-                  <span>{label}</span>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      type="button"
-                      onClick={() => setter(Math.max(count - 1, min))}
-                      className="w-8 h-8 rounded bg-gray-200 text-gray-800 text-xl flex items-center justify-center hover:bg-gray-300"
-                    >
-                      −
-                    </button>
-                    <span className="w-6 text-center">{count}</span>
-                    <button
-                      type="button"
-                      onClick={() => setter(count + 1)}
-                      className="w-8 h-8 rounded bg-gray-200 text-gray-800 text-xl flex items-center justify-center hover:bg-gray-300"
-                    >
-                      +
-                    </button>
-                  </div>
+      {/* Mobile Search Modal - Appears when Edit is clicked */}
+      {showMobileSearchModal && (
+        <div className="fixed inset-0 -mt-36 bg-black bg-opacity-40 flex items-center justify-center z-50 md:hidden">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-lg" ref={mobileModalRef}>
+            <h2 className="text-xl font-semibold text-blue-950 mb-4">Edit Search</h2>
+            
+            <form onSubmit={(e) => {
+              handleSearch(e);
+              setShowMobileSearchModal(false);
+            }}>
+              {/* Destination Dropdown */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Destination</label>
+                <select
+                  value={selectedLocationId}
+                  onChange={(e) => {
+                    const selected = destinations.find(d => d.id === e.target.value);
+                    setSelectedLocationId(e.target.value);
+                    setSelectedDestination(selected);
+                  }}
+                  className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 focus:ring-0 transition-colors bg-white w-full text-blue-950"
+                >
+                  {destinations.map((destination) => (
+                    <option key={destination.id} value={destination.id}>
+                      {destination.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Check In */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Check In</label>
+                <input
+                  type="date"
+                  value={checkinDate}
+                  onChange={handleCheckinChange}
+                  className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 w-full"
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+
+              {/* Check Out */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Check Out</label>
+                <input
+                  type="date"
+                  value={checkoutDate}
+                  onChange={handleCheckoutChange}
+                  className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 w-full"
+                  min={checkinDate}
+                />
+              </div>
+
+              {/* Guests & Rooms */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Guests & Rooms</label>
+                <div
+                  onClick={() => setShowGuestModal(true)}
+                  className="p-3 h-12 border border-gray-300 rounded-lg bg-white w-full flex items-center cursor-pointer"
+                >
+                  <span className="text-blue-950">{guestText}</span>
                 </div>
-              ))}
-              <div className="text-right">
+              </div>
+
+              <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setShowGuestModal(false)}
-                  className="mt-4 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors"
+                  onClick={() => setShowMobileSearchModal(false)}
+                  className="flex-1 h-12 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
                 >
-                  Done
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 h-12 px-4 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"
+                >
+                  Apply
                 </button>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Guest Modal - Shared between desktop and mobile */}
+      {showGuestModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-80 space-y-4 shadow-lg">
+            <h2 className="text-lg font-semibold text-blue-950">Guests & Rooms</h2>
+            {[
+              { label: "Adults", count: adults, setter: setAdults, min: 1 },
+              { label: "Children", count: children, setter: setChildren, min: 0 },
+              { label: "Rooms", count: rooms, setter: setRooms, min: 1 }
+            ].map(({ label, count, setter, min }) => (
+              <div key={label} className="flex justify-between items-center">
+                <span>{label}</span>
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setter(Math.max(count - 1, min))}
+                    className="w-8 h-8 rounded bg-gray-200 text-gray-800 text-xl flex items-center justify-center hover:bg-gray-300"
+                  >
+                    −
+                  </button>
+                  <span className="w-6 text-center">{count}</span>
+                  <button
+                    type="button"
+                    onClick={() => setter(count + 1)}
+                    className="w-8 h-8 rounded bg-gray-200 text-gray-800 text-xl flex items-center justify-center hover:bg-gray-300"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => setShowGuestModal(false)}
+                className="mt-4 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors"
+              >
+                Done
+              </button>
             </div>
           </div>
-        )}
-      </form>
+        </div>
+      )}
     </div>
   );
 };

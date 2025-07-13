@@ -25,7 +25,8 @@ const HotelListPage = async ({ searchParams }) => {
     return (
         <div className="container mx-auto max-w-6xl p-4 pt-24 bg-white text-blue-950">
             {/* Search Bar Component */}
-            <div className="mb-6 md:mb-8">
+           
+            <div className="mb-6 md:mb-8  ">
                 <SearchBar
                     initialValues={{
                         checkin,
@@ -43,7 +44,7 @@ const HotelListPage = async ({ searchParams }) => {
                 <div className='hidden md:block md:col-span-1 border-r border-gray-200 text-center text-gray-600 p-2'>
                     <div className="sticky top-24">
                         <h3 className="font-semibold mb-3">Filters</h3>
-                        <p>Search functionality here will be implemented</p>
+                        <p>Search functionality here will be implement</p>
                     </div>
                 </div>
 
@@ -65,54 +66,69 @@ const HotelListPage = async ({ searchParams }) => {
                                 </div>
 
                                 {/* Hotel Details - Full width on mobile, 2/3 on desktop */}
-                                <div className="w-full md:w-2/3 space-y-2 md:space-y-3">
+                                <div className="w-full md:w-2/3 space-y-2 md:space-y-3 ">
+                                    <h3 className="text-lg md:text-xl font-bold">{hotel.name}</h3>
                                     <div className="flex flex-col md:flex-row justify-between gap-2">
                                         <div>
-                                            <h3 className="text-lg md:text-xl font-bold">{hotel.name}</h3>
-                                            <div className='flex flex-wrap items-center gap-1 md:gap-2 text-xs md:text-sm text-gray-600'>
+
+                                            <div className='flex pt-1 flex-wrap items-center gap-2 md:gap-5 text-xs md:text-sm text-gray-600'>
                                                 <div className='border border-gray-400 px-1 rounded-lg flex items-center gap-1'>
-                                                    <i className="fa-solid fa-star text-yellow-400 text-xs"></i> 
-                                                    <span>{hotel.star}</span>
-                                                </div> 
-                                                <p className="text-gray-600 flex items-center gap-1">
-                                                    <i className="fa-solid fa-location-dot text-xs"></i> 
+                                                    <i className="fa-solid fa-star text-yellow-400 text-xs"></i>
+                                                    <span>{hotel.star} star</span>
+                                                </div>
+                                                <p className="text-gray-600 text-xs flex items-center gap-1">
+                                                    <i className="fa-solid fa-location-dot text-xs"></i>
                                                     <span>{hotel.location}</span>
                                                 </p>
                                             </div>
-                                        </div> 
+
+                                            {/* Amenities */}
+                                            {hotel.summary && hotel.summary.length > 0 && (
+                                                <div className="flex flex-wrap gap-1 md:gap-2 pt-1 mt-3">
+                                                    {hotel.summary.slice(0, 3).map((amenity) => (
+                                                        <span key={amenity.id} className="flex items-center text-xs md:text-xs bg-gray-100 px-2 md:px-3 py-0.5 md:py-1 rounded-full">
+                                                            <i className={`${amenity.icon_class} mr-1 md:mr-2 text-blue-900 text-xs`}></i>
+                                                            {amenity.name}
+                                                        </span>
+                                                    ))}
+                                                    {hotel.summary.length > 3 && (
+                                                        <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
+                                                            +{hotel.summary.length - 3} more
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                        </div>
                                         <div className="text-left md:text-right">
                                             {hotel.discount && (
-                                                <p className="text-xs md:text-sm text-gray-500 line-through">৳{hotel.regular_price}</p>
-                                            )}
-                                            <p className="text-lg md:text-xl font-bold text-blue-900">৳{hotel.price_after_discount}</p>
-                                            {hotel.discount && (
-                                                <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                                                <span className="text-sm bg-[#FD7E14] text-white font-bold px-2 py-0.5 rounded-xl">
                                                     {hotel.discount}% OFF
                                                 </span>
                                             )}
+
+                                            {hotel.extra_discount_msg && (
+                                                <p className="text-xs py-1  text-green-800 px-2 rounded">
+                                                    {hotel.extra_discount_msg}
+                                                </p>
+                                            )}
+                                            <p className='mt-3 text-xs'>Starts From</p>
+                                            {hotel.discount && (
+                                                <p className="text-xs md:text-sm text-red-500 line-through">BDT {hotel.regular_price}</p>
+                                            )}
+                                            <p className="text-lg md:text-xl font-bold text-blue-900">BDT {hotel.price_after_discount}</p>
+                                            <p className='mt-1 text-xs'>for 1 Night , per room</p>
                                         </div>
                                     </div>
 
-                                    {/* Amenities */}
-                                    {hotel.summary && hotel.summary.length > 0 && (
-                                        <div className="flex flex-wrap gap-1 md:gap-2 pt-1 md:pt-2">
-                                            {hotel.summary.slice(0, 3).map((amenity) => (
-                                                <span key={amenity.id} className="flex items-center text-xs md:text-sm bg-gray-100 px-2 md:px-3 py-0.5 md:py-1 rounded-full">
-                                                    <i className={`${amenity.icon_class} mr-1 md:mr-2 text-blue-900 text-xs`}></i>
-                                                    {amenity.name}
-                                                </span>
-                                            ))}
-                                            {hotel.summary.length > 3 && (
-                                                <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
-                                                    +{hotel.summary.length - 3} more
-                                                </span>
-                                            )}
-                                        </div>
-                                    )}
+
 
                                     {/* View Details Button */}
-                                    <div className="flex pt-2 md:pt-0">
-                                        <button className="w-full md:w-auto mt-2 px-4 py-1.5 md:px-6 md:py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors text-sm md:text-base">
+                                    <div className="flex justify-end items-end pt-2 md:pt-0">
+                                        <button style={{
+                                            background:
+                                                "linear-gradient(90deg, #313881, #0678B4)",
+                                        }} className="w-full md:w-auto mt-2 px-4 py-1.5 md:px-3 md:py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors text-sm md:text-sm">
                                             View Details
                                         </button>
                                     </div>

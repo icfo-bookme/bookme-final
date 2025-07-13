@@ -235,7 +235,7 @@ const HotelSearch = () => {
         )}
 
         {/* Search Button - Responsive positioning */}
-        <div className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2  -translate-x-1/2  md:translate-x-0 flex justify-end">
+        <div className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2  -translate-x-1/2   flex justify-end">
   <SearchButton type="submit">Search Hotels</SearchButton>
 </div>
 
