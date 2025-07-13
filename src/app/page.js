@@ -59,7 +59,7 @@ export default async function Home() {
        
         
         {/* Centered search widget */}
-        <div className="relative z-20 w-[80%] mx-auto  -top-20 lg:top-20">
+        <div className="relative z-20 w-[94%] md:w-[70%] mx-auto   lg:top-20">
           <TravelSearchWidget />
         </div>
       </div>
