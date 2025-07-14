@@ -44,9 +44,9 @@ export default async function HotelDetails({ hotelId }) {
                 {hotelDetails.summary && hotelDetails.summary.length > 0 && (
                     <div className="mt-5">
                         <h3 className="text-xl font-bold text-blue-950 mb-1">Amenities:</h3>
-                        <div className="flex flex-wrap gap-1 md:gap-2">
+                        <div className="flex flex-wrap gap-1 md:gap-2 ">
                             {hotelDetails.summary.slice(0, 6).map((amenity) => (
-                                <span key={amenity.id} className="flex items-center text-xs md:text-xs bg-gray-100 px-2 md:px-3 py-0.5 md:py-1 rounded-full">
+                                <span key={amenity.id} className="flex items-center text-xs md:text-xs text-blue-950  bg-gray-100 px-2 md:px-3 py-0.5 md:py-1 rounded-full">
                                     <i className={`${amenity.icon_class} mr-1 md:mr-2 text-blue-900 text-xs`}></i>
                                     {amenity.name}
                                 </span>
