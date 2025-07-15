@@ -95,8 +95,8 @@ export default function HotelHashRoute({ hotelId }) {
   };
 
   const truncatedDescription = hotelDetails.description
-    ? hotelDetails.description.length > 300
-      ? hotelDetails.description.substring(0, 300) + '...'
+    ? hotelDetails.description.length > 290
+      ? hotelDetails.description.substring(0, 290) + '...'
       : hotelDetails.description
     : '';
 
@@ -110,8 +110,8 @@ export default function HotelHashRoute({ hotelId }) {
               key={item.id}
               onClick={() => scrollToSection(item.id)}
               className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors ${activeSection === item.id
-                  ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
-                  : 'text-gray-500 hover:text-gray-700'
+                ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
+                : 'text-gray-500 hover:text-gray-700'
                 }`}
             >
               {item.label}
@@ -133,13 +133,13 @@ export default function HotelHashRoute({ hotelId }) {
             <div className=' rounded-lg flex items-center gap-1 font-bold'>
               <span>Number of Rooms: {hotelDetails.number_of_rooms}</span>
             </div>
-            <p className="text-gray-600 flex items-center gap-1 font-bold"> 
+            <p className="text-gray-600 flex items-center gap-1 font-bold">
               <span>Number of Floors: {hotelDetails.Number_of_Floors}</span>
             </p>
             <p className="text-gray-600 flex items-center gap-1 font-bold">
               <span> Year of construction: {hotelDetails.Year_of_construction}</span>
             </p>
-          </div>  
+          </div>
 
           {hotelDetails.description && (
             <div className="mb-6">
@@ -147,7 +147,7 @@ export default function HotelHashRoute({ hotelId }) {
                 {showFullDescription ? hotelDetails.description : truncatedDescription}
               </p>
               {hotelDetails.description.length > 300 && (
-                <button 
+                <button
                   onClick={toggleDescription}
                   className="text-blue-800 border-b border-blue-500 hover:text-blue-700 mt-2 text-sm font-medium"
                 >
@@ -164,8 +164,7 @@ export default function HotelHashRoute({ hotelId }) {
           id="rooms"
           className="mb-12 pt-4 scroll-mt-20"
         >
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Rooms</h2>
-          <div className=" p-8 rounded-lg">
+          <div className="  rounded-lg">
             <RoomComponent hotel_id={hotelId} />
           </div>
         </section>

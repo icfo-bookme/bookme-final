@@ -44,18 +44,21 @@ const RoomComponent = ({ hotel_id }) => {
     );
 
     return (
-        <div className="container mx-auto px-4 py-8 text-blue-950">
-            <h1 className="text-3xl font-bold mb-8">Rooms for Hotel #{hotel_id}</h1>
+        <div className="container mx-auto  text-blue-950">
+            <div className="bg-blue-50 p-6 rounded-t-lg shadow-md ">
+                <h1 className="text-xl font-bold ">Room Details</h1>
+            </div>
+
 
             <div className="">
                 {rooms.map((room) => (
-                    <div key={room.id} className="mb-8 py-4 rounded-lg bg-gray-100 md:grid md:grid-cols-8 gap-6">
+                    <div key={room.id} className="py-4 rounded-lg bg-gray-100 border border-gray-300 mb-4 md:grid md:grid-cols-8 gap-6">
                         <div className='md:col-span-3 border-r border-gray-300'>
                             <RoomCarousel images={room.images} key={room.id} />
-                            <h2 className="text-xl pl-4 font-semibold mb-2">{room.name}</h2>
+                            <h2 className="text-xl mt-5 pl-4 font-semibold mb-2">{room.name}</h2>
                         </div>
                         <div className="md:col-span-5">
-                            
+
                             <p className="text-gray-600 mb-4">{room.description}</p>
                             <div className="flex items-center gap-2 mb-4">
                                 <span className="text-lg font-bold text-blue-900">${room.price}</span>
