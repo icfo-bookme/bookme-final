@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useRef, useState } from 'react';
 import getHotelDetails from "@/services/hotel/gethoteldetails";
+import RoomComponent from './Room/Room';
+import FacilitiesByCategory from './FacilitiesByCategory';
 
 export default function HotelHashRoute({ hotelId }) {
   const [hotelDetails, setHotelDetails] = useState(null);
@@ -143,8 +145,8 @@ export default function HotelHashRoute({ hotelId }) {
           className="mb-12 pt-4 scroll-mt-20"
         >
           <h2 className="text-xl font-bold text-gray-800 mb-6">Rooms</h2>
-          <div className="bg-gray-100 p-8 rounded-lg">
-            <p className="text-center text-gray-500">Room information will be displayed here</p>
+          <div className=" p-8 rounded-lg">
+           <RoomComponent hotel_id={hotelId} />
           </div>
         </section>
 
@@ -176,18 +178,7 @@ export default function HotelHashRoute({ hotelId }) {
           className="mb-12 pt-4 scroll-mt-20"
         >
           <h2 className="text-xl font-bold text-gray-800 mb-6">Facilities</h2>
-          {hotelDetails.summary && hotelDetails.summary.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {hotelDetails.summary.map((amenity) => (
-                <div key={amenity.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <i className={`${amenity.icon_class} text-blue-500`}></i>
-                  <span className="text-gray-700">{amenity.name}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500">No facilities information available</p>
-          )}
+          <FacilitiesByCategory categories={hotelDetails.category_wise_features} />
         </section>
 
         {/* Policy Section */}
