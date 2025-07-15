@@ -7,6 +7,7 @@ import FacilitiesByCategory from './FacilitiesByCategory';
 export default function HotelHashRoute({ hotelId }) {
   const [hotelDetails, setHotelDetails] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
+  const [showFullDescription, setShowFullDescription] = useState(false);
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
 
@@ -89,6 +90,16 @@ export default function HotelHashRoute({ hotelId }) {
     { id: 'policy', label: 'Policy' }
   ];
 
+  const toggleDescription = () => {
+    setShowFullDescription(!showFullDescription);
+  };
+
+  const truncatedDescription = hotelDetails.description
+    ? hotelDetails.description.length > 300
+      ? hotelDetails.description.substring(0, 300) + '...'
+      : hotelDetails.description
+    : '';
+
   return (
     <div className=" w-[85%] mx-auto  ">
       {/* Sticky Navigation Bar */}
@@ -119,20 +130,30 @@ export default function HotelHashRoute({ hotelId }) {
         >
           <h1 className="text-2xl md:text-xl font-bold text-gray-800 mb-4">Hotel Description</h1>
           <div className='flex flex-wrap items-center gap-2 md:gap-5 text-sm text-gray-600 mb-6'>
-            <div className='border border-gray-300 px-2 rounded-lg flex items-center gap-1'>
-              <i className="fa-solid fa-star text-yellow-400 text-xs"></i>
-              <span>{hotelDetails.star} star</span>
+            <div className=' rounded-lg flex items-center gap-1 font-bold'>
+              <span>Number of Rooms: {hotelDetails.number_of_rooms}</span>
             </div>
-            <p className="text-gray-600 flex items-center gap-1">
-              <i className="fa-solid fa-location-dot text-xs"></i>
-              <span>{hotelDetails.location}</span>
+            <p className="text-gray-600 flex items-center gap-1 font-bold"> 
+              <span>Number of Floors: {hotelDetails.Number_of_Floors}</span>
             </p>
-          </div>
+            <p className="text-gray-600 flex items-center gap-1 font-bold">
+              <span> Year of construction: {hotelDetails.Year_of_construction}</span>
+            </p>
+          </div>  
 
           {hotelDetails.description && (
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">About</h2>
-              <p className="text-gray-600 leading-relaxed">{hotelDetails.description}</p>
+              <p className="text-gray-600 leading-relaxed">
+                {showFullDescription ? hotelDetails.description : truncatedDescription}
+              </p>
+              {hotelDetails.description.length > 300 && (
+                <button 
+                  onClick={toggleDescription}
+                  className="text-blue-800 border-b border-blue-500 hover:text-blue-700 mt-2 text-sm font-medium"
+                >
+                  {showFullDescription ? 'See Less' : 'See More'}
+                </button>
+              )}
             </div>
           )}
         </section>
