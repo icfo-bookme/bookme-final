@@ -68,9 +68,9 @@ const RoomComponent = ({ hotel_id }) => {
                                             {room.feature_summary.map((amenity) => (
                                                 <span
                                                     key={amenity.id}
-                                                    className="flex items-center text-xs bg-gray-200 px-2 py-1 rounded-full"
+                                                    className="flex items-center text-sm bg-gray-200   rounded-full"
                                                 >
-                                                    <i className={`${amenity.icon_class} mr-1 text-blue-900`}></i>
+                                                    <i className={`fa fa-check mr-1 text-blue-900`}></i>
                                                     {amenity.name}
                                                 </span>
                                             ))}
@@ -82,10 +82,11 @@ const RoomComponent = ({ hotel_id }) => {
                                                     {showAllAmenities[room.id] ? 'Show less' : `+${room.summary.length - 6} more`}
                                                 </button>
                                             )}
-                                        </div>
+                                        </div> 
                                     </div>
                                 )}
                             </div>
+                            <button className=" text-blue-900 px-4 py-5 text-xs rounded font-bold underline transition">See All</button>
 
 
                         </div>
