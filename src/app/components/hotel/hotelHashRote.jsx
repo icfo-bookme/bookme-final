@@ -77,7 +77,7 @@ export default function HotelHashRoute({ hotelId }) {
   }
 
   // Split the near_by string into an array of locations
-  const nearbyLocations = hotelDetails.near_by 
+  const nearbyLocations = hotelDetails.near_by
     ? hotelDetails.near_by.split(',').map(loc => loc.trim()).filter(loc => loc)
     : [];
 
@@ -90,19 +90,18 @@ export default function HotelHashRoute({ hotelId }) {
   ];
 
   return (
-    <div className=" mx-auto px-4">
+    <div className=" w-[85%] mx-auto  ">
       {/* Sticky Navigation Bar */}
-      <div className="sticky top-14 bg-white z-10 border-b shadow-sm">
-        <div className="flex overflow-x-auto py-4 hide-scrollbar">
+      <div className="sticky top-14 rounded-lg bg-white z-10 border-b shadow-sm">
+        <div className="flex overflow-x-auto py-4 ml-4 hide-scrollbar">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => scrollToSection(item.id)}
-              className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors ${
-                activeSection === item.id
+              className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors ${activeSection === item.id
                   ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
                   : 'text-gray-500 hover:text-gray-700'
-              }`}
+                }`}
             >
               {item.label}
             </button>
@@ -113,12 +112,12 @@ export default function HotelHashRoute({ hotelId }) {
       {/* Content Sections */}
       <div className="py-8">
         {/* Overview Section */}
-        <section 
+        <section
           ref={(el) => (sectionsRef.current['overview'] = el)}
           id="overview"
-          className="mb-12 pt-4 scroll-mt-20"
+          className="mb-12 bg-white rounded-lg p-4 scroll-mt-20"
         >
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">{hotelDetails.name}</h1>
+          <h1 className="text-2xl md:text-xl font-bold text-gray-800 mb-4">Hotel Description</h1>
           <div className='flex flex-wrap items-center gap-2 md:gap-5 text-sm text-gray-600 mb-6'>
             <div className='border border-gray-300 px-2 rounded-lg flex items-center gap-1'>
               <i className="fa-solid fa-star text-yellow-400 text-xs"></i>
@@ -146,7 +145,7 @@ export default function HotelHashRoute({ hotelId }) {
         >
           <h2 className="text-xl font-bold text-gray-800 mb-6">Rooms</h2>
           <div className=" p-8 rounded-lg">
-           <RoomComponent hotel_id={hotelId} />
+            <RoomComponent hotel_id={hotelId} />
           </div>
         </section>
 
