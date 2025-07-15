@@ -48,14 +48,46 @@ const RoomComponent = ({ hotel_id }) => {
             <div className="bg-blue-50 p-6 rounded-t-lg shadow-md ">
                 <h1 className="text-xl font-bold ">Room Details</h1>
             </div>
-
-
             <div className="">
                 {rooms.map((room) => (
                     <div key={room.id} className="py-4 rounded-lg bg-gray-100 border border-gray-300 mb-4 md:grid md:grid-cols-8 gap-6">
                         <div className='md:col-span-3 border-r border-gray-300'>
                             <RoomCarousel images={room.images} key={room.id} />
                             <h2 className="text-xl mt-5 pl-4 font-semibold mb-2">{room.name}</h2>
+                            <div className='text-sm'>
+                                <p className="text-gray-600 pl-4 mb-1"><i className="fa-solid fa-flag"></i> {room.room_type}</p>
+                                <p className="text-gray-600 pl-4"><i className="fa-solid fa-users"></i>  Maximum Room Capacity: {room.max_adults} </p>
+                                <button className=" text-blue-900 px-4 py-5 rounded font-bold underline transition">View Room Details</button>
+                            </div>
+
+                            <div>
+                                {room.feature_summary && (
+                                    <div className="mt-4 pl-4">
+                                      
+                                        <div className="flex flex-wrap gap-2">
+                                            {room.feature_summary.map((amenity) => (
+                                                <span
+                                                    key={amenity.id}
+                                                    className="flex items-center text-xs bg-gray-200 px-2 py-1 rounded-full"
+                                                >
+                                                    <i className={`${amenity.icon_class} mr-1 text-blue-900`}></i>
+                                                    {amenity.name}
+                                                </span>
+                                            ))}
+                                            {room.feature_summary > 6 && (
+                                                <button
+                                                    className="text-xs bg-gray-200 px-2 py-1 rounded-full hover:bg-gray-300"
+                                                    onClick={() => toggleAmenities(room.id)}
+                                                >
+                                                    {showAllAmenities[room.id] ? 'Show less' : `+${room.summary.length - 6} more`}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+
                         </div>
                         <div className="md:col-span-5">
 
