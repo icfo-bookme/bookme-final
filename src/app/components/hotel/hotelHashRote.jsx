@@ -8,8 +8,24 @@ export default function HotelHashRoute({ hotelId }) {
   const [hotelDetails, setHotelDetails] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [isSmallDevice, setIsSmallDevice] = useState(false);
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallDevice(window.innerWidth < 640); // Tailwind's 'sm' breakpoint is 640px
+    };
+
+    // Initial check
+    checkScreenSize();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,9 +99,9 @@ export default function HotelHashRoute({ hotelId }) {
     : [];
 
   const navItems = [
-    { id: 'overview', label: 'Overview' },
+    ...(!isSmallDevice ? [{ id: 'overview', label: 'Overview' }] : []),
     { id: 'rooms', label: 'Rooms' },
-    { id: 'nearby', label: "What's Nearby" },
+    { id: 'nearby', label: isSmallDevice ? "Nearby" : "What's Nearby" },
     { id: 'facilities', label: 'Facilities' },
     { id: 'policy', label: 'Policy' }
   ];
@@ -101,18 +117,19 @@ export default function HotelHashRoute({ hotelId }) {
     : '';
 
   return (
-    <div className=" w-[85%] mx-auto  ">
+    <div className="md:w-[85%] mx-auto">
       {/* Sticky Navigation Bar */}
-      <div className="sticky top-14 rounded-lg bg-white z-10 border-b shadow-sm">
+      <div className="sticky top-14 rounded-lg bg-white z-30 border-b shadow-sm">
         <div className="flex overflow-x-auto py-4 ml-4 hide-scrollbar">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => scrollToSection(item.id)}
-              className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors ${activeSection === item.id
-                ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
-                : 'text-gray-500 hover:text-gray-700'
-                }`}
+              className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors ${
+                activeSection === item.id
+                  ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
             >
               {item.label}
             </button>
@@ -123,40 +140,42 @@ export default function HotelHashRoute({ hotelId }) {
       {/* Content Sections */}
       <div className="py-8">
         {/* Overview Section */}
-        <section
-          ref={(el) => (sectionsRef.current['overview'] = el)}
-          id="overview"
-          className="mb-12 bg-white rounded-lg p-4 scroll-mt-20"
-        >
-          <h1 className="text-2xl md:text-xl font-bold text-gray-800 mb-4">Hotel Description</h1>
-          <div className='flex flex-wrap items-center gap-2 md:gap-5 text-sm text-gray-600 mb-6'>
-            <div className=' rounded-lg flex items-center gap-1 font-bold'>
-              <span>Number of Rooms: {hotelDetails.number_of_rooms}</span>
-            </div>
-            <p className="text-gray-600 flex items-center gap-1 font-bold">
-              <span>Number of Floors: {hotelDetails.Number_of_Floors}</span>
-            </p>
-            <p className="text-gray-600 flex items-center gap-1 font-bold">
-              <span> Year of construction: {hotelDetails.Year_of_construction}</span>
-            </p>
-          </div>
-
-          {hotelDetails.description && (
-            <div className="mb-6">
-              <p className="text-gray-600 leading-relaxed">
-                {showFullDescription ? hotelDetails.description : truncatedDescription}
+        {!isSmallDevice && (
+          <section
+            ref={(el) => (sectionsRef.current['overview'] = el)}
+            id="overview"
+            className="mb-12 bg-white rounded-lg p-4 scroll-mt-20"
+          >
+            <h1 className="text-2xl md:text-xl font-bold text-gray-800 mb-4">Hotel Description</h1>
+            <div className='flex flex-wrap items-center gap-2 md:gap-5 text-sm text-gray-600 mb-6'>
+              <div className='rounded-lg flex items-center gap-1 font-bold'>
+                <span>Number of Rooms: {hotelDetails.number_of_rooms}</span>
+              </div>
+              <p className="text-gray-600 flex items-center gap-1 font-bold">
+                <span>Number of Floors: {hotelDetails.Number_of_Floors}</span>
               </p>
-              {hotelDetails.description.length > 300 && (
-                <button
-                  onClick={toggleDescription}
-                  className="text-blue-800 border-b border-blue-500 hover:text-blue-700 mt-2 text-sm font-medium"
-                >
-                  {showFullDescription ? 'See Less' : 'See More'}
-                </button>
-              )}
+              <p className="text-gray-600 flex items-center gap-1 font-bold">
+                <span> Year of construction: {hotelDetails.Year_of_construction}</span>
+              </p>
             </div>
-          )}
-        </section>
+
+            {hotelDetails.description && (
+              <div className="mb-6">
+                <p className="text-gray-600 leading-relaxed">
+                  {showFullDescription ? hotelDetails.description : truncatedDescription}
+                </p>
+                {hotelDetails.description.length > 300 && (
+                  <button
+                    onClick={toggleDescription}
+                    className="text-blue-800 border-b border-blue-500 hover:text-blue-700 mt-2 text-sm font-medium"
+                  >
+                    {showFullDescription ? 'See Less' : 'See More'}
+                  </button>
+                )}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Rooms Section */}
         <section
@@ -164,7 +183,7 @@ export default function HotelHashRoute({ hotelId }) {
           id="rooms"
           className="mb-12 pt-4 scroll-mt-20"
         >
-          <div className="  rounded-lg">
+          <div className="rounded-lg">
             <RoomComponent hotel_id={hotelId} />
           </div>
         </section>
@@ -175,7 +194,7 @@ export default function HotelHashRoute({ hotelId }) {
           id="nearby"
           className="mb-12 pt-4 scroll-mt-20"
         >
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Whats Nearby</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-6">{isSmallDevice ? 'Nearby' : 'Whats Nearby'}</h2>
           {nearbyLocations.length > 0 ? (
             <ul className="space-y-3">
               {nearbyLocations.map((location, index) => (

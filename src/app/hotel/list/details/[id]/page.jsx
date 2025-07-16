@@ -6,7 +6,7 @@ import HotelCarousel from "@/app/components/hotel/HotelSlider";
 export default function HotelDetailsPage({ params }) {
   return (
     <div className="pt-24 min-h-screen bg-gray-200">
-      <div className="w-[85%] rounded-lg  mx-auto grid grid-cols-1 bg-white md:grid-cols-12 gap-4 md:p-4">
+      <div className="md:w-[85%] rounded-lg  mx-auto grid grid-cols-1 bg-white md:grid-cols-12 gap-4 md:p-4">
         <div className="col-span-1 md:col-span-8 bg-white ">
             <HotelCarousel hotelId={params.id} />
         </div>
