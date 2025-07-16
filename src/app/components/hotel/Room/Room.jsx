@@ -65,10 +65,10 @@ const RoomComponent = ({ hotel_id }) => {
     );
 
     return (
-        <div className="md:container w-[96%] lg:w-[100%] mx-auto text-blue-950 grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+        <div className="md:container w-[98%] lg:w-[100%] mx-auto text-blue-950 grid grid-cols-1 md:grid-cols-6 md:gap-4 mb-6">
             {/* Room Details Modal */}
             {isModalOpen && selectedRoom && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 md:p-4">
                     <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
                         <div className="bg-gray-300 flex justify-between items-center border-b p-4">
                             <h2 className="text-xl font-bold">Room Details</h2>
@@ -273,18 +273,20 @@ const RoomComponent = ({ hotel_id }) => {
 
                                         <p className='text-xs text-gray-700 mt-3'>for 1 Night , per room</p>
 
-                                        <div className="flex text center justify-end items-end pt-2 md:pt-0">
-                                            <Button
-                                                style={{
-                                                    background: "linear-gradient(90deg, #313881, #0678B4)",
-                                                }}
-                                                className="w-full text-center md:w-auto mt-2 px-4 py-1.5 md:px-3 md:py-2 text-white rounded hover:opacity-90 transition-colors text-sm"
-                                            >
-                                                Add Room
-                                            </Button>
 
-                                        </div>
                                     </div>
+
+                                </div>
+                                <div className="flex text center justify-end items-end md:pt-0 mr-3">
+                                    <Button
+                                        style={{
+                                            background: "linear-gradient(90deg, #313881, #0678B4)",
+                                        }}
+                                        className="w-full text-center md:w-auto mt-2 px-2 py-1 md:px-3 md:py-2 text-white rounded hover:opacity-90 transition-colors text-sm"
+                                    >
+                                        Add Room
+                                    </Button>
+
                                 </div>
                             </div>
                         </div>
