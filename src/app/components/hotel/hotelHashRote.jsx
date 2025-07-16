@@ -117,7 +117,7 @@ export default function HotelHashRoute({ hotelId }) {
     : '';
 
   return (
-    <div className="md:w-[85%] mx-auto">
+    <div className="md:w-[85%] w-[96%] mx-auto">
       {/* Sticky Navigation Bar */}
       <div className="sticky top-14 rounded-lg bg-white z-30 border-b shadow-sm">
         <div className="flex overflow-x-auto py-4 ml-4 hide-scrollbar">

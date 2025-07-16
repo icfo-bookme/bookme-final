@@ -65,7 +65,7 @@ const RoomComponent = ({ hotel_id }) => {
     );
 
     return (
-        <div className="md:container mx-auto text-blue-950 grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+        <div className="md:container w-[96%] lg:w-[100%] mx-auto text-blue-950 grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
             {/* Room Details Modal */}
             {isModalOpen && selectedRoom && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
