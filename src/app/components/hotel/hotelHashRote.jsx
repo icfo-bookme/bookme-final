@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import getHotelDetails from "@/services/hotel/gethoteldetails";
 import RoomComponent from './Room/Room';
 import FacilitiesByCategory from './FacilitiesByCategory';
+import HotelPolicies from './Policies';
 
 export default function HotelHashRoute({ hotelId }) {
   const [hotelDetails, setHotelDetails] = useState(null);
@@ -227,7 +228,7 @@ export default function HotelHashRoute({ hotelId }) {
         >
           <h2 className="text-xl font-bold text-gray-800 mb-6">Policy</h2>
           <div className="bg-gray-100 p-8 rounded-lg">
-            <p className="text-center text-gray-500">Hotel policies will be displayed here</p>
+            <HotelPolicies Policies={hotelDetails.polices} />
           </div>
         </section>
       </div>

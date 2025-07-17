@@ -1,4 +1,3 @@
-
 import { Roboto } from "next/font/google";
 import Banner from "./components/Home/Banner";
 import Visa from "./components/Home/Visa";
@@ -9,7 +8,6 @@ import PromotionsPage from "./components/Home/PromotionsPage";
 import getServicesData from "@/services/homepage/getServicesData";
 import HpmepageBlog from "./components/pre-footer-content/Homepage";
 import TravelSearchWidget from "./components/SearchBar/SearchBar";
-
 
 // Optional: ensure server-side rendering
 export const dynamic = "force-dynamic";
@@ -47,25 +45,24 @@ export default async function Home() {
 
   return (
     <main className={roboto.className}>
-      <div className="relative w-full min-h-[67vh] md:min-h-[80vh]">
-      {/* Banner Background */}
-      <div className="w-full h-full">
-        <Banner />
-      </div>
-
-      {/* Overlay and Search Widget */}
-      <div className="absolute top-48 inset-0 z-10">
-        {/* Semi-transparent overlay */}
-       
-        
-        {/* Centered search widget */}
-        <div className="relative z-20 w-[94%] md:w-[80%] mx-auto   lg:top-20">
-          <TravelSearchWidget />
+      {/* Hero Section with Banner and Search Widget */}
+      <section className="relative w-full min-h-[67vh] md:min-h-[80vh]">
+        {/* Banner Background */}
+        <div className="absolute inset-0 w-full h-full">
+          <Banner />
         </div>
-      </div>
-    </div>
-      <div className="py-[20px] md:py-10">
-        <div className="mt-[12px] md:mt-0 w-[98%] 2xl:w-[1440px] gap-5 mx-auto">
+
+        {/* Search Widget Container */}
+        <div className="container relative md:top-96 top-36  z-10 h-full flex items-center justify-center px-4">
+          <div className="w-full md:max-w-5xl  md:-mt-24 lg:-mt-32">
+            <TravelSearchWidget />
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content Section */}
+      <section className="py-5 md:py-10 bg-white">
+        <div className="container mx-auto px-4 2xl:px-0">
           <div className="overflow-hidden">
             {servicesData.length > 0 ? (
               <>
@@ -82,14 +79,18 @@ export default async function Home() {
                 )}
               </>
             ) : (
-              <p className="text-center text-red-500">
+              <p className="text-center text-red-500 py-10">
                 Failed to load services data. Please try again later.
               </p>
             )}
           </div>
         </div>
-      </div>
-      <HpmepageBlog/>
+      </section>
+
+      {/* Blog Section */}
+      <section className="bg-gray-50">
+        <HpmepageBlog />
+      </section>
     </main>
   );
 }

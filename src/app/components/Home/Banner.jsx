@@ -18,7 +18,7 @@ export default function Banner() {
   // No need for API fetch since we're using a local video now
   const videoData = {
     title: "Plan to dream locations in just a click!",
-    subtitle: "Travel is a transformative and enriching experience that allows individuals to explore new destinations, cultures, and landscapes."
+   
   };
 
   useEffect(() => {

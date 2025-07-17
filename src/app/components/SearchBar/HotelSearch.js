@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import SearchField from "./SearchField";
 import SearchButton from "./SearchButton";
 import getDestination from "@/services/hotel/getDestination";
+import getHotelCategories from "@/services/hotel/getHotelCategories";
 
 const HotelSearch = () => {
   const router = useRouter();
@@ -13,6 +14,8 @@ const HotelSearch = () => {
   const [children, setChildren] = useState(0);
   const [rooms, setRooms] = useState(1);
   const [destinations, setDestinations] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedLocationId, setSelectedLocationId] = useState("");
 
   // Set default dates
@@ -34,31 +37,40 @@ const HotelSearch = () => {
   const [showCheckinCalendar, setShowCheckinCalendar] = useState(false);
   const [showCheckoutCalendar, setShowCheckoutCalendar] = useState(false);
 
-  // Fetch destination list from API
+  // Fetch destination and category lists from API
   useEffect(() => {
-    const fetchDestinations = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getDestination();
-        setDestinations(data);
-
-        if (data.length > 0) {
-          setSelectedLocationId(data[0].id);
+        const destinationsData = await getDestination();
+        setDestinations(destinationsData);
+        
+        const categoriesData = await getHotelCategories();
+        setCategories(categoriesData);
+        
+        if (destinationsData.length > 0) {
+          setSelectedLocationId(destinationsData[0].id);
         }
       } catch (error) {
-        console.error("Failed to load destinations:", error);
+        console.error("Failed to load data:", error);
       }
     };
 
-    fetchDestinations();
+    fetchData();
   }, []);
 
-  const guestText = `${adults} Adult${adults > 1 ? "s" : ""}, ${children} Child${
-    children !== 1 ? "ren" : ""
-  }, ${rooms} Room${rooms > 1 ? "s" : ""}`;
+  const guestText = `${adults} Adult${adults > 1 ? "s" : ""},  ${rooms} Room${rooms > 1 ? "s" : ""}`;
+
+  const handleCategoryToggle = (categoryId) => {
+    setSelectedCategories(prev => 
+      prev.includes(categoryId) 
+        ? prev.filter(id => id !== categoryId) 
+        : [...prev, categoryId]
+    );
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    
+
     const query = new URLSearchParams({
       checkin: checkinDate,
       checkout: checkoutDate,
@@ -66,6 +78,7 @@ const HotelSearch = () => {
       rooms: String(rooms),
       child_ages: "",
       adult: String(adults),
+      categories: selectedCategories.join(',')
     }).toString();
 
     router.push(`/hotel/list?${query}`);
@@ -75,7 +88,7 @@ const HotelSearch = () => {
     const newDate = new Date(e.target.value);
     setCheckinDate(e.target.value);
     setDisplayCheckin(formatDate(newDate));
-    
+
     // Ensure checkout is after checkin
     const checkout = new Date(checkoutDate);
     if (newDate >= checkout) {
@@ -84,7 +97,7 @@ const HotelSearch = () => {
       setCheckoutDate(nextDay.toISOString().split('T')[0]);
       setDisplayCheckout(formatDate(nextDay));
     }
-    
+
     setShowCheckinCalendar(false);
   };
 
@@ -106,13 +119,13 @@ const HotelSearch = () => {
   };
 
   return (
-    <div className="bg-white relative max-w-5xl mx-auto pb-6 text-blue-950">
+    <div className="bg-white  max-w-5xl mx-auto pb-6 text-blue-950">
       <form onSubmit={handleSearch}>
         {/* Grid layout changes for responsiveness */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Destination - Full width on mobile, first in order */}
           <div className="col-span-2 md:col-span-1 space-y-1">
-            <label className="block text-sm  text-blue-950">
+            <label className="block text-sm text-blue-950">
               City/Hotel/Resort/Area
             </label>
             <select
@@ -130,14 +143,14 @@ const HotelSearch = () => {
 
           {/* Check In - Half width on mobile, second in order */}
           <div className="sm:col-span-1 space-y-1 relative">
-            <label className="block font-medium text-sm  text-blue-950">
+            <label className="block font-medium text-sm text-blue-950">
               Check In
             </label>
             <div
               onClick={toggleCheckinCalendar}
               className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
             >
-              <div className=" font-bold text-blue-950 text-sm sm:text-base">{displayCheckin}</div>
+              <div className="font-bold text-blue-950 text-sm sm:text-base">{displayCheckin}</div>
             </div>
             {showCheckinCalendar && (
               <div className="absolute z-10 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-2">
@@ -154,14 +167,14 @@ const HotelSearch = () => {
 
           {/* Check Out - Half width on mobile, third in order */}
           <div className="sm:col-span-1 space-y-1 relative">
-            <label className="block  text-sm  text-blue-950">
+            <label className="block text-sm text-blue-950">
               Check Out
             </label>
             <div
               onClick={toggleCheckoutCalendar}
               className="p-3 border font-medium border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
             >
-              <div className=" font-bold text-blue-950 text-sm sm:text-base">{displayCheckout}</div>
+              <div className="font-bold text-blue-950 text-sm sm:text-base">{displayCheckout}</div>
             </div>
             {showCheckoutCalendar && (
               <div className="absolute z-10 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-2">
@@ -185,8 +198,30 @@ const HotelSearch = () => {
               onClick={() => setShowGuestModal(true)}
               className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
             >
-              <div className=" font-bold text-blue-950 text-sm sm:text-base">{guestText}</div>
+              <div className="font-bold text-blue-950 text-sm sm:text-base">{guestText}</div>
             </div>
+          </div>
+        </div>
+
+        {/* Category Selection */}
+        <div className="mt-4">
+        
+          <div className="flex flex-wrap gap-4">
+              <p className="text-sm font-bold text-blue-950 ">Search For</p>
+            {categories.map(category => (
+              <div key={category.id} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={`category-${category.id}`}
+                  checked={selectedCategories.includes(category.id)}
+                  onChange={() => handleCategoryToggle(category.id)}
+                  className="h-4 w-4 text-blue-900 rounded border-gray-300 focus:ring-blue-900"
+                />
+                <label htmlFor={`category-${category.id}`} className="ml-2 text-sm text-blue-950">
+                  {category.name}
+                </label>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -235,11 +270,9 @@ const HotelSearch = () => {
         )}
 
         {/* Search Button - Responsive positioning */}
-        <div className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2  -translate-x-1/2   flex justify-end">
-  <SearchButton type="submit">Search Hotels</SearchButton>
-</div>
-
-       
+        <div className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2 -translate-x-1/2 flex justify-end">
+          <SearchButton type="submit">Search Hotels</SearchButton>
+        </div>
       </form>
     </div>
   );
