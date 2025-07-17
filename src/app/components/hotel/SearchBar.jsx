@@ -4,24 +4,31 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import getDestination from "@/services/hotel/getDestination";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const SearchBar = ({ initialValues }) => {
   const router = useRouter();
   const [showGuestModal, setShowGuestModal] = useState(false);
-  const [showCheckinCalendar, setShowCheckinCalendar] = useState(false);
-  const [showCheckoutCalendar, setShowCheckoutCalendar] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [adults, setAdults] = useState(initialValues?.adults || 2);
   const [children, setChildren] = useState(0);
   const [rooms, setRooms] = useState(initialValues?.rooms || 1);
   const [destinations, setDestinations] = useState([]);
   const [selectedLocationId, setSelectedLocationId] = useState(initialValues?.locationID || "");
-  const [checkinDate, setCheckinDate] = useState(initialValues?.checkin || "");
-  const [checkoutDate, setCheckoutDate] = useState(initialValues?.checkout || "");
   const [selectedDestination, setSelectedDestination] = useState(null);
 
-  const checkinRef = useRef(null);
-  const checkoutRef = useRef(null);
+  const today = new Date();
+  const tomorrow = new Date();
+  tomorrow.setDate(today.getDate() + 1);
+
+  const [checkinDate, setCheckinDate] = useState(initialValues?.checkin ? new Date(initialValues.checkin) : today);
+  const [checkoutDate, setCheckoutDate] = useState(initialValues?.checkout ? new Date(initialValues.checkout) : tomorrow);
+  const [dateRange, setDateRange] = useState([checkinDate, checkoutDate]);
+
+  const datePickerRef = useRef(null);
+  const guestModalRef = useRef(null);
 
   // Get destination name by ID
   const getDestinationNameById = (id) => {
@@ -53,26 +60,14 @@ const SearchBar = ({ initialValues }) => {
     fetchDestinations();
   }, []);
 
-  useEffect(() => {
-    // Set default dates if not provided
-    if (!checkinDate) {
-      const today = new Date();
-      setCheckinDate(today.toISOString().split('T')[0]);
-      
-      const nextDay = new Date(today);
-      nextDay.setDate(today.getDate() + 2);
-      setCheckoutDate(nextDay.toISOString().split('T')[0]);
-    }
-  }, []);
-
   const guestText = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Adult${adults > 1 ? 's' : ''}`;
 
   const handleSearch = (e) => {
     e.preventDefault();
-    
+
     const query = new URLSearchParams({
-      checkin: checkinDate,
-      checkout: checkoutDate,
+      checkin: checkinDate.toISOString().split('T')[0],
+      checkout: checkoutDate.toISOString().split('T')[0],
       locationID: String(selectedLocationId),
       rooms: String(rooms),
       adult: String(adults),
@@ -81,37 +76,44 @@ const SearchBar = ({ initialValues }) => {
     router.push(`/hotel/list?${query}`);
   };
 
-  const handleCheckinChange = (e) => {
-    const newDate = e.target.value;
-    setCheckinDate(newDate);
-    setShowCheckinCalendar(false);
-    
-    // Auto-set checkout date if it's before checkin
-    const checkout = new Date(checkoutDate);
-    const checkin = new Date(newDate);
-    if (checkout <= checkin) {
-      const nextDay = new Date(checkin);
-      nextDay.setDate(checkin.getDate() + 2);
-      setCheckoutDate(nextDay.toISOString().split('T')[0]);
+  const handleDateChange = (update) => {
+    setDateRange(update);
+    if (update[0]) {
+      setCheckinDate(update[0]);
+    }
+    if (update[1]) {
+      setCheckoutDate(update[1]);
     }
   };
 
-  const handleCheckoutChange = (e) => {
-    setCheckoutDate(e.target.value);
-    setShowCheckoutCalendar(false);
+  const applyDateSelection = () => {
+    setShowDatePicker(false);
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: '2-digit'
+    }).replace(',', '');
+  };
+
+  const formatMobileDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   const handleClickOutside = (e) => {
-    if (checkinRef.current && !checkinRef.current.contains(e.target)) {
-      setShowCheckinCalendar(false);
+    // For date picker
+    if (datePickerRef.current && !datePickerRef.current.contains(e.target)) {
+      setShowDatePicker(false);
     }
-    if (checkoutRef.current && !checkoutRef.current.contains(e.target)) {
-      setShowCheckoutCalendar(false);
+    // For guest modal
+    if (guestModalRef.current && !guestModalRef.current.contains(e.target)) {
+      setShowGuestModal(false);
     }
   };
 
@@ -132,11 +134,11 @@ const SearchBar = ({ initialValues }) => {
               {getDestinationNameById(selectedLocationId)}
             </h1>
             <p className="text-sm text-gray-600">
-              {formatDate(checkinDate)} - {formatDate(checkoutDate)}, {guestText}
+              {formatMobileDate(checkinDate)} - {formatMobileDate(checkoutDate)}, {guestText}
             </p>
           </div>
           <div className='col-span-2 flex justify-end items-center'>
-            <button 
+            <button
               onClick={() => setShowMobileSearch(true)}
               className="bg-yellow-500 text-blue-950 px-4 text-sm font-bold py-2 rounded-lg"
             >
@@ -163,66 +165,32 @@ const SearchBar = ({ initialValues }) => {
             >
               {destinations.map((destination) => (
                 <option key={destination.id} value={destination.id}>
-                  {destination.name}
+                  {destination.name}, {destination.country}
                 </option>
               ))}
             </select>
           </div>
 
           {/* Check In */}
-          <div className="w-full md:w-1/5 relative" ref={checkinRef}>
+          <div className="w-full md:w-1/5">
             <label className="block text-xs font-medium text-gray-500 mb-1 uppercase">CHECK IN</label>
-            <div 
-              onClick={() => {
-                setShowCheckinCalendar(true);
-                setShowCheckoutCalendar(false);
-              }}
+            <div
+              onClick={() => setShowDatePicker(true)}
               className="p-3 h-14 border border-gray-300 rounded-lg flex flex-col justify-center cursor-pointer hover:border-blue-900"
             >
               <span className="text-lg font-medium">{formatDate(checkinDate)}</span>
-              <span className="text-xs text-gray-500">
-                {new Date(checkinDate).toLocaleDateString('en-US', { weekday: 'long' })}
-              </span>
             </div>
-            {showCheckinCalendar && (
-              <div className="absolute z-10 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-2">
-                <input
-                  type="date"
-                  value={checkinDate}
-                  onChange={handleCheckinChange}
-                  className="w-full p-2 border rounded-lg"
-                  min={new Date().toISOString().split('T')[0]}
-                />
-              </div>
-            )}
           </div>
 
           {/* Check Out */}
-          <div className="w-full md:w-1/5 relative" ref={checkoutRef}>
+          <div className="w-full md:w-1/5">
             <label className="block text-xs font-medium text-gray-500 mb-1 uppercase">CHECK OUT</label>
-            <div 
-              onClick={() => {
-                setShowCheckoutCalendar(true);
-                setShowCheckinCalendar(false);
-              }}
+            <div
+              onClick={() => setShowDatePicker(true)}
               className="p-3 h-14 border border-gray-300 rounded-lg flex flex-col justify-center cursor-pointer hover:border-blue-900"
             >
               <span className="text-lg font-medium">{formatDate(checkoutDate)}</span>
-              <span className="text-xs text-gray-500">
-                {new Date(checkoutDate).toLocaleDateString('en-US', { weekday: 'long' })}
-              </span>
             </div>
-            {showCheckoutCalendar && (
-              <div className="absolute z-10 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-2">
-                <input
-                  type="date"
-                  value={checkoutDate}
-                  onChange={handleCheckoutChange}
-                  className="w-full p-2 border rounded-lg"
-                  min={checkinDate}
-                />
-              </div>
-            )}
           </div>
 
           {/* Guests & Rooms */}
@@ -237,16 +205,127 @@ const SearchBar = ({ initialValues }) => {
           </div>
 
           {/* Search Button */}
-          <div className="w-full mt-2 md:w-1/5">
-            <button
+          <div className="w-full mt-4 md:w-1/5">
+            <button style={{
+              background:
+                "linear-gradient(90deg, #313881, #0678B4)",
+            }}
               type="submit"
               className="w-full h-14 text-lg px-4 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"
             >
-              Search Hotels
+              Modify Search
             </button>
           </div>
         </div>
       </form>
+
+      {/* Date Range Picker Modal */}
+      {showDatePicker && (
+        <div className="fixed  md:mt-0 inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div
+            ref={datePickerRef}
+            className="bg-white  rounded-lg p-4 shadow-lg mx-2 w-full max-w-[20rem] md:max-w-[33rem]"
+          >
+            <style jsx global>{`
+  .react-datepicker {
+    font-size: 0.85rem;
+    border: none;
+  }
+
+  .react-datepicker__month-container {
+    padding: 0.3rem;
+  }
+
+  .react-datepicker__header {
+    padding: 0.3rem;
+    background-color: white;
+    border-bottom: 1px solid #eee;
+  }
+
+  .react-datepicker__day-name,
+  .react-datepicker__day {
+    width: 1.7rem;
+    line-height: 1.7rem;
+    margin: 0.1rem;
+    font-weight: 500;
+  }
+
+  .react-datepicker__day--selected,
+  .react-datepicker__day--in-selecting-range,
+  .react-datepicker__day--in-range {
+    background-color: #1e3a8a;
+    color: white;
+  }
+
+  .react-datepicker__day--keyboard-selected {
+    background-color: #3b82f6;
+  }
+
+  .react-datepicker__navigation {
+    top: 8px;
+  }
+
+  @media (max-width: 768px) {
+    .react-datepicker {
+      font-size: 0.9rem;
+    }
+
+    .react-datepicker__month-container {
+      padding: 0.5rem;
+    }
+
+    .react-datepicker__day-name,
+    .react-datepicker__day {
+      width: 2.1rem;
+      line-height: 1.5rem;
+    }
+
+    .react-datepicker__navigation {
+      top: 7px;
+    }
+
+    .react-datepicker__month {
+      margin: 0;
+    }
+
+    .react-datepicker__header {
+      padding: 0.5rem;
+    }
+  }
+`}</style>
+
+            <DatePicker
+              selectsRange={true}
+              startDate={dateRange[0]}
+              endDate={dateRange[1]}
+              onChange={handleDateChange}
+              minDate={new Date()}
+              monthsShown={2} // this is what makes two months side-by-side
+              inline
+              className="border-0"
+              calendarClassName="w-full"
+              wrapperClassName="w-full"
+            />
+
+            <div className="flex justify-between mt-4">
+              <button
+                type="button"
+                onClick={() => setShowDatePicker(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={applyDateSelection}
+                className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Search Form - Visible when showMobileSearch is true */}
       {showMobileSearch && (
@@ -292,25 +371,23 @@ const SearchBar = ({ initialValues }) => {
             {/* Check In */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Check In</label>
-              <input
-                type="date"
-                value={checkinDate}
-                onChange={handleCheckinChange}
-                className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 w-full"
-                min={new Date().toISOString().split('T')[0]}
-              />
+              <div
+                onClick={() => setShowDatePicker(true)}
+                className="p-3 h-12 border border-gray-300 rounded-lg flex items-center cursor-pointer"
+              >
+                <span className="text-blue-950">{formatMobileDate(checkinDate)}</span>
+              </div>
             </div>
 
             {/* Check Out */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Check Out</label>
-              <input
-                type="date"
-                value={checkoutDate}
-                onChange={handleCheckoutChange}
-                className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 w-full"
-                min={checkinDate}
-              />
+              <div
+                onClick={() => setShowDatePicker(true)}
+                className="p-3 h-12 border border-gray-300 rounded-lg flex items-center cursor-pointer"
+              >
+                <span className="text-blue-950">{formatMobileDate(checkoutDate)}</span>
+              </div>
             </div>
 
             {/* Guests & Rooms */}
@@ -346,7 +423,10 @@ const SearchBar = ({ initialValues }) => {
       {/* Guest Modal - Shared between desktop and mobile */}
       {showGuestModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-80 space-y-4 shadow-lg">
+          <div
+            ref={guestModalRef}
+            className="bg-white rounded-lg p-6 w-80 space-y-4 shadow-lg mx-2"
+          >
             <h2 className="text-lg font-semibold text-blue-950">Guests & Rooms</h2>
             {[
               { label: "Adults", count: adults, setter: setAdults, min: 1 },
@@ -374,13 +454,20 @@ const SearchBar = ({ initialValues }) => {
                 </div>
               </div>
             ))}
-            <div className="text-right">
+            <div className="flex justify-between mt-4">
               <button
                 type="button"
                 onClick={() => setShowGuestModal(false)}
-                className="mt-4 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors"
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
               >
-                Done
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowGuestModal(false)}
+                className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors"
+              >
+                Apply
               </button>
             </div>
           </div>

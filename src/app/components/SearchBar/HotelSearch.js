@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import SearchField from "./SearchField";
 import SearchButton from "./SearchButton";
 import getDestination from "@/services/hotel/getDestination";
 import getHotelCategories from "@/services/hotel/getHotelCategories";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const HotelSearch = () => {
   const router = useRouter();
@@ -17,36 +19,28 @@ const HotelSearch = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedLocationId, setSelectedLocationId] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Set default dates
+  const datePickerRef = useRef(null);
+  const guestModalRef = useRef(null);
+
   const today = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(today.getDate() + 1);
 
-  const formatDate = (date) => {
-    const options = { day: 'numeric', month: 'short', weekday: 'short' };
-    const formattedDate = date.toLocaleDateString('en-US', options);
-    const year = date.getFullYear().toString().slice(-2);
-    return formattedDate.replace(/(\w+ \d+, )(\w+)/, `$1'${year} $2`);
-  };
+  const [checkinDate, setCheckinDate] = useState(today);
+  const [checkoutDate, setCheckoutDate] = useState(tomorrow);
+  const [dateRange, setDateRange] = useState([today, tomorrow]);
 
-  const [checkinDate, setCheckinDate] = useState(today.toISOString().split('T')[0]);
-  const [checkoutDate, setCheckoutDate] = useState(tomorrow.toISOString().split('T')[0]);
-  const [displayCheckin, setDisplayCheckin] = useState(formatDate(today));
-  const [displayCheckout, setDisplayCheckout] = useState(formatDate(tomorrow));
-  const [showCheckinCalendar, setShowCheckinCalendar] = useState(false);
-  const [showCheckoutCalendar, setShowCheckoutCalendar] = useState(false);
-
-  // Fetch destination and category lists from API
   useEffect(() => {
     const fetchData = async () => {
       try {
         const destinationsData = await getDestination();
         setDestinations(destinationsData);
-        
+
         const categoriesData = await getHotelCategories();
         setCategories(categoriesData);
-        
+
         if (destinationsData.length > 0) {
           setSelectedLocationId(destinationsData[0].id);
         }
@@ -58,12 +52,29 @@ const HotelSearch = () => {
     fetchData();
   }, []);
 
-  const guestText = `${adults} Adult${adults > 1 ? "s" : ""},  ${rooms} Room${rooms > 1 ? "s" : ""}`;
+  // Handle click outside for modals
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showDatePicker && datePickerRef.current && !datePickerRef.current.contains(event.target)) {
+        setShowDatePicker(false);
+      }
+      if (showGuestModal && guestModalRef.current && !guestModalRef.current.contains(event.target)) {
+        setShowGuestModal(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDatePicker, showGuestModal]);
+
+  const guestText = `${adults} Adult${adults > 1 ? "s" : ""}, ${rooms} Room${rooms > 1 ? "s" : ""}`;
 
   const handleCategoryToggle = (categoryId) => {
-    setSelectedCategories(prev => 
-      prev.includes(categoryId) 
-        ? prev.filter(id => id !== categoryId) 
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId]
     );
   };
@@ -72,62 +83,45 @@ const HotelSearch = () => {
     e.preventDefault();
 
     const query = new URLSearchParams({
-      checkin: checkinDate,
-      checkout: checkoutDate,
+      checkin: checkinDate.toISOString().split("T")[0],
+      checkout: checkoutDate.toISOString().split("T")[0],
       locationID: String(selectedLocationId),
       rooms: String(rooms),
       child_ages: "",
       adult: String(adults),
-      categories: selectedCategories.join(',')
+      categories: selectedCategories.join(","),
     }).toString();
 
     router.push(`/hotel/list?${query}`);
   };
 
-  const handleCheckinChange = (e) => {
-    const newDate = new Date(e.target.value);
-    setCheckinDate(e.target.value);
-    setDisplayCheckin(formatDate(newDate));
-
-    // Ensure checkout is after checkin
-    const checkout = new Date(checkoutDate);
-    if (newDate >= checkout) {
-      const nextDay = new Date(newDate);
-      nextDay.setDate(newDate.getDate() + 1);
-      setCheckoutDate(nextDay.toISOString().split('T')[0]);
-      setDisplayCheckout(formatDate(nextDay));
+  const handleDateChange = (update) => {
+    setDateRange(update);
+    if (update[0]) {
+      setCheckinDate(update[0]);
     }
-
-    setShowCheckinCalendar(false);
+    if (update[1]) {
+      setCheckoutDate(update[1]);
+      setShowDatePicker(false);
+    }
   };
 
-  const handleCheckoutChange = (e) => {
-    const newDate = new Date(e.target.value);
-    setCheckoutDate(e.target.value);
-    setDisplayCheckout(formatDate(newDate));
-    setShowCheckoutCalendar(false);
-  };
-
-  const toggleCheckinCalendar = () => {
-    setShowCheckinCalendar(!showCheckinCalendar);
-    setShowCheckoutCalendar(false);
-  };
-
-  const toggleCheckoutCalendar = () => {
-    setShowCheckoutCalendar(!showCheckoutCalendar);
-    setShowCheckinCalendar(false);
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: '2-digit'
+    });
   };
 
   return (
-    <div className="bg-white  max-w-5xl mx-auto pb-6 text-blue-950">
+    <div className="bg-white max-w-5xl mx-auto pb-6 text-blue-950 relative">
       <form onSubmit={handleSearch}>
-        {/* Grid layout changes for responsiveness */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Destination - Full width on mobile, first in order */}
+          {/* Destination */}
           <div className="col-span-2 md:col-span-1 space-y-1">
-            <label className="block text-sm text-blue-950">
-              City/Hotel/Resort/Area
-            </label>
+            <label className="block text-sm text-blue-950">City/Hotel/Resort/Area</label>
             <select
               value={selectedLocationId}
               onChange={(e) => setSelectedLocationId(e.target.value)}
@@ -141,55 +135,29 @@ const HotelSearch = () => {
             </select>
           </div>
 
-          {/* Check In - Half width on mobile, second in order */}
+          {/* Check In */}
           <div className="sm:col-span-1 space-y-1 relative">
-            <label className="block font-medium text-sm text-blue-950">
-              Check In
-            </label>
+            <label className="block text-sm text-blue-950">Check In</label>
             <div
-              onClick={toggleCheckinCalendar}
-              className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
+              onClick={() => setShowDatePicker(true)}
+              className="p-3 border w-full border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white text-sm sm:text-base text-blue-950 font-bold"
             >
-              <div className="font-bold text-blue-950 text-sm sm:text-base">{displayCheckin}</div>
+              {formatDate(checkinDate)}
             </div>
-            {showCheckinCalendar && (
-              <div className="absolute z-10 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-2">
-                <input
-                  type="date"
-                  value={checkinDate}
-                  onChange={handleCheckinChange}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="p-2 border rounded text-sm sm:text-base"
-                />
-              </div>
-            )}
           </div>
 
-          {/* Check Out - Half width on mobile, third in order */}
+          {/* Check Out */}
           <div className="sm:col-span-1 space-y-1 relative">
-            <label className="block text-sm text-blue-950">
-              Check Out
-            </label>
+            <label className="block text-sm text-blue-950">Check Out</label>
             <div
-              onClick={toggleCheckoutCalendar}
-              className="p-3 border font-medium border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
+              onClick={() => setShowDatePicker(true)}
+              className="p-3 border w-full border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white text-sm sm:text-base text-blue-950 font-bold"
             >
-              <div className="font-bold text-blue-950 text-sm sm:text-base">{displayCheckout}</div>
+              {formatDate(checkoutDate)}
             </div>
-            {showCheckoutCalendar && (
-              <div className="absolute z-10 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-2">
-                <input
-                  type="date"
-                  value={checkoutDate}
-                  onChange={handleCheckoutChange}
-                  min={checkinDate}
-                  className="p-2 border rounded text-sm sm:text-base"
-                />
-              </div>
-            )}
           </div>
 
-          {/* Guests & Rooms - Full width on mobile, fourth in order */}
+          {/* Guests & Rooms */}
           <div className="col-span-2 md:col-span-1 space-y-1">
             <label className="block text-sm font-medium text-blue-950">
               Guests & Rooms
@@ -198,17 +166,48 @@ const HotelSearch = () => {
               onClick={() => setShowGuestModal(true)}
               className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
             >
-              <div className="font-bold text-blue-950 text-sm sm:text-base">{guestText}</div>
+              <div className="font-bold text-blue-950 text-sm sm:text-base">
+                {guestText}
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Date Range Picker Modal */}
+        {showDatePicker && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div 
+              ref={datePickerRef}
+              className="bg-white rounded-lg p-6 shadow-lg"
+            >
+              <DatePicker
+                selectsRange={true}
+                startDate={dateRange[0]}
+                endDate={dateRange[1]}
+                onChange={handleDateChange}
+                minDate={new Date()}
+                monthsShown={2}
+                inline
+                className="border-0"
+              />
+              <div className="flex justify-end mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowDatePicker(false)}
+                  className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors text-sm sm:text-base"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Category Selection */}
         <div className="mt-4">
-        
           <div className="flex flex-wrap gap-4">
-              <p className="text-sm font-bold text-blue-950 ">Search For</p>
-            {categories.map(category => (
+            <p className="text-sm font-bold text-blue-950">Search For</p>
+            {categories.map((category) => (
               <div key={category.id} className="flex items-center">
                 <input
                   type="checkbox"
@@ -228,7 +227,10 @@ const HotelSearch = () => {
         {/* Guest Modal */}
         {showGuestModal && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-80 space-y-4 shadow-lg">
+            <div 
+              ref={guestModalRef}
+              className="bg-white rounded-lg p-6 w-80 space-y-4 shadow-lg"
+            >
               <h2 className="text-lg font-semibold text-blue-950">Guests & Rooms</h2>
 
               {[["Adults", adults, setAdults, 1], ["Children", children, setChildren, 0], ["Rooms", rooms, setRooms, 1]].map(
@@ -269,8 +271,8 @@ const HotelSearch = () => {
           </div>
         )}
 
-        {/* Search Button - Responsive positioning */}
-        <div className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2 -translate-x-1/2 flex justify-end">
+        {/* Search Button */}
+        <div  className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2 -translate-x-1/2 flex justify-end">
           <SearchButton type="submit">Search Hotels</SearchButton>
         </div>
       </form>
