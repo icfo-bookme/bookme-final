@@ -73,7 +73,7 @@ export default function Visa() {
     };
 
     return (
-        <div className="bg-white w-full mx-auto px-4 sm:px-6 py-6 md:py-10 lg:py-12 max-w-7xl">
+        <div className="bg-white w-full mx-auto  sm:px-6 py-6 md:py-10 lg:py-12 max-w-7xl">
             <div className="w-full text-center mb-8 md:mb-12">
                 <h2 className="text-xl md:text-2xl font-bold text-[#00026E] mb-2">
                     Popular Visa Destinations

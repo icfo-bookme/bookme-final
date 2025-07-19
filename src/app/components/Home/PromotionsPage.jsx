@@ -78,7 +78,7 @@ export default function PromotionsPage() {
     };
 
     return (
-        <div className={`${roboto.className} bg-white w-full mx-auto px-4 sm:px-6 py-6 md:py-10 lg:py-12 max-w-7xl`}>
+        <div className={`${roboto.className} bg-white w-full mx-auto  sm:px-6 py-6 md:py-10 lg:py-12 max-w-7xl`}>
             <div className="w-full text-center mb-8 md:mb-12">
                 <h2 className="text-xl md:text-2xl font-bold text-blue-800 mb-2">
                     Save & Explore Global Destinations!

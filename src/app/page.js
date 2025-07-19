@@ -53,16 +53,16 @@ export default async function Home() {
         </div>
 
         {/* Search Widget Container */}
-        <div className="container relative md:top-96 top-36  z-10 h-full flex items-center justify-center px-4">
-          <div className="w-full md:max-w-5xl  md:-mt-24 lg:-mt-32">
+        <div className=" relative md:top-96 top-36   z-10 h-full flex items-center justify-center ">
+          <div className="w-full  md:max-w-5xl md:-mt-24 lg:-mt-32">
             <TravelSearchWidget />
           </div>
         </div>
       </section>
 
       {/* Main Content Section */}
-      <section className="py-5 md:py-10 bg-white">
-        <div className="container mx-auto px-4 2xl:px-0">
+      <section className="py-5  bg-white">
+        <div className=" mx-auto  ">
           <div className="overflow-hidden">
             {servicesData.length > 0 ? (
               <>
