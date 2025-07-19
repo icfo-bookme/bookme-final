@@ -5,8 +5,19 @@ import SearchBar from '@/app/components/hotel/SearchBar';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
+// Wrap the main component with Suspense to handle useSearchParams
 const HotelListPage = () => {
+  return (
+    <Suspense fallback={<div>Loading search parameters...</div>}>
+      <HotelListContent />
+    </Suspense>
+  );
+};
+
+// Move the main content to a separate component
+const HotelListContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -21,7 +32,7 @@ const HotelListPage = () => {
 
   useEffect(() => {      
     const fetchHotels = async () => {
-     
+      if (!locationID) return;
 
       try {
         const apiUrl = `https://bookme.com.bd/admin/api/hotel/listing/${locationID}`;
@@ -55,7 +66,7 @@ const HotelListPage = () => {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:pt-28 bg-white text-blue-950">
-      <div className="mb-8 md:mb-10  rounded-xl p-4 shadow-lg">
+      <div className="mb-8 md:mb-10 rounded-xl p-4 shadow-lg">
         <SearchBar
           initialValues={{
             checkin,
@@ -174,7 +185,7 @@ const HotelListPage = () => {
                       {/* Amenities */}
                       {hotel.summary?.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {hotel.summary.slice(0, 4).map((amenity) => (
+                          {hotel.summary.slice(0, 6).map((amenity) => (
                             <span
                               key={amenity.id}
                               className="flex items-center text-xs bg-gray-50 border border-gray-200 px-3 py-1 rounded-full hover:bg-blue-50 hover:border-blue-200 transition-colors"
@@ -183,9 +194,9 @@ const HotelListPage = () => {
                               {amenity.name}
                             </span>
                           ))}
-                          {hotel.summary.length > 4 && (
+                          {hotel.summary.length > 6 && (
                             <span className="text-xs bg-gray-50 border border-gray-200 px-3 py-1 rounded-full">
-                              +{hotel.summary.length - 4} more
+                              +{hotel.summary.length - 6} more
                             </span>
                           )}
                         </div>
@@ -208,11 +219,11 @@ const HotelListPage = () => {
                       </div>
 
                       <Link
-                        href={`/hotel/list/details/${hotel.id}`} style={{
-              background:
-                "linear-gradient(90deg, #313881, #0678B4)",
-            }}
-                        className="mt-3 md:mt-0 inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white  rounded-lg hover:from-blue-800 hover:to-blue-700 transition-all shadow-sm hover:shadow-md"
+                        href={`/hotel/list/details/${hotel.id}`}
+                        style={{
+                          background: "linear-gradient(90deg, #313881, #0678B4)",
+                        }}
+                        className="mt-3 md:mt-0 inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white rounded-lg hover:from-blue-800 hover:to-blue-700 transition-all shadow-sm hover:shadow-md"
                       >
                         View Details
                         <i className="fa-solid fa-arrow-right ml-2 text-xs"></i>
