@@ -54,7 +54,7 @@ export default async function Home() {
 
         {/* Search Widget Container */}
         <div className=" relative md:top-96 top-36   z-10 h-full flex items-center justify-center ">
-          <div className="w-full  md:max-w-5xl md:-mt-24 lg:-mt-32">
+          <div className="w-full  md:max-w-5xl px-5 lg:px-0 md:-mt-24 lg:-mt-32">
             <TravelSearchWidget />
           </div>
         </div>
