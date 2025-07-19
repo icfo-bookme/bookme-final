@@ -250,7 +250,7 @@ const RoomComponent = ({ hotel_id }) => {
                                             Breakfast {room.breakfast_status === 'included' ? 'Included' : 'Not Included'}
                                         </p>
 
-                                        <p className="text-gray-600 mt-2 text-xs mb-4">{room.description}</p>
+                                        <p className="text-gray-600 mt-2 text-xs mb-4">{room.room_characteristics}</p>
                                         <li className='text-xs'>Free cancellation before 00:01 on {getFormattedDate()}</li>
                                     </div>
                                     <div className='text-end'>
