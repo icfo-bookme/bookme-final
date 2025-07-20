@@ -48,22 +48,30 @@ const HotelListContent = () => {
         }
         const hotelData = await hotelRes.json();
         
-        // Filter out hotels with price 0 and add proper numeric prices
-        const processedHotels = hotelData
-          .filter(hotel => hotel.price_after_discount > 0)
-          .map(hotel => ({
+        // Process all hotels, including those with price 0 or no price
+        const processedHotels = hotelData.map(hotel => {
+          // Handle cases where price might be 0, null, or undefined
+          const price = hotel.price_after_discount || 0;
+          const numericPrice = typeof price === 'string' 
+            ? parseFloat(price.replace(/[^0-9.]/g, '')) || 0
+            : price || 0;
+            
+          return {
             ...hotel,
-            numericPrice: typeof hotel.price_after_discount === 'string' 
-              ? parseFloat(hotel.price_after_discount.replace(/[^0-9.]/g, '')) 
-              : hotel.price_after_discount,
-            starNumber: parseInt(hotel.star)
-          }));
+            numericPrice,
+            starNumber: parseInt(hotel.star) || 0,
+            hasPrice: numericPrice > 0 // Add flag to indicate if price is available
+          };
+        });
         
         setHotels(processedHotels);
 
-        // Calculate max price for range slider
-        const maxPrice = processedHotels.reduce((max, hotel) => 
-          Math.max(max, hotel.numericPrice), 0);
+        // Calculate max price for range slider (only from hotels with prices)
+        const pricedHotels = processedHotels.filter(hotel => hotel.hasPrice);
+        const maxPrice = pricedHotels.length > 0 
+          ? pricedHotels.reduce((max, hotel) => Math.max(max, hotel.numericPrice), 0)
+          : 10000; // Default max if no priced hotels
+          
         setPriceRange([0, Math.ceil(maxPrice / 1000) * 1000]);
 
         // Fetch amenities
@@ -119,16 +127,17 @@ const HotelListContent = () => {
 
   // Filter hotels based on selected filters
   const filteredHotels = hotels.filter(hotel => {
-    // Amenities filter - now checks both summary and facilities
+    // Amenities filter - checks both summary and facilities
     const amenityMatch = selectedAmenities.length === 0 || 
       selectedAmenities.every(amenityId => 
         (hotel.summary?.some(amenity => amenity.id === amenityId)) ||
         (hotel.facilities?.some(facility => facility.id === amenityId))
       );
     
-    // Price range filter
-    const priceMatch = hotel.numericPrice >= priceRange[0] && 
-                      hotel.numericPrice <= priceRange[1];
+    // Price range filter - show all if no price, otherwise filter by range
+    const priceMatch = !hotel.hasPrice || 
+                      (hotel.numericPrice >= priceRange[0] && 
+                       hotel.numericPrice <= priceRange[1]);
     
     // Star rating filter
     const starMatch = selectedStars.length === 0 || 
@@ -139,6 +148,11 @@ const HotelListContent = () => {
 
   // Sort hotels based on selected option
   const sortedHotels = [...filteredHotels].sort((a, b) => {
+    // Handle hotels without prices (show them at the end)
+    if (!a.hasPrice && !b.hasPrice) return 0;
+    if (!a.hasPrice) return 1;
+    if (!b.hasPrice) return -1;
+
     switch (sortOption) {
       case 'price-low-high':
         return a.numericPrice - b.numericPrice;
@@ -148,7 +162,7 @@ const HotelListContent = () => {
         // Sort by star rating (descending), then by price (ascending)
         return b.starNumber - a.starNumber || a.numericPrice - b.numericPrice;
       default:
-        // 'recommended' - keep original order or apply any default sorting
+        // 'recommended' - keep original order
         return 0;
     }
   });
@@ -225,7 +239,6 @@ const HotelListContent = () => {
                     {Array(star).fill().map((_, i) => (
                       <i key={i} className="fa-solid fa-star text-yellow-400 text-xs mr-0.5"></i>
                     ))}
-                    {star < 5 && <span className="text-gray-400 ml-1"></span>}
                   </label>
                 </div>
               ))}
@@ -334,7 +347,7 @@ const HotelListContent = () => {
                         <span>{hotel.location}</span>
                       </div>
 
-                      {/* Amenities - now showing both summary and facilities */}
+                      {/* Amenities - showing both summary and facilities */}
                       {(hotel.summary?.length > 0 || hotel.facilities?.length > 0) && (
                         <div className="flex flex-wrap gap-2 mb-4">
                           {[...(hotel.summary || []), ...(hotel.facilities || [])]
@@ -372,9 +385,19 @@ const HotelListContent = () => {
                           <p className="text-xs text-green-600 font-medium mb-1">{hotel.extra_discount_msg}</p>
                         )}
                         <div className="flex items-end gap-2">
-                          <p className="text-xl font-bold text-blue-800">BDT {hotel.price_after_discount.toLocaleString()}</p>
-                          {hotel.discount && hotel.discount > 0 && (
-                            <p className="text-sm text-gray-500 line-through">BDT {hotel.regular_price?.toLocaleString()}</p>
+                          {hotel.hasPrice ? (
+                            <>
+                              <p className="text-xl font-bold text-blue-800">
+                                BDT {hotel.price_after_discount.toLocaleString()}
+                              </p>
+                              {hotel.discount && hotel.discount > 0 && (
+                                <p className="text-sm text-gray-500 line-through">
+                                  BDT {hotel.regular_price?.toLocaleString()}
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <p className="text-sm text-blue-600">Contact for price</p>
                           )}
                         </div>
                         <p className="text-xs text-gray-500 mt-1">for 1 Night, per room</p>
