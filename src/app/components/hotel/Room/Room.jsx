@@ -190,7 +190,7 @@ const RoomComponent = ({ hotel_id }) => {
                         <div key={room.id} className="py-4 rounded-lg bg-gray-100 border border-gray-300 mb-4 md:grid md:grid-cols-8 justify-between gap-6">
                             <div className='md:col-span-3 border-r border-gray-300'>
                                 <RoomCarousel images={room.images} key={room.id} />
-                                <h2 className="text-xl mt-5 pl-4 font-semibold mb-2">{room.name}</h2>
+                                <h2 className="text-xl mt-5 pl-4 font-semibold mb-2">{room.room_name}</h2>
                                 <div className='text-sm'>
                                     <p className="text-gray-600 pl-4 mb-1"><i className="fa-solid fa-flag"></i> {room.room_type}</p>
                                     <p className="text-gray-600 pl-4"><i className="fa-solid fa-users"></i> Maximum Room Capacity: {room.max_adults} </p>

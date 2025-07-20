@@ -65,7 +65,7 @@ const HotelListContent = () => {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl  lg:px-8  md:pt-28 bg-white text-blue-950">
+    <div className="container mx-auto max-w-7xl  lg:px-8  md:pt-24 bg-white text-blue-950">
       <div className="mb-8 md:mb-8 rounded-xl ">
         <SearchBar
           initialValues={{
