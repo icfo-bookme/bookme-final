@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 
-// Wrap the main component with Suspense to handle useSearchParams
 const HotelListPage = () => {
   return (
     <Suspense fallback={<div>Loading search parameters...</div>}>
@@ -16,7 +15,6 @@ const HotelListPage = () => {
   );
 };
 
-// Move the main content to a separate component
 const HotelListContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -28,31 +26,132 @@ const HotelListContent = () => {
   const adult = searchParams.get('adult') || '2';
 
   const [hotels, setHotels] = useState([]);
+  const [amenities, setAmenities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAmenities, setSelectedAmenities] = useState([]);
+  const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [selectedStars, setSelectedStars] = useState([]);
+  const [sortOption, setSortOption] = useState('recommended');
 
   useEffect(() => {      
-    const fetchHotels = async () => {
+    const fetchData = async () => {
       if (!locationID) return;
 
       try {
+        setLoading(true);
+        // Fetch hotels
         const apiUrl = `https://bookme.com.bd/admin/api/hotel/listing/${locationID}`;
-        const res = await fetch(apiUrl);
+        const hotelRes = await fetch(apiUrl);
 
-        if (!res.ok) {
+        if (!hotelRes.ok) {
           throw new Error('Failed to fetch hotels');
         }
+        const hotelData = await hotelRes.json();
+        
+        // Filter out hotels with price 0 and add proper numeric prices
+        const processedHotels = hotelData
+          .filter(hotel => hotel.price_after_discount > 0)
+          .map(hotel => ({
+            ...hotel,
+            numericPrice: typeof hotel.price_after_discount === 'string' 
+              ? parseFloat(hotel.price_after_discount.replace(/[^0-9.]/g, '')) 
+              : hotel.price_after_discount,
+            starNumber: parseInt(hotel.star)
+          }));
+        
+        setHotels(processedHotels);
 
-        const data = await res.json();
-        setHotels(data);
+        // Calculate max price for range slider
+        const maxPrice = processedHotels.reduce((max, hotel) => 
+          Math.max(max, hotel.numericPrice), 0);
+        setPriceRange([0, Math.ceil(maxPrice / 1000) * 1000]);
+
+        // Fetch amenities
+        const amenitiesRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/aminities`);
+        if (amenitiesRes.ok) {
+          const amenitiesData = await amenitiesRes.json();
+          setAmenities(amenitiesData);
+        }
       } catch (error) {
-        console.error('Error fetching hotels:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHotels();
-  }, [checkin, checkout, locationID, router]);
+    fetchData();
+  }, [locationID]);
+
+  const handleAmenityChange = (amenityId) => {
+    setSelectedAmenities(prev => 
+      prev.includes(amenityId) 
+        ? prev.filter(id => id !== amenityId) 
+        : [...prev, amenityId]
+    );
+  };
+
+  const handleStarChange = (star) => {
+    setSelectedStars(prev =>
+      prev.includes(star)
+        ? prev.filter(s => s !== star)
+        : [...prev, star]
+    );
+  };
+
+  const handlePriceChange = (e, index) => {
+    const newValue = parseInt(e.target.value);
+    const newRange = [...priceRange];
+    newRange[index] = newValue;
+    
+    // Ensure min doesn't exceed max and vice versa
+    if (index === 0 && newValue > priceRange[1]) {
+      newRange[1] = newValue;
+    } else if (index === 1 && newValue < priceRange[0]) {
+      newRange[0] = newValue;
+    }
+    
+    setPriceRange(newRange);
+  };
+
+  const handleSortChange = (e) => {
+    setSortOption(e.target.value);
+  };
+
+  // Filter hotels based on selected filters
+  const filteredHotels = hotels.filter(hotel => {
+    // Amenities filter - now checks both summary and facilities
+    const amenityMatch = selectedAmenities.length === 0 || 
+      selectedAmenities.every(amenityId => 
+        (hotel.summary?.some(amenity => amenity.id === amenityId)) ||
+        (hotel.facilities?.some(facility => facility.id === amenityId))
+      );
+    
+    // Price range filter
+    const priceMatch = hotel.numericPrice >= priceRange[0] && 
+                      hotel.numericPrice <= priceRange[1];
+    
+    // Star rating filter
+    const starMatch = selectedStars.length === 0 || 
+                      selectedStars.includes(hotel.starNumber);
+    
+    return amenityMatch && priceMatch && starMatch;
+  });
+
+  // Sort hotels based on selected option
+  const sortedHotels = [...filteredHotels].sort((a, b) => {
+    switch (sortOption) {
+      case 'price-low-high':
+        return a.numericPrice - b.numericPrice;
+      case 'price-high-low':
+        return b.numericPrice - a.numericPrice;
+      case 'star-rating':
+        // Sort by star rating (descending), then by price (ascending)
+        return b.starNumber - a.starNumber || a.numericPrice - b.numericPrice;
+      default:
+        // 'recommended' - keep original order or apply any default sorting
+        return 0;
+    }
+  });
 
   if (loading) {
     return (
@@ -65,8 +164,8 @@ const HotelListContent = () => {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl  lg:px-8  md:pt-24 bg-white text-blue-950">
-      <div className="mb-8 md:mb-8 rounded-xl ">
+    <div className="container mx-auto max-w-7xl lg:px-8 md:pt-24 bg-white text-blue-950">
+      <div className="mb-8 md:mb-8 rounded-xl">
         <SearchBar
           initialValues={{
             checkin,
@@ -82,16 +181,31 @@ const HotelListContent = () => {
         {/* Filters Sidebar */}
         <div className='hidden md:block md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 h-fit sticky top-28'>
           <h3 className="font-semibold text-lg mb-4 text-gray-800 border-b pb-2">Refine Your Search</h3>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Price Range */}
             <div>
-              <h4 className="font-medium text-sm text-gray-700 mb-2">Price Range</h4>
-              <div className="h-1 bg-gray-200 rounded-full mb-2">
-                <div className="h-1 bg-blue-600 rounded-full w-3/4"></div>
+              <h4 className="font-medium text-sm text-gray-700 mb-3">Price Range (BDT)</h4>
+              <div className="px-2 mb-4">
+                <input
+                  type="range"
+                  min="0"
+                  max={priceRange[1]}
+                  value={priceRange[0]}
+                  onChange={(e) => handlePriceChange(e, 0)}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max={priceRange[1]}
+                  value={priceRange[1]}
+                  onChange={(e) => handlePriceChange(e, 1)}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer mt-2"
+                />
               </div>
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>BDT 0</span>
-                <span>BDT 10,000+</span>
+              <div className="flex justify-between text-sm text-gray-700">
+                <span>BDT {priceRange[0].toLocaleString()}</span>
+                <span>BDT {priceRange[1].toLocaleString()}</span>
               </div>
             </div>
 
@@ -99,13 +213,19 @@ const HotelListContent = () => {
             <div>
               <h4 className="font-medium text-sm text-gray-700 mb-2">Star Rating</h4>
               {[5, 4, 3, 2, 1].map((star) => (
-                <div key={star} className="flex items-center mb-1">
-                  <input type="checkbox" id={`star-${star}`} className="mr-2 accent-blue-600" />
+                <div key={star} className="flex items-center mb-2">
+                  <input 
+                    type="checkbox" 
+                    id={`star-${star}`} 
+                    className="mr-2 accent-blue-600"
+                    checked={selectedStars.includes(star)}
+                    onChange={() => handleStarChange(star)}
+                  />
                   <label htmlFor={`star-${star}`} className="text-sm text-gray-600 flex items-center">
                     {Array(star).fill().map((_, i) => (
                       <i key={i} className="fa-solid fa-star text-yellow-400 text-xs mr-0.5"></i>
                     ))}
-                    {star < 5 && <span className="text-gray-400 ml-1">& up</span>}
+                    {star < 5 && <span className="text-gray-400 ml-1"></span>}
                   </label>
                 </div>
               ))}
@@ -114,13 +234,40 @@ const HotelListContent = () => {
             {/* Amenities */}
             <div>
               <h4 className="font-medium text-sm text-gray-700 mb-2">Amenities</h4>
-              {['Free WiFi', 'Swimming Pool', 'Restaurant', 'Air Conditioning', 'Parking'].map((amenity) => (
-                <div key={amenity} className="flex items-center mb-1">
-                  <input type="checkbox" id={`amenity-${amenity}`} className="mr-2 accent-blue-600" />
-                  <label htmlFor={`amenity-${amenity}`} className="text-sm text-gray-600">{amenity}</label>
-                </div>
-              ))}
+              <div className="max-h-60 overflow-y-auto pr-2">
+                {amenities.map((amenity) => (
+                  <div key={amenity.id} className="flex items-center mb-2">
+                    <input 
+                      type="checkbox" 
+                      id={`amenity-${amenity.id}`} 
+                      className="mr-2 accent-blue-600"
+                      checked={selectedAmenities.includes(amenity.id)}
+                      onChange={() => handleAmenityChange(amenity.id)}
+                    />
+                    <label htmlFor={`amenity-${amenity.id}`} className="text-sm text-gray-600 flex items-center">
+                      {amenity.icon_class && (
+                        <i className={`${amenity.icon_class} mr-2 text-blue-600 text-xs`}></i>
+                      )}
+                      {amenity.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {/* Clear Filters Button */}
+            {(selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < 10000) && (
+              <button
+                onClick={() => {
+                  setSelectedAmenities([]);
+                  setSelectedStars([]);
+                  setPriceRange([0, 10000]);
+                }}
+                className="w-full py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
+              >
+                Clear All Filters
+              </button>
+            )}
           </div>
         </div>
 
@@ -128,22 +275,26 @@ const HotelListContent = () => {
         <div className="w-full md:w-3/4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-800">
-              {hotels.length} {hotels.length === 1 ? 'Hotel' : 'Hotels'} Found
+              {filteredHotels.length} {filteredHotels.length === 1 ? 'Hotel' : 'Hotels'} Found
             </h2>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-600">Sort by:</span>
-              <select className="text-sm border border-gray-300 rounded-md px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>Recommended</option>
-                <option>Price (Low to High)</option>
-                <option>Price (High to Low)</option>
-                <option>Star Rating</option>
+              <select 
+                className="text-sm border border-gray-300 rounded-md px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={sortOption}
+                onChange={handleSortChange}
+              >
+                <option value="recommended">Recommended</option>
+                <option value="price-low-high">Price (Low to High)</option>
+                <option value="price-high-low">Price (High to Low)</option>
+                <option value="star-rating">Star Rating</option>
               </select>
             </div>
           </div>
 
-          {hotels.length > 0 ? (
+          {filteredHotels.length > 0 ? (
             <div className="space-y-5">
-              {hotels.map((hotel) => (
+              {sortedHotels.map((hotel) => (
                 <div
                   key={hotel.id}
                   className="group relative flex flex-col md:flex-row gap-5 p-5 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 bg-white hover:border-blue-100"
@@ -156,8 +307,9 @@ const HotelListContent = () => {
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, 40vw"
+                      priority={false}
                     />
-                    {hotel.discount && (
+                    {hotel.discount && hotel.discount > 0 && (
                       <div className="absolute top-3 left-0 bg-[#FD7E14] text-white font-bold text-xs px-3 py-1 shadow-md z-10">
                         <span className="relative z-10">{hotel.discount}% OFF</span>
                         <div className="absolute right-0 top-0 w-0 h-0 border-l-[12px] border-l-transparent border-t-[20px] border-t-[#FD7E14] border-b-0 border-r-0 transform translate-x-full"></div>
@@ -179,24 +331,34 @@ const HotelListContent = () => {
 
                       <div className="flex items-center text-sm text-gray-600 mb-3">
                         <i className="fa-solid fa-location-dot text-xs mr-2"></i>
-                        <span>{hotel.street_address} {hotel.location}</span>
+                        <span>{hotel.location}</span>
                       </div>
 
-                      {/* Amenities */}
-                      {hotel.summary?.length > 0 && (
+                      {/* Amenities - now showing both summary and facilities */}
+                      {(hotel.summary?.length > 0 || hotel.facilities?.length > 0) && (
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {hotel.summary.slice(0, 6).map((amenity) => (
-                            <span
-                              key={amenity.id}
-                              className="flex items-center text-xs bg-gray-50 border border-gray-200 px-3 py-1 rounded-full hover:bg-blue-50 hover:border-blue-200 transition-colors"
-                            >
-                              <i className={`${amenity.icon_class} mr-2 text-blue-600 text-xs`}></i>
-                              {amenity.name}
-                            </span>
-                          ))}
-                          {hotel.summary.length > 6 && (
+                          {[...(hotel.summary || []), ...(hotel.facilities || [])]
+                            .slice(0, 6)
+                            .filter((item, index, self) => 
+                              index === self.findIndex((t) => t.id === item.id)
+                            )
+                            .map((amenity) => {
+                              const amenityData = amenities.find(a => a.id === amenity.id);
+                              return (
+                                <span
+                                  key={amenity.id}
+                                  className="flex items-center text-xs bg-gray-50 border border-gray-200 px-3 py-1 rounded-full hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                                >
+                                  {amenityData?.icon_class && (
+                                    <i className={`${amenityData.icon_class} mr-2 text-blue-600 text-xs`}></i>
+                                  )}
+                                  {amenityData?.name || amenity.name}
+                                </span>
+                              );
+                            })}
+                          {(hotel.summary?.length + hotel.facilities?.length) > 6 && (
                             <span className="text-xs bg-gray-50 border border-gray-200 px-3 py-1 rounded-full">
-                              +{hotel.summary.length - 6} more
+                              +{(hotel.summary?.length || 0) + (hotel.facilities?.length || 0) - 6} more
                             </span>
                           )}
                         </div>
@@ -210,16 +372,16 @@ const HotelListContent = () => {
                           <p className="text-xs text-green-600 font-medium mb-1">{hotel.extra_discount_msg}</p>
                         )}
                         <div className="flex items-end gap-2">
-                          <p className="text-xl font-bold text-blue-800">BDT {hotel.price_after_discount}</p>
-                          {hotel.discount && (
-                            <p className="text-sm text-gray-500 line-through">BDT {hotel.regular_price}</p>
+                          <p className="text-xl font-bold text-blue-800">BDT {hotel.price_after_discount.toLocaleString()}</p>
+                          {hotel.discount && hotel.discount > 0 && (
+                            <p className="text-sm text-gray-500 line-through">BDT {hotel.regular_price?.toLocaleString()}</p>
                           )}
                         </div>
                         <p className="text-xs text-gray-500 mt-1">for 1 Night, per room</p>
                       </div>
 
                       <Link
-                        href={`/hotel/list/details/${hotel.id}`}
+                        href={`/hotel/list/details/${hotel.id}?checkin=${checkin}&checkout=${checkout}&rooms=${rooms}&adult=${adult}`}
                         style={{
                           background: "linear-gradient(90deg, #313881, #0678B4)",
                         }}
@@ -240,8 +402,20 @@ const HotelListContent = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-800 mb-2">No hotels found</h3>
               <p className="text-gray-600 max-w-md mx-auto">
-                We could not find any hotels matching your criteria. Try adjusting your search filters or dates.
+                {selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < 10000
+                  ? "No hotels match your selected filters. Try adjusting your filters."
+                  : "We could not find any hotels matching your criteria. Try adjusting your search filters or dates."}
               </p>
+              <button
+                onClick={() => {
+                  setSelectedAmenities([]);
+                  setSelectedStars([]);
+                  setPriceRange([0, 10000]);
+                }}
+                className="mt-4 inline-block px-5 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors mr-2"
+              >
+                Clear Filters
+              </button>
               <Link
                 href="/hotel"
                 className="mt-4 inline-block px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
