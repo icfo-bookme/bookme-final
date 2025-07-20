@@ -240,7 +240,7 @@ const HotelListContent = () => {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl lg:px-8 md:pt-24 bg-white text-blue-950">
+    <div className="container mx-auto max-w-7xl py-16 lg:px-8 md:pt-24 bg-white text-blue-950">
       <div className="mb-8 md:mb-8 rounded-xl">
         <SearchBar
           initialValues={{
@@ -272,7 +272,7 @@ const HotelListContent = () => {
 
       {/* Mobile Filters Panel */}
       {showMobileFilters && (
-        <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30 flex justify-end">
+        <div className="md:hidden mt-12 fixed inset-0 bg-black bg-opacity-50 z-30 flex justify-end">
           <div 
             ref={mobileFiltersRef}
             className="w-full max-w-sm bg-white h-full overflow-y-auto animate-slide-in"
