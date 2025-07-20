@@ -36,7 +36,9 @@ const HotelListContent = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const searchRef = useRef(null);
+  const mobileFiltersRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -100,6 +102,14 @@ const HotelListContent = () => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
+      }
+      
+      if (mobileFiltersRef.current && !mobileFiltersRef.current.contains(event.target)) {
+        // Check if the click was on the filter button
+        const filterButton = document.getElementById('mobile-filter-button');
+        if (filterButton && !filterButton.contains(event.target)) {
+          setShowMobileFilters(false);
+        }
       }
     };
 
@@ -243,8 +253,179 @@ const HotelListContent = () => {
         />
       </div>
 
+      {/* Mobile Filter Button - Fixed at bottom */}
+      <div className="md:hidden fixed bottom-6 left-0 right-0 flex justify-center z-20">
+        <button
+          id="mobile-filter-button"
+          onClick={() => setShowMobileFilters(!showMobileFilters)}
+          className="flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+        >
+          <i className="fa-solid fa-sliders"></i>
+          <span>Filters</span>
+          {(selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < maxPrice || searchQuery) && (
+            <span className="bg-white text-blue-600 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              {selectedAmenities.length + selectedStars.length + (priceRange[1] < maxPrice ? 1 : 0) + (searchQuery ? 1 : 0)}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Filters Panel */}
+      {showMobileFilters && (
+        <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30 flex justify-end">
+          <div 
+            ref={mobileFiltersRef}
+            className="w-full max-w-sm bg-white h-full overflow-y-auto animate-slide-in"
+          >
+            <div className="p-4 sticky top-0 bg-white border-b flex justify-between items-center z-10">
+              <h3 className="font-bold text-lg">Filters</h3>
+              <button 
+                onClick={() => setShowMobileFilters(false)}
+                className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="p-4 space-y-6">
+              {/* Hotel Name Search */}
+              <div className="relative" ref={searchRef}>
+                <h4 className="font-medium text-sm text-gray-700 mb-2">Search by Hotel Name</h4>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Enter hotel name..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
+                    className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => {
+                        setSearchQuery('');
+                        setShowSuggestions(false);
+                      }}
+                      className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                    >
+                      <i className="fa-solid fa-times"></i>
+                    </button>
+                  )}
+                </div>
+                
+                {/* Suggestions Dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    {suggestions.map((hotel) => (
+                      <div
+                        key={hotel.id}
+                        className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer"
+                        onClick={() => selectSuggestion(hotel.name)}
+                      >
+                        {hotel.name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Price Range */}
+              <div>
+                <h4 className="font-medium text-sm text-gray-700 mb-3">Price Range</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Min: {formatPrice(priceRange[0])}</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max={maxPrice}
+                      value={priceRange[0]}
+                      onChange={handleMinPriceChange}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Max: {formatPrice(priceRange[1])}</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max={maxPrice}
+                      value={priceRange[1]}
+                      onChange={handleMaxPriceChange}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Star Rating */}
+              <div>
+                <h4 className="font-medium text-sm text-gray-700 mb-2">Star Rating</h4>
+                {[5, 4, 3, 2, 1].map((star) => (
+                  <div key={star} className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      id={`mobile-star-${star}`}
+                      className="mr-2 accent-blue-600"
+                      checked={selectedStars.includes(star)}
+                      onChange={() => handleStarChange(star)}
+                    />
+                    <label htmlFor={`mobile-star-${star}`} className="text-sm text-gray-600 flex items-center">
+                      {Array(star).fill().map((_, i) => (
+                        <i key={i} className="fa-solid fa-star text-yellow-400 text-xs mr-0.5"></i>
+                      ))}
+                    </label>
+                  </div>
+                ))}
+              </div>
+
+              {/* Amenities */}
+              <div>
+                <h4 className="font-medium text-sm text-gray-700 mb-2">Amenities</h4>
+                <div className="max-h-60 overflow-y-auto pr-2">
+                  {amenities.map((amenity) => (
+                    <div key={amenity.id} className="flex items-center mb-2">
+                      <input
+                        type="checkbox"
+                        id={`mobile-amenity-${amenity.id}`}
+                        className="mr-2 accent-blue-600"
+                        checked={selectedAmenities.includes(amenity.id)}
+                        onChange={() => handleAmenityChange(amenity.id)}
+                      />
+                      <label htmlFor={`mobile-amenity-${amenity.id}`} className="text-sm text-gray-600 flex items-center">
+                        {amenity.icon_class && (
+                          <i className={`${amenity.icon_class} mr-2 text-blue-600 text-xs`}></i>
+                        )}
+                        {amenity.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 sticky bottom-0 bg-white border-t flex justify-between gap-3">
+              <button
+                onClick={resetAllFilters}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Reset
+              </button>
+              <button
+                onClick={() => setShowMobileFilters(false)}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row bg-blue-100 p-4 rounded-lg gap-6">
-        {/* Filters Sidebar */}
+        {/* Filters Sidebar - Hidden on mobile */}
         <div className='hidden md:block md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 h-fit top-28'>
           <div className="flex justify-between items-center mb-4 border-b pb-4">
             <h3 className="font-semibold text-lg text-gray-800">Refine Your Search</h3>
@@ -300,7 +481,7 @@ const HotelListContent = () => {
           </div>
 
           <div className="space-y-6">
-            {/* Price Range - Using native range inputs */}
+            {/* Price Range */}
             <div>
               <h4 className="font-medium text-sm text-gray-700 mb-3">Price Range</h4>
               <div className="space-y-4">
@@ -383,7 +564,7 @@ const HotelListContent = () => {
               {filteredHotels.length} {filteredHotels.length === 1 ? 'Hotel' : 'Hotels'} Found
             </h2>
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">Sort by:</span>
+              <span className="text-sm text-gray-600 hidden md:inline">Sort by:</span>
               <select
                 className="text-sm border border-gray-300 rounded-md px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={sortOption}
@@ -391,7 +572,7 @@ const HotelListContent = () => {
               >
                 <option value="price-high-low">Price (High to Low)</option>
                 <option value="price-low-high">Price (Low to High)</option>
-                
+                <option value="star-rating">Star Rating</option>
               </select>
             </div>
           </div>
