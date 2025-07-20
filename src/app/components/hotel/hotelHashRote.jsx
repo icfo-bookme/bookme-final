@@ -96,7 +96,7 @@ export default function HotelHashRoute({ hotelId }) {
 
   // Split the near_by string into an array of locations
   const nearbyLocations = hotelDetails.near_by
-    ? hotelDetails.near_by.split('|').map(loc => loc.trim()).filter(loc => loc)
+    ? hotelDetails.near_by.split('.').map(loc => loc.trim()).filter(loc => loc)
     : [];
 
   const navItems = [

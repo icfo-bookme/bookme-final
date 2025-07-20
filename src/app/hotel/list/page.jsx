@@ -179,7 +179,7 @@ const HotelListContent = () => {
 
                       <div className="flex items-center text-sm text-gray-600 mb-3">
                         <i className="fa-solid fa-location-dot text-xs mr-2"></i>
-                        <span>{hotel.location}</span>
+                        <span>{hotel.street_address} {hotel.location}</span>
                       </div>
 
                       {/* Amenities */}

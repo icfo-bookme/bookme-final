@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Roboto } from "next/font/google";
@@ -23,6 +23,7 @@ const BookMeHeader = () => {
   const [destinations, setDestinations] = useState([]);
   const { currentPage, handlePageChange } = usePagination();
   const router = useRouter();
+  const packageTourRef = useRef(null);
 
   const handleClick = () => {
     handlePageChange(1);
@@ -57,6 +58,19 @@ const BookMeHeader = () => {
       }
     };
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (packageTourRef.current && !packageTourRef.current.contains(event.target)) {
+        setIsPackageTourOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const onSubmit = (data) => {
@@ -108,7 +122,7 @@ const BookMeHeader = () => {
                 </Link>
 
                 {/* Package Tour with Dropdown */}
-                <div className="relative group">
+                <div className="relative group" ref={packageTourRef}>
                   <button
                     onClick={togglePackageTour}
                     className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200 flex items-center gap-1"
@@ -135,7 +149,6 @@ const BookMeHeader = () => {
                           </Link>
                         ))}
                     </div>
-
                   )}
                 </div>
 
