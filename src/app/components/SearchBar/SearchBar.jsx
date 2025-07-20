@@ -15,7 +15,7 @@ const TravelBookingTabs = () => {
   const [activeTab, setActiveTab] = useState("hotel");
 
   return (
-    <div className=" bg-white shadow-lg border rounded-lg text-blue-950">
+    <div className="mb-12 bg-white shadow-lg border rounded-lg text-blue-950">
       {/* Tabs Navigation - Responsive layout */}
       <div className="flex lg:w-[50%] border-b">
         <TabButton

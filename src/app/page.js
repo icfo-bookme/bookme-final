@@ -46,15 +46,15 @@ export default async function Home() {
   return (
     <main className={roboto.className}>
       {/* Hero Section with Banner and Search Widget */}
-      <section className="relative w-full min-h-[67vh] md:min-h-[80vh]">
+      <section className="relative w-full min-h-[67vh]  md:min-h-[80vh]">
         {/* Banner Background */}
         <div className="absolute inset-0 w-full h-full">
           <Banner />
         </div>
 
         {/* Search Widget Container */}
-        <div className=" relative md:top-96 top-36   z-10 h-full flex items-center justify-center ">
-          <div className="w-full  md:max-w-5xl px-5 lg:px-0 md:-mt-24 lg:-mt-32">
+        <div className=" relative md:top-96 top-36  z-10 h-full flex items-center justify-center ">
+          <div className="w-[98%] md:w-full mx-auto md:max-w-5xl  md:-mt-24 lg:-mt-32">
             <TravelSearchWidget />
           </div>
         </div>
