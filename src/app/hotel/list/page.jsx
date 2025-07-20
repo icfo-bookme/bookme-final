@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import SearchBar from '@/app/components/hotel/SearchBar';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -33,8 +33,12 @@ const HotelListContent = () => {
   const [selectedStars, setSelectedStars] = useState([]);
   const [sortOption, setSortOption] = useState('recommended');
   const [maxPrice, setMaxPrice] = useState(10000);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchRef = useRef(null);
 
-  useEffect(() => {      
+  useEffect(() => {
     const fetchData = async () => {
       if (!locationID) return;
 
@@ -48,14 +52,14 @@ const HotelListContent = () => {
           throw new Error('Failed to fetch hotels');
         }
         const hotelData = await hotelRes.json();
-        
+
         // Process all hotels
         const processedHotels = hotelData.map(hotel => {
           const price = hotel.price_after_discount || 0;
-          const numericPrice = typeof price === 'string' 
+          const numericPrice = typeof price === 'string'
             ? parseFloat(price.replace(/[^0-9.]/g, '')) || 0
             : price || 0;
-            
+
           return {
             ...hotel,
             numericPrice,
@@ -63,15 +67,15 @@ const HotelListContent = () => {
             hasPrice: numericPrice > 0
           };
         });
-        
+
         setHotels(processedHotels);
 
         // Calculate max price from hotels with prices
         const pricedHotels = processedHotels.filter(hotel => hotel.hasPrice);
-        const calculatedMaxPrice = pricedHotels.length > 0 
+        const calculatedMaxPrice = pricedHotels.length > 0
           ? Math.max(...pricedHotels.map(hotel => hotel.numericPrice))
           : 10000;
-          
+
         setMaxPrice(Math.ceil(calculatedMaxPrice / 1000) * 1000);
         setPriceRange([0, Math.ceil(calculatedMaxPrice / 1000) * 1000]);
 
@@ -91,10 +95,24 @@ const HotelListContent = () => {
     fetchData();
   }, [locationID]);
 
+  useEffect(() => {
+    // Close suggestions when clicking outside
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleAmenityChange = (amenityId) => {
-    setSelectedAmenities(prev => 
-      prev.includes(amenityId) 
-        ? prev.filter(id => id !== amenityId) 
+    setSelectedAmenities(prev =>
+      prev.includes(amenityId)
+        ? prev.filter(id => id !== amenityId)
         : [...prev, amenityId]
     );
   };
@@ -121,22 +139,55 @@ const HotelListContent = () => {
     setSortOption(e.target.value);
   };
 
+  const handleSearchChange = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    if (query.length > 0) {
+      const matchedHotels = hotels.filter(hotel =>
+        hotel.name.toLowerCase().includes(query)
+      ).slice(0, 5); // Limit to 5 suggestions
+      setSuggestions(matchedHotels);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const selectSuggestion = (hotelName) => {
+    setSearchQuery(hotelName);
+    setShowSuggestions(false);
+  };
+
+  const resetAllFilters = () => {
+    setSelectedAmenities([]);
+    setSelectedStars([]);
+    setPriceRange([0, maxPrice]);
+    setSearchQuery('');
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
   // Filter hotels based on selected filters
   const filteredHotels = hotels.filter(hotel => {
-    const amenityMatch = selectedAmenities.length === 0 || 
-      selectedAmenities.every(amenityId => 
+    const nameMatch = searchQuery === '' || 
+      hotel.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const amenityMatch = selectedAmenities.length === 0 ||
+      selectedAmenities.every(amenityId =>
         (hotel.summary?.some(amenity => amenity.id === amenityId)) ||
         (hotel.facilities?.some(facility => facility.id === amenityId))
       );
-    
-    const priceMatch = !hotel.hasPrice || 
-                      (hotel.numericPrice >= priceRange[0] && 
-                       hotel.numericPrice <= priceRange[1]);
-    
-    const starMatch = selectedStars.length === 0 || 
-                      selectedStars.includes(hotel.starNumber);
-    
-    return amenityMatch && priceMatch && starMatch;
+
+    const priceMatch = !hotel.hasPrice ||
+      (hotel.numericPrice >= priceRange[0] &&
+        hotel.numericPrice <= priceRange[1]);
+
+    const starMatch = selectedStars.length === 0 ||
+      selectedStars.includes(hotel.starNumber);
+
+    return nameMatch && amenityMatch && priceMatch && starMatch;
   });
 
   // Enhanced sorting function
@@ -194,8 +245,60 @@ const HotelListContent = () => {
 
       <div className="flex flex-col md:flex-row bg-blue-100 p-4 rounded-lg gap-6">
         {/* Filters Sidebar */}
-        <div className='hidden md:block md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 h-fit sticky top-28'>
-          <h3 className="font-semibold text-lg mb-4 text-gray-800 border-b pb-2">Refine Your Search</h3>
+        <div className='hidden md:block md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 h-fit top-28'>
+          <div className="flex justify-between items-center mb-4 border-b pb-4">
+            <h3 className="font-semibold text-lg text-gray-800">Refine Your Search</h3>
+            {(selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < maxPrice || searchQuery) && (
+              <button
+                onClick={resetAllFilters}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Reset All
+              </button>
+            )}
+          </div>
+          
+          {/* Hotel Name Search with Suggestions */}
+          <div className="mb-6 relative" ref={searchRef}>
+            <h4 className="font-medium text-sm text-gray-700 mb-2">Search by Hotel Name</h4>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Enter hotel name..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
+                className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setShowSuggestions(false);
+                  }}
+                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                >
+                  <i className="fa-solid fa-times"></i>
+                </button>
+              )}
+            </div>
+            
+            {/* Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                {suggestions.map((hotel) => (
+                  <div
+                    key={hotel.id}
+                    className="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer"
+                    onClick={() => selectSuggestion(hotel.name)}
+                  >
+                    {hotel.name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="space-y-6">
             {/* Price Range - Using native range inputs */}
             <div>
@@ -231,9 +334,9 @@ const HotelListContent = () => {
               <h4 className="font-medium text-sm text-gray-700 mb-2">Star Rating</h4>
               {[5, 4, 3, 2, 1].map((star) => (
                 <div key={star} className="flex items-center mb-2">
-                  <input 
-                    type="checkbox" 
-                    id={`star-${star}`} 
+                  <input
+                    type="checkbox"
+                    id={`star-${star}`}
                     className="mr-2 accent-blue-600"
                     checked={selectedStars.includes(star)}
                     onChange={() => handleStarChange(star)}
@@ -253,9 +356,9 @@ const HotelListContent = () => {
               <div className="max-h-60 overflow-y-auto pr-2">
                 {amenities.map((amenity) => (
                   <div key={amenity.id} className="flex items-center mb-2">
-                    <input 
-                      type="checkbox" 
-                      id={`amenity-${amenity.id}`} 
+                    <input
+                      type="checkbox"
+                      id={`amenity-${amenity.id}`}
                       className="mr-2 accent-blue-600"
                       checked={selectedAmenities.includes(amenity.id)}
                       onChange={() => handleAmenityChange(amenity.id)}
@@ -270,20 +373,6 @@ const HotelListContent = () => {
                 ))}
               </div>
             </div>
-
-            {/* Clear Filters Button */}
-            {(selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < maxPrice) && (
-              <button
-                onClick={() => {
-                  setSelectedAmenities([]);
-                  setSelectedStars([]);
-                  setPriceRange([0, maxPrice]);
-                }}
-                className="w-full py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-              >
-                Clear All Filters
-              </button>
-            )}
           </div>
         </div>
 
@@ -295,15 +384,14 @@ const HotelListContent = () => {
             </h2>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-600">Sort by:</span>
-              <select 
+              <select
                 className="text-sm border border-gray-300 rounded-md px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={sortOption}
                 onChange={handleSortChange}
               >
-                <option value="recommended">Recommended</option>
-                <option value="price-low-high">Price (Low to High)</option>
                 <option value="price-high-low">Price (High to Low)</option>
-                <option value="star-rating">Star Rating</option>
+                <option value="price-low-high">Price (Low to High)</option>
+                
               </select>
             </div>
           </div>
@@ -355,7 +443,7 @@ const HotelListContent = () => {
                         <div className="flex flex-wrap gap-2 mb-4">
                           {[...(hotel.summary || []), ...(hotel.facilities || [])]
                             .slice(0, 6)
-                            .filter((item, index, self) => 
+                            .filter((item, index, self) =>
                               index === self.findIndex((t) => t.id === item.id)
                             )
                             .map((amenity) => {
@@ -428,16 +516,12 @@ const HotelListContent = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-800 mb-2">No hotels found</h3>
               <p className="text-gray-600 max-w-md mx-auto">
-                {selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < maxPrice
+                {selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < maxPrice || searchQuery
                   ? "No hotels match your selected filters. Try adjusting your filters."
                   : "We could not find any hotels matching your criteria. Try adjusting your search filters or dates."}
               </p>
               <button
-                onClick={() => {
-                  setSelectedAmenities([]);
-                  setSelectedStars([]);
-                  setPriceRange([0, maxPrice]);
-                }}
+                onClick={resetAllFilters}
                 className="mt-4 inline-block px-5 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors mr-2"
               >
                 Clear Filters
