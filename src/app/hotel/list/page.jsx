@@ -65,8 +65,8 @@ const HotelListContent = () => {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:pt-28 bg-white text-blue-950">
-      <div className="mb-8 md:mb-10 rounded-xl p-4 shadow-lg">
+    <div className="container mx-auto max-w-7xl  lg:px-8  md:pt-28 bg-white text-blue-950">
+      <div className="mb-8 md:mb-8 rounded-xl ">
         <SearchBar
           initialValues={{
             checkin,
@@ -78,7 +78,7 @@ const HotelListContent = () => {
         />
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row bg-blue-100 p-4 rounded-lg gap-6">
         {/* Filters Sidebar */}
         <div className='hidden md:block md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 h-fit sticky top-28'>
           <h3 className="font-semibold text-lg mb-4 text-gray-800 border-b pb-2">Refine Your Search</h3>

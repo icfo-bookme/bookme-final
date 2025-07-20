@@ -1,4 +1,3 @@
-// lib/api/getHotelDetails.js
 const getHotelDetails = async (hotelId) => {
   try {
     const response = await fetch(

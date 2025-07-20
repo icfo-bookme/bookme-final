@@ -8,6 +8,7 @@ import PromotionsPage from "./components/Home/PromotionsPage";
 import getServicesData from "@/services/homepage/getServicesData";
 import HpmepageBlog from "./components/pre-footer-content/Homepage";
 import TravelSearchWidget from "./components/SearchBar/SearchBar";
+import Hotel from "./components/Home/Hotel";
 
 // Optional: ensure server-side rendering
 export const dynamic = "force-dynamic";
@@ -27,6 +28,9 @@ export default async function Home() {
     (item) => item?.category_name === "Visa" && item?.isShow === "yes"
   );
 
+   const shouldShowHotel = servicesData?.some(
+    (item) => item?.category_name === "Hotel" && item?.isShow === "yes"
+  );
   const shouldShowTour = servicesData?.some(
     (item) => item?.category_name === "Tour" && item?.isShow === "yes"
   );
@@ -69,6 +73,8 @@ export default async function Home() {
                 <PromotionsPage servicesData={servicesData} />
 
                 {shouldShowVisa && <Visa />}
+
+                {shouldShowHotel && <Hotel />}
 
                 {shouldShowTour && (
                   <>

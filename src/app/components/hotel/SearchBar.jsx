@@ -125,7 +125,7 @@ const SearchBar = ({ initialValues }) => {
   }, []);
 
   return (
-    <div className="bg-white rounded-xl py-4 max-w-6xl mx-auto">
+    <div className="bg-white rounded-xl  max-w-7xl mx-auto">
       {/* Mobile Header - Visible only on small devices when search form is collapsed */}
       {!showMobileSearch && (
         <div className='grid grid-cols-5 md:hidden mb-4 px-4'>
