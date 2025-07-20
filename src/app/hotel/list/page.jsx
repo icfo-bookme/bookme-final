@@ -32,6 +32,7 @@ const HotelListContent = () => {
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [selectedStars, setSelectedStars] = useState([]);
   const [sortOption, setSortOption] = useState('recommended');
+  const [maxPrice, setMaxPrice] = useState(10000);
 
   useEffect(() => {      
     const fetchData = async () => {
@@ -48,9 +49,8 @@ const HotelListContent = () => {
         }
         const hotelData = await hotelRes.json();
         
-        // Process all hotels, including those with price 0 or no price
+        // Process all hotels
         const processedHotels = hotelData.map(hotel => {
-          // Handle cases where price might be 0, null, or undefined
           const price = hotel.price_after_discount || 0;
           const numericPrice = typeof price === 'string' 
             ? parseFloat(price.replace(/[^0-9.]/g, '')) || 0
@@ -60,19 +60,20 @@ const HotelListContent = () => {
             ...hotel,
             numericPrice,
             starNumber: parseInt(hotel.star) || 0,
-            hasPrice: numericPrice > 0 // Add flag to indicate if price is available
+            hasPrice: numericPrice > 0
           };
         });
         
         setHotels(processedHotels);
 
-        // Calculate max price for range slider (only from hotels with prices)
+        // Calculate max price from hotels with prices
         const pricedHotels = processedHotels.filter(hotel => hotel.hasPrice);
-        const maxPrice = pricedHotels.length > 0 
-          ? pricedHotels.reduce((max, hotel) => Math.max(max, hotel.numericPrice), 0)
-          : 10000; // Default max if no priced hotels
+        const calculatedMaxPrice = pricedHotels.length > 0 
+          ? Math.max(...pricedHotels.map(hotel => hotel.numericPrice))
+          : 10000;
           
-        setPriceRange([0, Math.ceil(maxPrice / 1000) * 1000]);
+        setMaxPrice(Math.ceil(calculatedMaxPrice / 1000) * 1000);
+        setPriceRange([0, Math.ceil(calculatedMaxPrice / 1000) * 1000]);
 
         // Fetch amenities
         const amenitiesRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/aminities`);
@@ -106,19 +107,14 @@ const HotelListContent = () => {
     );
   };
 
-  const handlePriceChange = (e, index) => {
-    const newValue = parseInt(e.target.value);
-    const newRange = [...priceRange];
-    newRange[index] = newValue;
-    
-    // Ensure min doesn't exceed max and vice versa
-    if (index === 0 && newValue > priceRange[1]) {
-      newRange[1] = newValue;
-    } else if (index === 1 && newValue < priceRange[0]) {
-      newRange[0] = newValue;
-    }
-    
-    setPriceRange(newRange);
+  const handleMinPriceChange = (e) => {
+    const value = parseInt(e.target.value);
+    setPriceRange(prev => [value, prev[1]]);
+  };
+
+  const handleMaxPriceChange = (e) => {
+    const value = parseInt(e.target.value);
+    setPriceRange(prev => [prev[0], value]);
   };
 
   const handleSortChange = (e) => {
@@ -127,28 +123,25 @@ const HotelListContent = () => {
 
   // Filter hotels based on selected filters
   const filteredHotels = hotels.filter(hotel => {
-    // Amenities filter - checks both summary and facilities
     const amenityMatch = selectedAmenities.length === 0 || 
       selectedAmenities.every(amenityId => 
         (hotel.summary?.some(amenity => amenity.id === amenityId)) ||
         (hotel.facilities?.some(facility => facility.id === amenityId))
       );
     
-    // Price range filter - show all if no price, otherwise filter by range
     const priceMatch = !hotel.hasPrice || 
                       (hotel.numericPrice >= priceRange[0] && 
                        hotel.numericPrice <= priceRange[1]);
     
-    // Star rating filter
     const starMatch = selectedStars.length === 0 || 
                       selectedStars.includes(hotel.starNumber);
     
     return amenityMatch && priceMatch && starMatch;
   });
 
-  // Sort hotels based on selected option
+  // Enhanced sorting function
   const sortedHotels = [...filteredHotels].sort((a, b) => {
-    // Handle hotels without prices (show them at the end)
+    // Handle hotels without prices (always show them after priced hotels)
     if (!a.hasPrice && !b.hasPrice) return 0;
     if (!a.hasPrice) return 1;
     if (!b.hasPrice) return -1;
@@ -166,6 +159,14 @@ const HotelListContent = () => {
         return 0;
     }
   });
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-BD', {
+      style: 'currency',
+      currency: 'BDT',
+      maximumFractionDigits: 0
+    }).format(price).replace('BDT', 'BDT ');
+  };
 
   if (loading) {
     return (
@@ -196,30 +197,32 @@ const HotelListContent = () => {
         <div className='hidden md:block md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 h-fit sticky top-28'>
           <h3 className="font-semibold text-lg mb-4 text-gray-800 border-b pb-2">Refine Your Search</h3>
           <div className="space-y-6">
-            {/* Price Range */}
+            {/* Price Range - Using native range inputs */}
             <div>
-              <h4 className="font-medium text-sm text-gray-700 mb-3">Price Range (BDT)</h4>
-              <div className="px-2 mb-4">
-                <input
-                  type="range"
-                  min="0"
-                  max={priceRange[1]}
-                  value={priceRange[0]}
-                  onChange={(e) => handlePriceChange(e, 0)}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                />
-                <input
-                  type="range"
-                  min="0"
-                  max={priceRange[1]}
-                  value={priceRange[1]}
-                  onChange={(e) => handlePriceChange(e, 1)}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer mt-2"
-                />
-              </div>
-              <div className="flex justify-between text-sm text-gray-700">
-                <span>BDT {priceRange[0].toLocaleString()}</span>
-                <span>BDT {priceRange[1].toLocaleString()}</span>
+              <h4 className="font-medium text-sm text-gray-700 mb-3">Price Range</h4>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Min: {formatPrice(priceRange[0])}</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max={maxPrice}
+                    value={priceRange[0]}
+                    onChange={handleMinPriceChange}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Max: {formatPrice(priceRange[1])}</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max={maxPrice}
+                    value={priceRange[1]}
+                    onChange={handleMaxPriceChange}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
               </div>
             </div>
 
@@ -269,12 +272,12 @@ const HotelListContent = () => {
             </div>
 
             {/* Clear Filters Button */}
-            {(selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < 10000) && (
+            {(selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < maxPrice) && (
               <button
                 onClick={() => {
                   setSelectedAmenities([]);
                   setSelectedStars([]);
-                  setPriceRange([0, 10000]);
+                  setPriceRange([0, maxPrice]);
                 }}
                 className="w-full py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
               >
@@ -347,7 +350,7 @@ const HotelListContent = () => {
                         <span>{hotel.location}</span>
                       </div>
 
-                      {/* Amenities - showing both summary and facilities */}
+                      {/* Amenities */}
                       {(hotel.summary?.length > 0 || hotel.facilities?.length > 0) && (
                         <div className="flex flex-wrap gap-2 mb-4">
                           {[...(hotel.summary || []), ...(hotel.facilities || [])]
@@ -388,11 +391,11 @@ const HotelListContent = () => {
                           {hotel.hasPrice ? (
                             <>
                               <p className="text-xl font-bold text-blue-800">
-                                BDT {hotel.price_after_discount.toLocaleString()}
+                                {formatPrice(hotel.price_after_discount)}
                               </p>
                               {hotel.discount && hotel.discount > 0 && (
                                 <p className="text-sm text-gray-500 line-through">
-                                  BDT {hotel.regular_price?.toLocaleString()}
+                                  {formatPrice(hotel.regular_price)}
                                 </p>
                               )}
                             </>
@@ -425,7 +428,7 @@ const HotelListContent = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-800 mb-2">No hotels found</h3>
               <p className="text-gray-600 max-w-md mx-auto">
-                {selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < 10000
+                {selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < maxPrice
                   ? "No hotels match your selected filters. Try adjusting your filters."
                   : "We could not find any hotels matching your criteria. Try adjusting your search filters or dates."}
               </p>
@@ -433,7 +436,7 @@ const HotelListContent = () => {
                 onClick={() => {
                   setSelectedAmenities([]);
                   setSelectedStars([]);
-                  setPriceRange([0, 10000]);
+                  setPriceRange([0, maxPrice]);
                 }}
                 className="mt-4 inline-block px-5 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors mr-2"
               >
