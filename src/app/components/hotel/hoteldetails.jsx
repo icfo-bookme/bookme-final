@@ -1,27 +1,25 @@
-import getHotelDetails from "@/services/hotel/gethoteldetails";
+'use client'
 
-export default async function HotelDetails({ hotelId }) {
-    const hotelDetails = await getHotelDetails(hotelId);
 
-    // Split the near_by string into an array of locations
-    const nearbyLocations = hotelDetails.near_by 
-        ? hotelDetails.near_by.split('|').map(loc => loc.trim()).filter(loc => loc)
+
+export default function HotelDetails({ hotel }) {
+   
+   console.log("Hotel Details:", hotel);
+     const nearbyLocations = hotel.near_by 
+        ? hotel.near_by.split('|').map(loc => loc.trim()).filter(loc => loc)
         : [];
-
-    console.log("Hotel Details:", hotelDetails);
-    
     return (
-        <div className="">
+        <div className="bg-white p-4 rounded-lg shadow-sm">
             <div className="container mx-auto">
-                <h1 className="text-xl text-blue-950 font-bold">{hotelDetails.name}</h1>
+                <h1 className="text-xl text-blue-950 font-bold">{hotel.name}</h1>
                 <div className='flex pt-1 flex-wrap items-center gap-2 md:gap-5 text-xs md:text-sm text-gray-600'>
                     <div className='border border-gray-400 px-1 rounded-lg flex items-center gap-1'>
-                        <i className="fa-solid fa-star text-yellow-400 text-xs"></i>
-                        <span>{hotelDetails.star} star</span>
+                        <i className="fa-solid fa-star text-yellow-400 text-sm mr-1"></i>
+                        <span>{hotel.star} star</span>
                     </div>
                     <p className="text-gray-600 text-xs flex items-center gap-1">
-                        <i className="fa-solid fa-location-dot text-xs"></i>
-                        <span>{hotelDetails.location}</span>
+                        <i className="fa-solid fa-location-dot text-gray-400 text-xs"></i>
+                        <span>{hotel.location}</span>
                     </p>
                 </div>
 
@@ -32,7 +30,7 @@ export default async function HotelDetails({ hotelId }) {
                         <ul className="text-xs text-gray-600 space-y-1 ml-3">
                             {nearbyLocations.map((location, index) => (
                                 <li key={index} className="flex items-start gap-1">
-                                    <i className="fa-solid fa-location-dot text-xs mt-1 flex-shrink-0"></i>
+                                  
                                     <span>{location}</span>
                                 </li>
                             ))}
@@ -41,26 +39,23 @@ export default async function HotelDetails({ hotelId }) {
                 )}
 
                 {/* Amenities/summary section */}
-                {hotelDetails.summary && hotelDetails.summary.length > 0 && (
+                {hotel.summary && hotel.summary.length > 0 && (
                     <div className="mt-5">
                         <h3 className="text-xl font-bold text-blue-950 mb-1">Amenities:</h3>
-                        <div className="flex flex-wrap gap-1 md:gap-2 ">
-                            {hotelDetails.summary.slice(0, 6).map((amenity) => (
-                                <span key={amenity.id} className="flex items-center text-xs md:text-xs text-blue-950  bg-gray-100 px-2 md:px-3 py-0.5 md:py-1 rounded-full">
-                                    <i className={`${amenity.icon_class} mr-1 md:mr-2 text-blue-900 text-xs`}></i>
+                        <div className="flex flex-wrap gap-1 md:gap-2">
+                            {hotel.summary.slice(0, 6).map((amenity) => (
+                                <span key={amenity.id} className="flex items-center text-xs md:text-xs text-blue-950 bg-gray-100 px-2 md:px-3 py-0.5 md:py-1 rounded-full">  
                                     {amenity.name}
                                 </span>
                             ))}
-                            {hotelDetails.summary.length > 6 && (
+                            {hotel.summary.length > 6 && (
                                 <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
-                                    +{hotelDetails.summary.length - 3} more
+                                    +{hotel.summary.length - 6} more
                                 </span>
                             )}
                         </div>
                     </div>
                 )}
-
-               
             </div>
         </div>
     );

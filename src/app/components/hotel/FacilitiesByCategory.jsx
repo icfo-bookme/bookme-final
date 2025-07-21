@@ -1,25 +1,27 @@
 "use client";
 import React from "react";
-import { FaCheck } from "react-icons/fa"; // Always use this icon
+import { FaCheck } from "react-icons/fa";
 
 const FacilitiesByCategory = ({ categories }) => {
-  console.log("FacilitiesByCategory categories:", categories);
-
   return (
     <div className="space-y-6 bg-white p-6 rounded-lg shadow-md">
       {categories.map((category, idx) => (
-        <div key={idx}>
-          <h3 className="font-bold text-lg text-blue-950 mb-2">
+        <div key={idx} className="border-b border-gray-100 pb-4 last:border-0">
+          <h3 className="font-bold text-lg text-blue-950 mb-3">
             {category.category_name}
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {category.features.map((feature) => (
               <div
                 key={feature.id}
-                className="flex items-center space-x-2 text-sm text-gray-700"
+                className="flex items-center space-x-2 border border-gray-300 text-sm text-gray-700 p-2 bg-blue-100 rounded transition-colors"
               >
-                <FaCheck className="text-blue-500" />
-                <span>{feature.name}</span>
+                {feature.icon_class ? (
+                  <i className={`${feature.icon_class} text-blue-500 text-sm w-4 flex justify-center`} />
+                ) : (
+                  <FaCheck className="text-blue-500" />
+                )}
+                <span className="whitespace-nowrap">{feature.name}</span>
               </div>
             ))}
           </div>

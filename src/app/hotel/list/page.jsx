@@ -384,7 +384,7 @@ const HotelListContent = () => {
               {/* Amenities */}
               <div>
                 <h4 className="font-medium text-sm text-gray-700 mb-2">Amenities</h4>
-                <div className="max-h-60 overflow-y-auto pr-2">
+                <div className="max-h-80 overflow-y-auto pr-2">
                   {amenities.map((amenity) => (
                     <div key={amenity.id} className="flex items-center mb-2">
                       <input

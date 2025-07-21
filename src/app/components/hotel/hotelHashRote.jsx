@@ -4,86 +4,109 @@ import getHotelDetails from "@/services/hotel/gethoteldetails";
 import RoomComponent from './Room/Room';
 import FacilitiesByCategory from './FacilitiesByCategory';
 import HotelPolicies from './Policies';
+import HotelCarousel from './HotelSlider';
+import HotelDetails from './hoteldetails';
 
-export default function HotelHashRoute({ hotelId }) {
-  const [hotelDetails, setHotelDetails] = useState(null);
+export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
+  const [hotelDetails, setHotelDetails] = useState(initialHotelDetails);
   const [activeSection, setActiveSection] = useState('overview');
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isSmallDevice, setIsSmallDevice] = useState(false);
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
-
+  const navRef = useRef(null);
+  const resizeTimeoutRef = useRef(null);
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsSmallDevice(window.innerWidth < 640); // Tailwind's 'sm' breakpoint is 640px
+      // Clear any existing timeout
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+
+      // Set new timeout to debounce resize events
+      resizeTimeoutRef.current = setTimeout(() => {
+        setIsSmallDevice(window.innerWidth < 768);
+      }, 100);
     };
 
     // Initial check
     checkScreenSize();
-
-    // Add event listener for window resize
     window.addEventListener('resize', checkScreenSize);
 
-    // Cleanup
-    return () => window.removeEventListener('resize', checkScreenSize);
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+    };
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getHotelDetails(hotelId);
-      setHotelDetails(data);
-    };
-    fetchData();
-  }, [hotelId]);
+
 
   useEffect(() => {
-    // Initialize Intersection Observer for better section detection
+    if (!hotelDetails) return;
+
+    const handleHashChange = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash && sectionsRef.current && sectionsRef.current[hash]) {
+        scrollToSection(hash, false);
+      }
+    };
+
+    // Initialize Intersection Observer
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-            // Update URL hash without scrolling
-            window.history.replaceState(null, '', `#${entry.target.id}`);
+            const sectionId = entry.target.id;
+            setActiveSection(sectionId);
+            if (window.location.hash.substring(1) !== sectionId) {
+              window.history.replaceState(null, '', `#${sectionId}`);
+            }
           }
         });
       },
       {
         root: null,
         rootMargin: '0px',
-        threshold: 0.5,
+        threshold: 0.1,
       }
     );
 
-    // Observe all sections
-    Object.values(sectionsRef.current).forEach((section) => {
-      if (section) {
-        observerRef.current.observe(section);
-      }
-    });
+    // Observe all sections safely
+    if (sectionsRef.current) {
+      Object.values(sectionsRef.current).forEach((section) => {
+        if (section && observerRef.current) {
+          observerRef.current.observe(section);
+        }
+      });
+    }
 
     // Check initial hash on load
-    const hash = window.location.hash.substring(1);
-    if (hash && sectionsRef.current[hash]) {
-      scrollToSection(hash, false);
-    }
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
 
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
+      window.removeEventListener('hashchange', handleHashChange);
     };
-  }, [hotelDetails]); // Re-run when hotel details are loaded
+  }, [hotelDetails]);
 
   const scrollToSection = (sectionId, smooth = true) => {
+    if (!sectionsRef.current || !sectionsRef.current[sectionId]) return;
+
     const element = sectionsRef.current[sectionId];
-    if (element) {
-      window.scrollTo({
-        top: element.offsetTop - 80,
-        behavior: smooth ? 'smooth' : 'auto'
-      });
-      setActiveSection(sectionId);
-    }
+    const offset = navRef.current ? navRef.current.offsetHeight + 20 : 100;
+
+    window.scrollTo({
+      top: element.offsetTop - offset,
+      behavior: smooth ? 'smooth' : 'auto'
+    });
+
+    setActiveSection(sectionId);
+    window.history.replaceState(null, '', `#${sectionId}`);
   };
 
   if (!hotelDetails) {
@@ -94,17 +117,16 @@ export default function HotelHashRoute({ hotelId }) {
     );
   }
 
-  // Split the near_by string into an array of locations
   const nearbyLocations = hotelDetails.near_by
     ? hotelDetails.near_by.split('|').map(loc => loc.trim()).filter(loc => loc)
     : [];
 
   const navItems = [
-    ...(!isSmallDevice ? [{ id: 'overview', label: 'Overview' }] : []),
-    { id: 'rooms', label: 'Rooms' },
-    { id: 'nearby', label: isSmallDevice ? "Nearby" : "What's Nearby" },
-    { id: 'facilities', label: 'Facilities' },
-    { id: 'policy', label: 'Policy' }
+    { id: 'overview', label: 'Overview', showOnMobile: false },
+    { id: 'rooms', label: 'Rooms', showOnMobile: true },
+    { id: 'nearby', label: isSmallDevice ? "Nearby" : "What's Nearby", showOnMobile: true },
+    { id: 'facilities', label: 'Facilities', showOnMobile: true },
+    { id: 'policy', label: 'Policies', showOnMobile: true }
   ];
 
   const toggleDescription = () => {
@@ -118,122 +140,167 @@ export default function HotelHashRoute({ hotelId }) {
     : '';
 
   return (
-    <div className="md:w-[85%] w-[96%] mx-auto">
+    <div className="md:w-[90%] w-[96%] mx-auto">
       {/* Sticky Navigation Bar */}
-      <div className="sticky top-14 rounded-lg bg-white z-30 border-b shadow-sm">
-        <div className="flex overflow-x-auto py-4 ml-4 hide-scrollbar">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => scrollToSection(item.id)}
-              className={`px-4 py-2 whitespace-nowrap font-medium text-sm transition-colors ${
-                activeSection === item.id
-                  ? 'text-blue-600 border-b-2 border-blue-600 font-semibold'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+      <div
+        ref={navRef}
+        className="sticky rounded-lg top-14 bg-white z-30 border-b  shadow-sm"
+      >
+        <div className="container mx-auto px-2 sm:px-4">
+          <div className="flex overflow-x-auto py-3 hide-scrollbar">
+            <div className="flex space-x-1 min-w-max">
+              {navItems.map((item) => (
+                (!isSmallDevice || item.showOnMobile) && (
+                  <button
+                    key={item.id}
+                    onClick={() => scrollToSection(item.id)}
+                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-200 ${activeSection === item.id
+                      ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-inner'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+                      }`}
+                  >
+                    {item.label}
+                  </button>
+                )
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Content Sections */}
-      <div className="py-8">
-        {/* Overview Section */}
-        {!isSmallDevice && (
-          <section
-            ref={(el) => (sectionsRef.current['overview'] = el)}
-            id="overview"
-            className="mb-12 bg-white rounded-lg p-4 scroll-mt-20"
-          >
-            <h1 className="text-2xl md:text-xl font-bold text-gray-800 mb-4">Hotel Description</h1>
-            <div className='flex flex-wrap items-center gap-2 md:gap-5 text-sm text-gray-600 mb-6'>
-              <div className='rounded-lg flex items-center gap-1 font-bold'>
-                <span>Number of Rooms: {hotelDetails.number_of_rooms}</span>
-              </div>
-              <p className="text-gray-600 flex items-center gap-1 font-bold">
-                <span>Number of Floors: {hotelDetails.Number_of_Floors}</span>
-              </p>
-              <p className="text-gray-600 flex items-center gap-1 font-bold">
-                <span> Year of construction: {hotelDetails.Year_of_construction}</span>
-              </p>
-            </div>
+      <div className="p-2 md:p-4 rounded-lg mx-auto grid grid-cols-1 bg-white md:grid-cols-10 gap-4">
+        <div className="col-span-1 md:col-span-7 bg-white">
+          <HotelCarousel hotelId={hotelId} />
+        </div>
 
-            {hotelDetails.description && (
-              <div className="mb-6">
-                <p className="text-gray-600 leading-relaxed">
-                  {showFullDescription ? hotelDetails.description : truncatedDescription}
-                </p>
-                {hotelDetails.description.length > 300 && (
-                  <button
-                    onClick={toggleDescription}
-                    className="text-blue-800 border-b border-blue-500 hover:text-blue-700 mt-2 text-sm font-medium"
-                  >
-                    {showFullDescription ? 'See Less' : 'See More'}
-                  </button>
-                )}
-              </div>
-            )}
-          </section>
-        )}
+        <div className="col-span-1 md:col-span-3 bg-white">
+          <HotelDetails hotel={hotelDetails} />
+
+        </div>
+
+      </div>
+
+      <div className="py-6 space-y-8 sm:space-y-12">
+        {/* Overview Section */}
+        <section
+          ref={(el) => {
+            if (el) sectionsRef.current['overview'] = el;
+          }}
+          id="overview"
+          className={`bg-white rounded-lg p-4 sm:p-6 shadow-sm scroll-mt-24 ${isSmallDevice && !navItems.some(item => item.id === 'overview' && item.showOnMobile) ? '' : ''}`}
+        >
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Hotel Description</h1>
+          <div className='flex flex-wrap items-center gap-2 sm:gap-5 text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6'>
+            <div className='rounded-lg flex items-center gap-1 font-medium'>
+              <span>Rooms: {hotelDetails.number_of_rooms}</span>
+            </div>
+            <p className="text-gray-600 flex items-center gap-1 font-medium">
+              <span>Floors: {hotelDetails.Number_of_Floors}</span>
+            </p>
+            <p className="text-gray-600 flex items-center gap-1 font-medium">
+              <span>Built: {hotelDetails.Year_of_construction}</span>
+            </p>
+          </div>
+
+          {hotelDetails.description && (
+            <div className="mb-4 sm:mb-6">
+              <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+                {showFullDescription ? hotelDetails.description : truncatedDescription}
+              </p>
+              {hotelDetails.description.length > 300 && (
+                <button
+                  onClick={toggleDescription}
+                  className="text-blue-600 hover:text-blue-800 mt-2 text-xs sm:text-sm font-medium flex items-center"
+                >
+                  {showFullDescription ? (
+                    <>
+                      <span>Show less</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                      </svg>
+                    </>
+                  ) : (
+                    <>
+                      <span>Show more</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          )}
+        </section>
 
         {/* Rooms Section */}
         <section
-          ref={(el) => (sectionsRef.current['rooms'] = el)}
+          ref={(el) => {
+            if (el) sectionsRef.current['rooms'] = el;
+          }}
           id="rooms"
-          className="mb-12 pt-4 scroll-mt-20"
+          className="scroll-mt-24"
         >
-          <div className="rounded-lg">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
             <RoomComponent hotel_id={hotelId} />
           </div>
         </section>
 
-        {/* What's Nearby Section */}
+        {/* Nearby Section */}
         <section
-          ref={(el) => (sectionsRef.current['nearby'] = el)}
+          ref={(el) => {
+            if (el) sectionsRef.current['nearby'] = el;
+          }}
           id="nearby"
-          className="mb-12 pt-4 scroll-mt-20"
+          className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24"
         >
-          <h2 className="text-xl font-bold text-gray-800 mb-6">{isSmallDevice ? 'Nearby' : 'Whats Nearby'}</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">
+            {isSmallDevice ? 'Nearby' : "What's Nearby"}
+          </h2>
           {nearbyLocations.length > 0 ? (
-            <ul className="space-y-3">
+            <ul className="space-y-2 sm:space-y-3">
               {nearbyLocations.map((location, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <i className="fa-solid fa-location-dot text-blue-500 mt-1"></i>
-                  <span className="text-gray-700">{location}</span>
+                <li key={index} className="flex items-start gap-2 sm:gap-3">
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="text-gray-700 text-sm sm:text-base">{location}</span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500">No nearby locations information available</p>
+            <p className="text-gray-500 text-sm sm:text-base">No nearby locations information available</p>
           )}
         </section>
 
         {/* Facilities Section */}
         <section
-          ref={(el) => (sectionsRef.current['facilities'] = el)}
+          ref={(el) => {
+            if (el) sectionsRef.current['facilities'] = el;
+          }}
           id="facilities"
-          className="mb-12 pt-4 scroll-mt-20"
+          className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24"
         >
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Facilities</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Facilities</h2>
           <FacilitiesByCategory categories={hotelDetails.category_wise_features} />
         </section>
 
         {/* Policy Section */}
         <section
-          ref={(el) => (sectionsRef.current['policy'] = el)}
+          ref={(el) => {
+            if (el) sectionsRef.current['policy'] = el;
+          }}
           id="policy"
-          className="mb-12 pt-4 scroll-mt-20"
+          className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24"
         >
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Policy</h2>
-          <div className="bg-gray-100 p-8 rounded-lg">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Policies</h2>
+          <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
             <HotelPolicies Policies={hotelDetails.polices} />
           </div>
         </section>
       </div>
 
-      {/* Custom scrollbar hide for navigation */}
       <style jsx>{`
         .hide-scrollbar {
           -ms-overflow-style: none;
