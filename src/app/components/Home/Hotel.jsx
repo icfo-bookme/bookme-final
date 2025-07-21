@@ -192,7 +192,7 @@ export default function Hotel() {
                                     </div>
                                     <div className="p-4 sm:p-5 md:p-6 flex-grow flex flex-col">
                                         <Link href={`/hotel/${hotel.hotel_id}`} className="cursor-pointer">
-                                            <h3 className="text-lg md:text-xl h-12 font-bold text-[#00026E] mb-2 hover:text-blue-700 transition-colors line-clamp-2">
+                                            <h3 className="text-lg md:text-xl h-16 font-bold text-[#00026E] mb-2 hover:text-blue-700 transition-colors line-clamp-2">
                                                 {hotel.hotel_name}
                                             </h3>
                                         </Link>
@@ -207,17 +207,9 @@ export default function Hotel() {
                                                         <span className="font-bold text-lg sm:text-xl text-blue-900">
                                                             {hotel.lowest_price?.toLocaleString()} TK
                                                         </span>
-                                                        {hotel.original_price && (
-                                                            <span className="text-sm text-gray-500 line-through">
-                                                                {hotel.original_price.toLocaleString()} TK
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    {hotel.discount && (
-                                                        <span className="text-xs text-green-600 mt-1">
-                                                            {hotel.discount}% OFF
-                                                        </span>
-                                                    )}
+                                                        
+                                                    </div> 
+                                                    
                                                 </div>
                                                 <Link
                                                     href={`/hotel/list/details/${hotel.hotel_id}`}
