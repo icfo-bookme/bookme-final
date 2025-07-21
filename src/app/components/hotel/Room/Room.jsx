@@ -264,7 +264,7 @@ const RoomComponent = ({ hotel_id }) => {
                                 <h2 className="text-xl mt-5 pl-4 font-semibold mb-2">{room.room_name}</h2>
                                 <div className='text-sm'>
                                     <p className="text-gray-600 pl-4 mb-1"><i className="fa-solid fa-flag"></i> {room.room_type}</p>
-                                    <p className="text-gray-600 pl-4"><i className="fa-solid fa-users"></i> Maximum Room Capacity: {room.max_adults} </p>
+                                    <p className="text-gray-600 pl-4"><i className="fa-solid fa-users"></i> Maximum Room Capacity:  {room.max_adults } Adult {room.complementary_child_occupancy} Child </p>
                                     <button
                                         className="text-blue-900 px-4 py-5 rounded font-bold underline transition"
                                         onClick={() => openRoomDetails(room)}
