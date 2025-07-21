@@ -1,6 +1,5 @@
-'use client'
+'use client';
 import { useEffect, useRef, useState } from 'react';
-import getHotelDetails from "@/services/hotel/gethoteldetails";
 import RoomComponent from './Room/Room';
 import FacilitiesByCategory from './FacilitiesByCategory';
 import HotelPolicies from './Policies';
@@ -11,47 +10,26 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
   const [hotelDetails, setHotelDetails] = useState(initialHotelDetails);
   const [activeSection, setActiveSection] = useState('overview');
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const [isSmallDevice, setIsSmallDevice] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
   const navRef = useRef(null);
-  const resizeTimeoutRef = useRef(null);
+
   useEffect(() => {
-    const checkScreenSize = () => {
-      // Clear any existing timeout
-      if (resizeTimeoutRef.current) {
-        clearTimeout(resizeTimeoutRef.current);
-      }
-
-      // Set new timeout to debounce resize events
-      resizeTimeoutRef.current = setTimeout(() => {
-        setIsSmallDevice(window.innerWidth < 768);
-      }, 100);
+    // Check if mobile on mount and resize
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
     };
 
-    // Initial check
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
 
-    return () => {
-      window.removeEventListener('resize', checkScreenSize);
-      if (resizeTimeoutRef.current) {
-        clearTimeout(resizeTimeoutRef.current);
-      }
-    };
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-
 
   useEffect(() => {
     if (!hotelDetails) return;
-
-    const handleHashChange = () => {
-      const hash = window.location.hash.substring(1);
-      if (hash && sectionsRef.current && sectionsRef.current[hash]) {
-        scrollToSection(hash, false);
-      }
-    };
 
     // Initialize Intersection Observer
     observerRef.current = new IntersectionObserver(
@@ -68,45 +46,49 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
       },
       {
         root: null,
-        rootMargin: '0px',
+        rootMargin: isMobile ? '0px 0px -40% 0px' : '0px 0px -30% 0px',
         threshold: 0.1,
       }
     );
 
-    // Observe all sections safely
-    if (sectionsRef.current) {
-      Object.values(sectionsRef.current).forEach((section) => {
-        if (section && observerRef.current) {
-          observerRef.current.observe(section);
-        }
-      });
-    }
+    // Observe all sections
+    Object.values(sectionsRef.current).forEach((section) => {
+      if (section) observerRef.current.observe(section);
+    });
 
-    // Check initial hash on load
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
+    // Handle initial hash
+    const handleInitialHash = () => {
+      const hash = window.location.hash.substring(1) || 'overview';
+      if (sectionsRef.current[hash]) {
+        setTimeout(() => scrollToSection(hash, false), 100);
+      }
+    };
+
+    handleInitialHash();
 
     return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-      window.removeEventListener('hashchange', handleHashChange);
+      if (observerRef.current) observerRef.current.disconnect();
     };
-  }, [hotelDetails]);
+  }, [hotelDetails, isMobile]);
 
   const scrollToSection = (sectionId, smooth = true) => {
-    if (!sectionsRef.current || !sectionsRef.current[sectionId]) return;
-
     const element = sectionsRef.current[sectionId];
-    const offset = navRef.current ? navRef.current.offsetHeight + 20 : 100;
+    if (!element) return;
+
+    const offset = (navRef.current?.offsetHeight || 64) + (isMobile ? 10 : 20);
+    const targetPosition = element.offsetTop - offset;
 
     window.scrollTo({
-      top: element.offsetTop - offset,
-      behavior: smooth ? 'smooth' : 'auto'
+      top: targetPosition,
+      behavior: smooth ? 'smooth' : 'auto',
     });
 
     setActiveSection(sectionId);
-    window.history.replaceState(null, '', `#${sectionId}`);
+  };
+
+  const handleNavClick = (sectionId, e) => {
+    e.preventDefault();
+    scrollToSection(sectionId);
   };
 
   if (!hotelDetails) {
@@ -122,11 +104,11 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
     : [];
 
   const navItems = [
-    { id: 'overview', label: 'Overview', showOnMobile: false },
-    { id: 'rooms', label: 'Rooms', showOnMobile: true },
-    { id: 'nearby', label: isSmallDevice ? "Nearby" : "What's Nearby", showOnMobile: true },
-    { id: 'facilities', label: 'Facilities', showOnMobile: true },
-    { id: 'policy', label: 'Policies', showOnMobile: true }
+    { id: 'overview', label: 'Overview' },
+    { id: 'rooms', label: 'Rooms' },
+    { id: 'nearby', label: "What's Nearby" },
+    { id: 'facilities', label: 'Facilities' },
+    { id: 'policy', label: 'Policies' }
   ];
 
   const toggleDescription = () => {
@@ -140,57 +122,53 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
     : '';
 
   return (
-    <div className="md:w-[90%] w-[96%] mx-auto">
-      {/* Sticky Navigation Bar */}
+    <div className="md:w-[90%] w-[95%] mx-auto">
+      {/* Navigation Bar - Sticky and responsive */}
       <div
         ref={navRef}
-        className="sticky rounded-lg top-14 bg-white z-30 border-b  shadow-sm"
+        className="sticky top-14 bg-white z-30 border-b shadow-sm"
       >
         <div className="container mx-auto px-2 sm:px-4">
           <div className="flex overflow-x-auto py-3 hide-scrollbar">
             <div className="flex space-x-1 min-w-max">
               {navItems.map((item) => (
-                (!isSmallDevice || item.showOnMobile) && (
-                  <button
-                    key={item.id}
-                    onClick={() => scrollToSection(item.id)}
-                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-200 ${activeSection === item.id
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  onClick={(e) => handleNavClick(item.id, e)}
+                  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                    activeSection === item.id
                       ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-inner'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-                      }`}
-                  >
-                    {item.label}
-                  </button>
-                )
+                  }`}
+                >
+                  {item.label}
+                </a>
               ))}
             </div>
           </div>
         </div>
       </div>
 
+      {/* Main Layout - Responsive grid */}
       <div className="p-2 md:p-4 rounded-lg mx-auto grid grid-cols-1 bg-white md:grid-cols-10 gap-4">
-        <div className="col-span-1 md:col-span-7 bg-white">
-          <HotelCarousel hotelId={hotelId} />
+        <div className="col-span-1 md:col-span-7">
+          <HotelCarousel images={hotelDetails?.images || []} />
         </div>
-
-        <div className="col-span-1 md:col-span-3 bg-white">
-          <HotelDetails hotel={hotelDetails} />
-
+        <div className="col-span-1 md:col-span-3">
+          <HotelDetails hotel={hotelDetails || {}} />
         </div>
-
       </div>
 
-      <div className="py-6 space-y-8 sm:space-y-12">
-        {/* Overview Section */}
-        <section
-          ref={(el) => {
-            if (el) sectionsRef.current['overview'] = el;
-          }}
-          id="overview"
-          className={`bg-white rounded-lg p-4 sm:p-6 shadow-sm scroll-mt-24 ${isSmallDevice && !navItems.some(item => item.id === 'overview' && item.showOnMobile) ? '' : ''}`}
+      {/* Content Sections with proper spacing */}
+      <div className="py-6 space-y-6 sm:space-y-8">
+        <section 
+          ref={(el) => (sectionsRef.current['overview'] = el)}
+          id="overview" 
+          className="bg-white rounded-lg p-4 sm:p-6 shadow-sm scroll-mt-24"
         >
           <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Hotel Description</h1>
-          <div className='flex flex-wrap items-center gap-2 sm:gap-5 text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6'>
+          <div className='flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6'>
             <div className='rounded-lg flex items-center gap-1 font-medium'>
               <span>Rooms: {hotelDetails.number_of_rooms}</span>
             </div>
@@ -212,33 +190,16 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
                   onClick={toggleDescription}
                   className="text-blue-600 hover:text-blue-800 mt-2 text-xs sm:text-sm font-medium flex items-center"
                 >
-                  {showFullDescription ? (
-                    <>
-                      <span>Show less</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
-                      </svg>
-                    </>
-                  ) : (
-                    <>
-                      <span>Show more</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </>
-                  )}
+                  {showFullDescription ? 'Show less' : 'Show more'}
                 </button>
               )}
             </div>
           )}
         </section>
 
-        {/* Rooms Section */}
-        <section
-          ref={(el) => {
-            if (el) sectionsRef.current['rooms'] = el;
-          }}
-          id="rooms"
+        <section 
+          ref={(el) => (sectionsRef.current['rooms'] = el)}
+          id="rooms" 
           className="scroll-mt-24"
         >
           <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
@@ -246,52 +207,51 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
           </div>
         </section>
 
-        {/* Nearby Section */}
-        <section
-          ref={(el) => {
-            if (el) sectionsRef.current['nearby'] = el;
-          }}
-          id="nearby"
-          className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24"
+        <section 
+          ref={(el) => (sectionsRef.current['nearby'] = el)}
+          id="nearby" 
+          className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6 scroll-mt-24"
         >
-          <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">
-            {isSmallDevice ? 'Nearby' : "What's Nearby"}
-          </h2>
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
+              <i className="fa-solid fa-location-dot text-blue-600"></i>
+              Nearby Locations
+            </h2>
+            {nearbyLocations.length > 0 && (
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-50 text-blue-700">
+                {nearbyLocations.length} places
+              </span>
+            )}
+          </div>
+
           {nearbyLocations.length > 0 ? (
             <ul className="space-y-2 sm:space-y-3">
               {nearbyLocations.map((location, index) => (
-                <li key={index} className="flex items-start gap-2 sm:gap-3">
-                  <svg className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span className="text-gray-700 text-sm sm:text-base">{location}</span>
+                <li key={index} className="flex items-start gap-3 group hover:bg-gray-50 px-2 py-1.5 rounded-lg transition-colors">
+                  <i className="fa-solid fa-location-dot text-gray-400 mt-0.5"></i>
+                  <span className="text-gray-800 text-sm sm:text-base">{location}</span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500 text-sm sm:text-base">No nearby locations information available</p>
+            <div className="flex flex-col items-center justify-center py-4 text-center">
+              <p className="text-gray-500 text-sm sm:text-base">No nearby locations available</p>
+            </div>
           )}
         </section>
 
-        {/* Facilities Section */}
-        <section
-          ref={(el) => {
-            if (el) sectionsRef.current['facilities'] = el;
-          }}
-          id="facilities"
+        <section 
+          ref={(el) => (sectionsRef.current['facilities'] = el)}
+          id="facilities" 
           className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24"
         >
           <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Facilities</h2>
-          <FacilitiesByCategory categories={hotelDetails.category_wise_features} />
+          <FacilitiesByCategory categories={hotelDetails.category_wise_features || {}} />
         </section>
 
-        {/* Policy Section */}
-        <section
-          ref={(el) => {
-            if (el) sectionsRef.current['policy'] = el;
-          }}
-          id="policy"
+        <section 
+          ref={(el) => (sectionsRef.current['policy'] = el)}
+          id="policy" 
           className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24"
         >
           <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Policies</h2>

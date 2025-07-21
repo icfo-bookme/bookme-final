@@ -30,7 +30,7 @@ export default function HotelDetails({ hotel }) {
                         <ul className="text-xs text-gray-600 space-y-1 ml-3">
                             {nearbyLocations.map((location, index) => (
                                 <li key={index} className="flex items-start gap-1">
-                                  
+                                   <i className="fa-solid fa-location-dot text-gray-400 text-xs"></i>
                                     <span>{location}</span>
                                 </li>
                             ))}

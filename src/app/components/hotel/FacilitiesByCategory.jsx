@@ -4,13 +4,13 @@ import { FaCheck } from "react-icons/fa";
 
 const FacilitiesByCategory = ({ categories }) => {
   return (
-    <div className="space-y-6 bg-white p-6 rounded-lg shadow-md">
+    <div className="w-[98%] mx-auto space-y-6 bg-white p-6 rounded-lg shadow-md">
       {categories.map((category, idx) => (
         <div key={idx} className="border-b border-gray-100 pb-4 last:border-0">
           <h3 className="font-bold text-lg text-blue-950 mb-3">
             {category.category_name}
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {category.features.map((feature) => (
               <div
                 key={feature.id}

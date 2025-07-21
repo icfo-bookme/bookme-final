@@ -11,6 +11,19 @@ const RoomComponent = ({ hotel_id }) => {
     const [error, setError] = useState(null);
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [cart, setCart] = useState([]);
+    const [showCart, setShowCart] = useState(false);
+    const [isLargeScreen, setIsLargeScreen] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsLargeScreen(window.innerWidth >= 1024);
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -46,6 +59,43 @@ const RoomComponent = ({ hotel_id }) => {
         return today.toLocaleDateString('en-GB', options).replace(',', '');
     };
 
+    const addToCart = (room) => {
+        const discountedPrice = Math.round(room.price - (room.price * room.discount / 100));
+        const taxes = Math.round(discountedPrice * 0.265);
+        const totalPrice = discountedPrice + taxes;
+        
+        const cartItem = {
+            id: room.id,
+            name: room.room_name,
+            type: room.room_type,
+            adults: room.max_adults,
+            children: room.complementary_child_occupancy,
+            price: discountedPrice,
+            taxes: taxes,
+            total: totalPrice,
+            breakfast: room.breakfast_status === 'included' ? 'Included' : 'Not Included',
+            image: room.images?.[0]?.url || ''
+        };
+
+        setCart([...cart, cartItem]);
+        if (!isLargeScreen) {
+            setShowCart(true);
+        }
+    };
+
+    const removeFromCart = (index) => {
+        const newCart = [...cart];
+        newCart.splice(index, 1);
+        setCart(newCart);
+        if (newCart.length === 0) {
+            setShowCart(false);
+        }
+    };
+
+    const calculateTotal = () => {
+        return cart.reduce((sum, item) => sum + item.total, 0);
+    };
+
     if (loading) return (
         <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -65,7 +115,24 @@ const RoomComponent = ({ hotel_id }) => {
     );
 
     return (
-        <div className="md:container w-[98%] lg:w-[100%] mx-auto text-blue-950 grid grid-cols-1 md:grid-cols-6 md:gap-4 mb-6">
+        <div className="md:container w-[98%] lg:w-[100%] mx-auto text-blue-950 grid grid-cols-1 md:grid-cols-6 md:gap-4 mb-6 relative">
+            {/* Floating Cart Icon (Mobile and LG) */}
+            {(cart.length > 0 && (isLargeScreen || window.innerWidth < 768)) && (
+                <div className={`fixed ${isLargeScreen ? 'bottom-6 right-6' : 'bottom-6 right-6'} z-40`}>
+                    <button 
+                        onClick={() => setShowCart(!showCart)}
+                        className="relative bg-blue-900 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform"
+                    >
+                        <i className="fa-solid fa-cart-shopping text-xl"></i>
+                        {cart.length > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                {cart.length}
+                            </span>
+                        )}
+                    </button>
+                </div>
+            )}
+
             {/* Room Details Modal */}
             {isModalOpen && selectedRoom && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 md:p-4">
@@ -81,35 +148,31 @@ const RoomComponent = ({ hotel_id }) => {
                         </div>
 
                         <div className="p-4">
-                            {/* Room Images */}
-
-
                             {/* Basic Info */}
-                            <div className="grid grid-cols-1  gap-6 mb-6">
+                            <div className="grid grid-cols-1 gap-6 mb-6">
                                 <div>
-                                    <h3 className="text-lg font-semibold mb-2"> {selectedRoom.name}</h3>
+                                    <h3 className="text-lg font-semibold mb-2">{selectedRoom.name}</h3>
                                     <ul className="space-y-2">
                                         <li className="flex text-xs items-start text-gray-600">
-                                            <i className="fa-solid fa-bed mt-1 mr-2 "></i>
+                                            <i className="fa-solid fa-bed mt-1 mr-2"></i>
                                             <span>{selectedRoom.room_type}</span>
                                         </li>
                                         <li className="flex text-xs items-start text-gray-600">
-                                            <i className="fa-solid fa-user mt-1 mr-2 "></i>
+                                            <i className="fa-solid fa-user mt-1 mr-2"></i>
                                             <span>{selectedRoom.max_adults} Adults</span>
                                         </li>
-
                                     </ul>
                                 </div>
 
                                 <hr />
                                 <div className='flex justify-between gap-2'>
                                     <p> <span className='font-semibold text-xs'>Adult Occupancy: </span> {selectedRoom.max_adults}</p>
-                                    <p className='mr-5'> <span className='font-semibold text-xs '>
+                                    <p className='mr-5'> <span className='font-semibold text-xs'>
                                         Complementary Child Occupancy: </span> {selectedRoom.complementary_child_occupancy}</p>
                                 </div>
                                 <div className='flex justify-between -mt-5 gap-2'>
                                     <p> <span className='font-semibold text-xs'>On Demand Extra Bed: </span> {selectedRoom.on_demand_extra_bed}</p>
-                                    <p className='mr-5'> <span className='font-semibold text-xs '>
+                                    <p className='mr-5'> <span className='font-semibold text-xs'>
                                         Maximum Number of Guests Allowed: </span> {selectedRoom.max_guests_allowed}</p>
                                 </div>
                                 <hr />
@@ -120,21 +183,18 @@ const RoomComponent = ({ hotel_id }) => {
                                         <span className="font-semibold text-xs">Smoking status: </span>
                                         {selectedRoom.smoking_status == 1 ? "Yes" : "No"}
                                     </p>
-
                                 </div>
                                 <div className='flex justify-between -mt-5 gap-2'>
-                                    <p> <span className='font-semibold text-xs'>Room Characteristics : </span> {selectedRoom.room_characteristics}</p>
-                                    <p className='mr-5'> <span className='font-semibold text-xs '>
-                                        Room Size : </span> {selectedRoom.room_size_sqft} Sqft</p>
+                                    <p> <span className='font-semibold text-xs'>Room Characteristics: </span> {selectedRoom.room_characteristics}</p>
+                                    <p className='mr-5'> <span className='font-semibold text-xs'>
+                                        Room Size: </span> {selectedRoom.room_size_sqft} Sqft</p>
                                 </div>
                                 <hr />
-
                             </div>
 
                             {/* Features by Category */}
                             {selectedRoom.features_by_category?.length > 0 ? (
                                 <div className="mb-6">
-
                                     <div className="space-y-6">
                                         {selectedRoom.features_by_category.map((category) => (
                                             <div key={category.category_id}>
@@ -181,9 +241,20 @@ const RoomComponent = ({ hotel_id }) => {
             )}
 
             {/* Main Room Listing */}
-            <div className='md:col-span-5'>
+            <div className='md:col-span-6'>
                 <div className="bg-blue-50 p-3 rounded-t-lg shadow-md">
-                    <h1 className="text-lg font-bold">Room Details</h1>
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-lg font-bold">Room Details</h1>
+                        {(cart.length > 0 && !isLargeScreen) && (
+                            <button 
+                                onClick={() => setShowCart(!showCart)}
+                                className="relative bg-blue-900 text-white px-3 py-1 rounded-md text-sm md:hidden"
+                            >
+                                <i className="fa-solid fa-cart-shopping mr-2"></i>
+                                View Cart ({cart.length})
+                            </button>
+                        )}
+                    </div>
                 </div>
                 <div className="">
                     {rooms.map((room, index) => (
@@ -204,7 +275,7 @@ const RoomComponent = ({ hotel_id }) => {
 
                                 <div>
                                     {room.feature_summary?.length > 0 && (
-                                        <div className=" pl-4">
+                                        <div className="pl-4">
                                             <div className="flex flex-wrap gap-2">
                                                 {room.feature_summary.slice(0, 6).map((amenity) => (
                                                     <span
@@ -272,13 +343,11 @@ const RoomComponent = ({ hotel_id }) => {
                                         </p>
 
                                         <p className='text-xs text-gray-700 mt-3'>for 1 Night , per room</p>
-
-
                                     </div>
-
                                 </div>
                                 <div className="flex text center justify-end items-end md:pt-0 mr-3">
                                     <Button
+                                        onClick={() => addToCart(room)}
                                         style={{
                                             background: "linear-gradient(90deg, #313881, #0678B4)",
                                         }}
@@ -286,7 +355,6 @@ const RoomComponent = ({ hotel_id }) => {
                                     >
                                         Add Room
                                     </Button>
-
                                 </div>
                             </div>
                         </div>
@@ -294,9 +362,70 @@ const RoomComponent = ({ hotel_id }) => {
                 </div>
             </div>
 
-            <div className='md:col-span-1 hidden md:block'>
-                {/* Empty space for layout balance */}
-            </div>
+          
+
+            {/* Floating Cart Panel (Mobile and LG) */}
+            {(showCart && cart.length > 0) && (
+                <div className={`fixed inset-0 bg-black bg-opacity-50 z-40 flex ${isLargeScreen ? 'items-center justify-end' : 'items-end'}`}>
+                    <div className={`bg-white ${isLargeScreen ? 'w-96 rounded-l-lg h-[80vh] mr-0' : 'w-full rounded-t-lg max-h-[70vh]'} shadow-lg overflow-y-auto`}>
+                        <div className="bg-blue-900 text-white p-3 sticky top-0 flex justify-between items-center">
+                            <h3 className="font-bold">Your Cart ({cart.length})</h3>
+                            <button 
+                                onClick={() => setShowCart(false)}
+                                className="text-white hover:text-gray-200"
+                            >
+                                <i className="fa-solid fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <div className={`overflow-y-auto ${isLargeScreen ? 'h-[calc(80vh-120px)]' : 'max-h-[60vh]'} p-3`}>
+                            {cart.map((item, index) => (
+                                <div key={index} className="border-b border-gray-200 py-3 flex items-start">
+                                    {item.image && (
+                                        <div className="w-16 h-16 rounded-md overflow-hidden mr-3">
+                                            <Image 
+                                                src={item.image} 
+                                                alt={item.name}
+                                                width={64}
+                                                height={64}
+                                                className="object-cover w-full h-full"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-sm">{item.name}</h4>
+                                        <p className="text-xs text-gray-600">{item.type}</p>
+                                        <p className="text-xs text-gray-600">{item.adults} Adults, {item.children} Children</p>
+                                        <p className="text-xs text-gray-600">Breakfast: {item.breakfast}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-bold text-sm">BDT {item.price}</p>
+                                        <button 
+                                            onClick={() => removeFromCart(index)}
+                                            className="text-red-500 text-xs hover:text-red-700"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="p-3 bg-gray-50 border-t border-gray-200 sticky bottom-0">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="font-semibold">Total:</span>
+                                <span className="font-bold text-lg">BDT {calculateTotal()}</span>
+                            </div>
+                            <Button
+                                style={{
+                                    background: "linear-gradient(90deg, #313881, #0678B4)",
+                                }}
+                                className="w-full py-2 text-white rounded hover:opacity-90 transition-colors"
+                            >
+                                Proceed to Checkout
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
