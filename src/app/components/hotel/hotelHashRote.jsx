@@ -125,7 +125,7 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
         </div>
         <h3 className="text-lg font-medium text-gray-800 mb-2">Failed to load hotel details</h3>
         <p className="text-gray-600 max-w-md">
-          We couldn't load the hotel information. Please try refreshing the page.
+          We couldnot load the hotel information. Please try refreshing the page.
         </p>
       </div>
     );
