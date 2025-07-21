@@ -659,7 +659,9 @@ const HotelListContent = () => {
                           {hotel.extra_discount_msg && (
                             <p className="text-xs text-green-600 font-medium mb-1">{hotel.extra_discount_msg}</p>
                           )}
+                           <span className="text-xs text-gray-500">Starting From:</span>
                           <div className="flex items-end gap-2">
+                           
                             {hotel.hasPrice ? (
                               <>
                                 <p className="text-xl font-bold text-blue-800">

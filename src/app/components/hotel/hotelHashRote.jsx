@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import RoomComponent from './Room/Room';
 import FacilitiesByCategory from './FacilitiesByCategory';
@@ -11,13 +12,13 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
   const [activeSection, setActiveSection] = useState('overview');
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isLoading, setIsLoading] = useState(!initialHotelDetails);
 
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
   const navRef = useRef(null);
 
   useEffect(() => {
-    // Check if mobile on mount and resize
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -25,13 +26,32 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+    // Fetch hotel details if not provided
+    if (!initialHotelDetails && hotelId) {
+      const fetchHotelDetails = async () => {
+        try {
+          setIsLoading(true);
+          const response = await fetch(`/api/hotels/${hotelId}`);
+          const data = await response.json();
+          setHotelDetails(data);
+        } catch (error) {
+          console.error('Error fetching hotel details:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchHotelDetails();
+    }
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      if (observerRef.current) observerRef.current.disconnect();
+    };
+  }, [hotelId, initialHotelDetails]);
 
   useEffect(() => {
     if (!hotelDetails) return;
 
-    // Initialize Intersection Observer
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -51,12 +71,10 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
       }
     );
 
-    // Observe all sections
     Object.values(sectionsRef.current).forEach((section) => {
       if (section) observerRef.current.observe(section);
     });
 
-    // Handle initial hash
     const handleInitialHash = () => {
       const hash = window.location.hash.substring(1) || 'overview';
       if (sectionsRef.current[hash]) {
@@ -91,10 +109,24 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
     scrollToSection(sectionId);
   };
 
-  if (!hotelDetails) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!hotelDetails) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-center p-4">
+        <div className="text-red-500 mb-4">
+          <i className="fa-solid fa-triangle-exclamation text-3xl"></i>
+        </div>
+        <h3 className="text-lg font-medium text-gray-800 mb-2">Failed to load hotel details</h3>
+        <p className="text-gray-600 max-w-md">
+          We couldn't load the hotel information. Please try refreshing the page.
+        </p>
       </div>
     );
   }
@@ -104,11 +136,11 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
     : [];
 
   const navItems = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'rooms', label: 'Rooms' },
-    { id: 'nearby', label: "What's Nearby" },
-    { id: 'facilities', label: 'Facilities' },
-    { id: 'policy', label: 'Policies' }
+    { id: 'overview', label: 'Overview', icon: 'fa-info-circle' },
+    { id: 'rooms', label: 'Rooms', icon: 'fa-bed' },
+    { id: 'nearby', label: "What's Nearby", icon: 'fa-location-dot' },
+    { id: 'facilities', label: 'Facilities', icon: 'fa-wifi' },
+    { id: 'policy', label: 'Policies', icon: 'fa-clipboard-list' }
   ];
 
   const toggleDescription = () => {
@@ -136,12 +168,13 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
                   key={item.id}
                   href={`#${item.id}`}
                   onClick={(e) => handleNavClick(item.id, e)}
-                  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
                     activeSection === item.id
                       ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-inner'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
                   }`}
                 >
+                  <i className={`fa-solid ${item.icon} text-xs`}></i>
                   {item.label}
                 </a>
               ))}
@@ -151,33 +184,36 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
       </div>
 
       {/* Main Layout - Responsive grid */}
-      <div className="p-2 md:p-4 rounded-lg mx-auto grid grid-cols-1 bg-white md:grid-cols-10 gap-4">
-        <div className="col-span-1 md:col-span-7">
-          <HotelCarousel images={hotelDetails?.images || []} />
+      <section 
+        ref={(el) => (sectionsRef.current['overview'] = el)}
+        id="overview"
+        className="scroll-mt-24"
+      >
+        <div className="p-2 md:p-4 rounded-lg mx-auto grid grid-cols-1 bg-white md:grid-cols-10 gap-4">
+          <div className="col-span-1 md:col-span-7">
+            <HotelCarousel images={hotelDetails?.images || []} />
+          </div>
+          <div className="col-span-1 md:col-span-3">
+            <HotelDetails hotel={hotelDetails} />
+          </div>
         </div>
-        <div className="col-span-1 md:col-span-3">
-          <HotelDetails hotel={hotelDetails || {}} />
-        </div>
-      </div>
 
-      {/* Content Sections with proper spacing */}
-      <div className="py-6 space-y-6 sm:space-y-8">
-        <section 
-          ref={(el) => (sectionsRef.current['overview'] = el)}
-          id="overview" 
-          className="bg-white rounded-lg p-4 sm:p-6 shadow-sm scroll-mt-24"
-        >
+        {/* Hotel Description Section */}
+        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm mt-4">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Hotel Description</h1>
           <div className='flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6'>
             <div className='rounded-lg flex items-center gap-1 font-medium'>
-              <span>Rooms: {hotelDetails.number_of_rooms}</span>
+              <i className="fa-solid fa-door-closed"></i>
+              <span>Rooms: {hotelDetails.number_of_rooms || 'N/A'}</span>
             </div>
-            <p className="text-gray-600 flex items-center gap-1 font-medium">
-              <span>Floors: {hotelDetails.Number_of_Floors}</span>
-            </p>
-            <p className="text-gray-600 flex items-center gap-1 font-medium">
-              <span>Built: {hotelDetails.Year_of_construction}</span>
-            </p>
+            <div className="text-gray-600 flex items-center gap-1 font-medium">
+              <i className="fa-solid fa-building"></i>
+              <span>Floors: {hotelDetails.Number_of_Floors || 'N/A'}</span>
+            </div>
+            <div className="text-gray-600 flex items-center gap-1 font-medium">
+              <i className="fa-solid fa-calendar"></i>
+              <span>Built: {hotelDetails.Year_of_construction || 'N/A'}</span>
+            </div>
           </div>
 
           {hotelDetails.description && (
@@ -190,76 +226,99 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
                   onClick={toggleDescription}
                   className="text-blue-600 hover:text-blue-800 mt-2 text-xs sm:text-sm font-medium flex items-center"
                 >
-                  {showFullDescription ? 'Show less' : 'Show more'}
+                  {showFullDescription ? (
+                    <>
+                      <i className="fa-solid fa-chevron-up mr-1"></i> Show less
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-chevron-down mr-1"></i> Show more
+                    </>
+                  )}
                 </button>
               )}
             </div>
           )}
-        </section>
+        </div>
+      </section>
 
-        <section 
-          ref={(el) => (sectionsRef.current['rooms'] = el)}
-          id="rooms" 
-          className="scroll-mt-24"
-        >
-          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-            <RoomComponent hotel_id={hotelId} />
-          </div>
-        </section>
+      {/* Rooms Section */}
+      <section 
+        ref={(el) => (sectionsRef.current['rooms'] = el)}
+        id="rooms" 
+        className="scroll-mt-24 mt-6"
+      >
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
+            <i className="fa-solid fa-bed text-blue-600"></i>
+            Available Rooms
+          </h2>
+          <RoomComponent hotel_id={hotelId} />
+        </div>
+      </section>
 
-        <section 
-          ref={(el) => (sectionsRef.current['nearby'] = el)}
-          id="nearby" 
-          className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6 scroll-mt-24"
-        >
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <i className="fa-solid fa-location-dot text-blue-600"></i>
-              Nearby Locations
-            </h2>
-            {nearbyLocations.length > 0 && (
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-50 text-blue-700">
-                {nearbyLocations.length} places
-              </span>
-            )}
-          </div>
-
-          {nearbyLocations.length > 0 ? (
-            <ul className="space-y-2 sm:space-y-3">
-              {nearbyLocations.map((location, index) => (
-                <li key={index} className="flex items-start gap-3 group hover:bg-gray-50 px-2 py-1.5 rounded-lg transition-colors">
-                  <i className="fa-solid fa-location-dot text-gray-400 mt-0.5"></i>
-                  <span className="text-gray-800 text-sm sm:text-base">{location}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-4 text-center">
-              <p className="text-gray-500 text-sm sm:text-base">No nearby locations available</p>
-            </div>
+      {/* Nearby Locations Section */}
+      <section 
+        ref={(el) => (sectionsRef.current['nearby'] = el)}
+        id="nearby" 
+        className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6 scroll-mt-24 mt-6"
+      >
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <i className="fa-solid fa-location-dot text-blue-600"></i>
+            Nearby Locations
+          </h2>
+          {nearbyLocations.length > 0 && (
+            <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-blue-50 text-blue-700">
+              {nearbyLocations.length} places
+            </span>
           )}
-        </section>
+        </div>
 
-        <section 
-          ref={(el) => (sectionsRef.current['facilities'] = el)}
-          id="facilities" 
-          className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24"
-        >
-          <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Facilities</h2>
-          <FacilitiesByCategory categories={hotelDetails.category_wise_features || {}} />
-        </section>
-
-        <section 
-          ref={(el) => (sectionsRef.current['policy'] = el)}
-          id="policy" 
-          className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24"
-        >
-          <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">Policies</h2>
-          <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
-            <HotelPolicies Policies={hotelDetails.polices} />
+        {nearbyLocations.length > 0 ? (
+          <ul className="space-y-2 sm:space-y-3">
+            {nearbyLocations.map((location, index) => (
+              <li key={index} className="flex items-start gap-3 group hover:bg-gray-50 px-2 py-1.5 rounded-lg transition-colors">
+                <i className="fa-solid fa-location-dot text-gray-400 mt-0.5"></i>
+                <span className="text-gray-800 text-sm sm:text-base">{location}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-4 text-center">
+            <i className="fa-solid fa-map-location-dot text-gray-300 text-3xl mb-2"></i>
+            <p className="text-gray-500 text-sm sm:text-base">No nearby locations information available</p>
           </div>
-        </section>
-      </div>
+        )}
+      </section>
+
+      {/* Facilities Section */}
+      <section 
+        ref={(el) => (sectionsRef.current['facilities'] = el)}
+        id="facilities" 
+        className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24 mt-6"
+      >
+        <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
+          <i className="fa-solid fa-wifi text-blue-600"></i>
+          Hotel Facilities
+        </h2>
+        <FacilitiesByCategory categories={hotelDetails.category_wise_features || {}} />
+      </section>
+
+      {/* Policies Section */}
+      <section 
+        ref={(el) => (sectionsRef.current['policy'] = el)}
+        id="policy" 
+        className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24 mt-6 mb-8"
+      >
+        <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
+          <i className="fa-solid fa-clipboard-list text-blue-600"></i>
+          Hotel Policies
+        </h2>
+        <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
+          <HotelPolicies Policies={hotelDetails.polices} />
+        </div>
+      </section>
 
       <style jsx>{`
         .hide-scrollbar {
