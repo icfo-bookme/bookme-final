@@ -65,7 +65,7 @@ export default async function Home() {
       </section>
 
       {/* Main Content Section */}
-      <section className="py-5  bg-white">
+      <section className="py-5 mt-16 lg:mt-0 bg-white">
         <div className=" mx-auto  ">
           <div className="overflow-hidden">
             {servicesData.length > 0 ? (

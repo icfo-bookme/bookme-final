@@ -1,11 +1,11 @@
 'use client'
 
-
+import { FaCheck } from "react-icons/fa";
 
 export default function HotelDetails({ hotel }) {
-   
-   console.log("Hotel Details:", hotel);
-     const nearbyLocations = hotel.near_by 
+
+    console.log("Hotel Details:", hotel);
+    const nearbyLocations = hotel.near_by
         ? hotel.near_by.split('|').map(loc => loc.trim()).filter(loc => loc)
         : [];
     return (
@@ -30,7 +30,7 @@ export default function HotelDetails({ hotel }) {
                         <ul className="text-xs text-gray-600 space-y-1 ml-3">
                             {nearbyLocations.map((location, index) => (
                                 <li key={index} className="flex items-start gap-1">
-                                   <i className="fa-solid fa-location-dot text-gray-400 text-xs"></i>
+                                    <i className="fa-solid fa-location-dot text-gray-400 text-xs"></i>
                                     <span>{location}</span>
                                 </li>
                             ))}
@@ -38,16 +38,29 @@ export default function HotelDetails({ hotel }) {
                     </div>
                 )}
 
-                {/* Amenities/summary section */}
                 {hotel.summary && hotel.summary.length > 0 && (
                     <div className="mt-5">
                         <h3 className="text-xl font-bold text-blue-950 mb-1">Amenities:</h3>
                         <div className="flex flex-wrap gap-1 md:gap-2">
                             {hotel.summary.slice(0, 6).map((amenity) => (
-                                <span key={amenity.id} className="flex items-center text-xs md:text-xs text-blue-950 bg-gray-100 px-2 md:px-3 py-0.5 md:py-1 rounded-full">  
+                                <span
+                                    key={amenity.id}
+                                    className="flex items-center text-xs md:text-xs text-blue-950 bg-gray-100 px-2 md:px-3 py-0.5 md:py-1 rounded-full"
+                                >
+                                   
+                                    {amenity.icon_class ? (
+                                        <i
+                                            className={`${amenity.icon_class} text-blue-500 text-sm w-4 flex justify-center mr-1`}
+                                        />
+                                    ) : (
+                                        <FaCheck className="text-blue-500 text-sm mr-1" />
+                                    )}
+                                  
                                     {amenity.name}
                                 </span>
                             ))}
+
+                          
                             {hotel.summary.length > 6 && (
                                 <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
                                     +{hotel.summary.length - 6} more
