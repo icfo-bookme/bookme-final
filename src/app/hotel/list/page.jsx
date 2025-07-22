@@ -440,9 +440,9 @@ const HotelListContent = () => {
       }
     `}</style>
 
-      <div className="flex sticky flex-col md:flex-row bg-blue-100 p-4 rounded-lg gap-6">
+      <div className="flex sticky flex-col md:flex-row bg-blue-100 p-4  rounded-lg gap-6">
         {/* Filters Sidebar - Hidden on mobile */}
-        <div className='sticky top-16 h-[calc(100vh)] overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 scrollbar-thumb-rounded md:block md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 '>
+        <div className='sticky top-16 h-[calc(100vh)] mb-3 overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 scrollbar-thumb-rounded md:block md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 '>
           <div className="flex justify-between items-center mb-4 border-b pb-4">
             <h3 className="font-bold text-lg text-blue-950">Refine Your Search</h3>
             {(selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < maxPrice || searchQuery) && (
