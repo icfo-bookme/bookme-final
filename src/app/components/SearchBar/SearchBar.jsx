@@ -15,7 +15,7 @@ const TravelBookingTabs = () => {
   const [activeTab, setActiveTab] = useState("hotel");
 
   return (
-    <div className="mb-12 bg-white shadow-lg border rounded-lg text-blue-950">
+    <div className=" bg-white shadow-lg border rounded-lg text-blue-950">
       {/* Tabs Navigation - Responsive layout */}
       <div className="flex lg:w-[50%] border-b">
         <TabButton
@@ -63,7 +63,7 @@ const TravelBookingTabs = () => {
 const TabButton = ({ children, active, onClick, icon }) => (
   <button
     onClick={onClick}
-    className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm md:text-base font-medium transition-colors ${
+    className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2  py-3 sm:px-4 sm:py-4 text-xs sm:text-sm md:text-base font-medium transition-colors ${
       active
         ? "text-blue-950 border-b-2 border-blue-950"
         : "text-gray-500 hover:text-blue-800"

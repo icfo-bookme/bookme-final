@@ -10,7 +10,6 @@ import HpmepageBlog from "./components/pre-footer-content/Homepage";
 import TravelSearchWidget from "./components/SearchBar/SearchBar";
 import Hotel from "./components/Home/Hotel";
 
-// Optional: ensure server-side rendering
 export const dynamic = "force-dynamic";
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400"] });
@@ -27,75 +26,70 @@ export default async function Home() {
   const shouldShowVisa = servicesData?.some(
     (item) => item?.category_name === "Visa" && item?.isShow === "yes"
   );
-
-   const shouldShowHotel = servicesData?.some(
+  const shouldShowHotel = servicesData?.some(
     (item) => item?.category_name === "Hotel" && item?.isShow === "yes"
   );
   const shouldShowTour = servicesData?.some(
     (item) => item?.category_name === "Tour" && item?.isShow === "yes"
   );
-
   const shouldShowTangour = servicesData?.some(
     (item) => item?.category_name === "Tanguar Haor" && item?.isShow === "yes"
   );
-
   const shouldShowSundarban = servicesData?.some(
     (item) => item?.category_name === "Sundarban" && item?.isShow === "yes"
   );
-
   const shouldShowSaintMartin = servicesData?.some(
     (item) => item?.category_name === "Saint Martin Ships" && item?.isShow === "yes"
   );
 
   return (
-    <main className={roboto.className}>
-      {/* Hero Section with Banner and Search Widget */}
-      <section className="relative w-full min-h-[67vh]  md:min-h-[80vh]">
+    <main className={`${roboto.className} bg-white`}>
+      {/* Hero Section */}
+      <section className="relative w-full min-h-[70vh] sm:min-h-[75vh] md:min-h-[60vh] ">
         {/* Banner Background */}
-        <div className="absolute inset-0 w-full h-full">
+        <div className="absolute inset-0 z-0">
           <Banner />
         </div>
 
-        {/* Search Widget Container */}
-        <div className=" relative md:top-96 top-36  z-10 h-full flex items-center justify-center ">
-          <div className="w-[98%] md:w-full mx-auto md:max-w-5xl  md:-mt-24 lg:-mt-32">
+        {/* Search Widget - Centered Vertically */}
+        <div className="absolute top-28 inset-0 z-10 flex items-center justify-center px-4">
+          <div className="w-full max-w-5xl mx-auto">
             <TravelSearchWidget />
           </div>
         </div>
       </section>
 
-      {/* Main Content Section */}
-      <section className="py-5 mt-16 lg:mt-0 bg-white">
-        <div className=" mx-auto  ">
-          <div className="overflow-hidden">
-            {servicesData.length > 0 ? (
-              <>
-                <PromotionsPage servicesData={servicesData} />
+      {/* Services Section */}
+      <section className="py-10 bg-white">
+        <div className="w-full max-w-screen-xl mx-auto px-4 space-y-10">
+          {servicesData.length > 0 ? (
+            <>
+              <PromotionsPage servicesData={servicesData} />
 
-                {shouldShowVisa && <Visa />}
+              {shouldShowVisa && <Visa />}
+              {shouldShowHotel && <Hotel />}
 
-                {shouldShowHotel && <Hotel />}
-
-                {shouldShowTour && (
-                  <>
-                    {shouldShowTangour && <Tangour />}
-                    {shouldShowSundarban && <Sundarban />}
-                    {shouldShowSaintMartin && <SaintMartin />}
-                  </>
-                )}
-              </>
-            ) : (
-              <p className="text-center text-red-500 py-10">
-                Failed to load services data. Please try again later.
-              </p>
-            )}
-          </div>
+              {shouldShowTour && (
+                <>
+                  {shouldShowTangour && <Tangour />}
+                  {shouldShowSundarban && <Sundarban />}
+                  {shouldShowSaintMartin && <SaintMartin />}
+                </>
+              )}
+            </>
+          ) : (
+            <p className="text-center text-red-600 text-lg font-semibold py-12">
+              Failed to load services data. Please try again later.
+            </p>
+          )}
         </div>
       </section>
 
       {/* Blog Section */}
-      <section className="bg-gray-50">
-        <HpmepageBlog />
+      <section className="bg-gray-100 py-10">
+        <div className="w-full max-w-screen-xl mx-auto px-4">
+          <HpmepageBlog />
+        </div>
       </section>
     </main>
   );

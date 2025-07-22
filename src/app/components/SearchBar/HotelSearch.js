@@ -2,12 +2,10 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import SearchField from "./SearchField";
-import SearchButton from "./SearchButton";
 import getDestination from "@/services/hotel/getDestination";
-import getHotelCategories from "@/services/hotel/getHotelCategories";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import SearchButton from "./SearchButton";
 
 const HotelSearch = () => {
   const router = useRouter();
@@ -16,13 +14,16 @@ const HotelSearch = () => {
   const [children, setChildren] = useState(0);
   const [rooms, setRooms] = useState(1);
   const [destinations, setDestinations] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
 
   const datePickerRef = useRef(null);
   const guestModalRef = useRef(null);
+  const searchRef = useRef(null);
 
   const today = new Date();
   const tomorrow = new Date();
@@ -38,11 +39,11 @@ const HotelSearch = () => {
         const destinationsData = await getDestination();
         setDestinations(destinationsData);
 
-        const categoriesData = await getHotelCategories();
-        setCategories(categoriesData);
-
+        // Pre-fill input with first destination
         if (destinationsData.length > 0) {
-          setSelectedLocationId(destinationsData[0].id);
+          const first = destinationsData[0];
+          setSearchQuery(`${first.name}, ${first.country}`);
+          setSelectedLocationId(first.id);
         }
       } catch (error) {
         console.error("Failed to load data:", error);
@@ -52,7 +53,7 @@ const HotelSearch = () => {
     fetchData();
   }, []);
 
-  // Handle click outside for modals
+  // Close dropdowns/modals when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showDatePicker && datePickerRef.current && !datePickerRef.current.contains(event.target)) {
@@ -61,26 +62,67 @@ const HotelSearch = () => {
       if (showGuestModal && guestModalRef.current && !guestModalRef.current.contains(event.target)) {
         setShowGuestModal(false);
       }
+      if (showSuggestions && searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showDatePicker, showGuestModal]);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showDatePicker, showGuestModal, showSuggestions]);
 
   const guestText = `${adults} Adult${adults > 1 ? "s" : ""}, ${rooms} Room${rooms > 1 ? "s" : ""}`;
 
-  const handleCategoryToggle = (categoryId) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
-    );
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    updateSuggestions(query);
+    setSelectedLocationId(""); // Clear selected location when typing
+  };
+
+const handleSearchFocus = () => {
+  if (isFirstInputInteraction) {
+    setIsFirstInputInteraction(false);
+
+    // Clear input and show all suggestions
+    setSearchQuery("");
+    setSelectedLocationId("");
+    setSuggestions(destinations); // show full list immediately
+  } else {
+    // show suggestions for current input
+    updateSuggestions(searchQuery);
+  }
+
+  setShowSuggestions(true);
+};
+
+
+  const updateSuggestions = (query) => {
+    const queryLower = query.toLowerCase();
+    const matched = destinations.filter((dest) => {
+      const fullName = `${dest.name} ${dest.country}`.toLowerCase();
+      let qIndex = 0;
+      for (let i = 0; i < fullName.length && qIndex < queryLower.length; i++) {
+        if (fullName[i] === queryLower[qIndex]) qIndex++;
+      }
+      return qIndex === queryLower.length;
+    });
+
+    setSuggestions(query.length === 0 ? destinations : matched);
+  };
+
+  const selectDestination = (destination) => {
+    setSearchQuery(`${destination.name}, ${destination.country}`);
+    setSelectedLocationId(destination.id);
+    setShowSuggestions(false);
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
+    if (!selectedLocationId) {
+      alert("Please select a destination");
+      return;
+    }
 
     const query = new URLSearchParams({
       checkin: checkinDate.toISOString().split("T")[0],
@@ -89,7 +131,6 @@ const HotelSearch = () => {
       rooms: String(rooms),
       child_ages: "",
       adult: String(adults),
-      categories: selectedCategories.join(","),
     }).toString();
 
     router.push(`/hotel/list?${query}`);
@@ -97,64 +138,67 @@ const HotelSearch = () => {
 
   const handleDateChange = (update) => {
     setDateRange(update);
-    if (update[0]) {
-      setCheckinDate(update[0]);
-    }
-    if (update[1]) {
-      setCheckoutDate(update[1]);
-    }
+    if (update[0]) setCheckinDate(update[0]);
+    if (update[1]) setCheckoutDate(update[1]);
   };
 
-  const applyDateSelection = () => {
-    setShowDatePicker(false);
-  };
+  const applyDateSelection = () => setShowDatePicker(false);
 
-  const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: '2-digit'
-    }).replace(',', '');
-  };
+  const formatDate = (date) =>
+    date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "2-digit",
+    }).replace(",", "");
 
   return (
     <div className="bg-white max-w-5xl mx-auto pb-6 text-blue-950 relative">
       <form onSubmit={handleSearch}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Destination */}
-          <div className="col-span-2 md:col-span-1 space-y-1">
+          {/* Destination Input */}
+          <div className="col-span-2 md:col-span-1 space-y-1 relative" ref={searchRef}>
             <label className="block text-sm text-blue-950">City/Hotel/Resort/Area</label>
-            <select
-              value={selectedLocationId}
-              onChange={(e) => setSelectedLocationId(e.target.value)}
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onFocus={handleSearchFocus}
+              placeholder="Search destinations..."
               className="p-3 font-bold border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white w-full text-blue-950 text-sm sm:text-base"
-            >
-              {destinations.map((destination) => (
-                <option key={destination.id} value={destination.id}>
-                  {destination.name}, {destination.country}
-                </option>
-              ))}
-            </select>
+            />
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+                {suggestions.map((destination) => (
+                  <div
+                    key={destination.id}
+                    className="p-3 hover:bg-blue-50 cursor-pointer text-sm sm:text-base"
+                    onClick={() => selectDestination(destination)}
+                  >
+                    {destination.name}, {destination.country}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Check In */}
+          {/* Check-in Date */}
           <div className="sm:col-span-1 space-y-1 relative">
             <label className="block text-sm text-blue-950">Check In</label>
             <div
               onClick={() => setShowDatePicker(true)}
-              className="p-3 border w-full border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white text-sm sm:text-base text-blue-950 font-bold"
+              className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white text-sm sm:text-base text-blue-950 font-bold"
             >
               {formatDate(checkinDate)}
             </div>
           </div>
 
-          {/* Check Out */}
+          {/* Check-out Date */}
           <div className="sm:col-span-1 space-y-1 relative">
             <label className="block text-sm text-blue-950">Check Out</label>
             <div
               onClick={() => setShowDatePicker(true)}
-              className="p-3 border w-full border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white text-sm sm:text-base text-blue-950 font-bold"
+              className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white text-sm sm:text-base text-blue-950 font-bold"
             >
               {formatDate(checkoutDate)}
             </div>
@@ -162,120 +206,41 @@ const HotelSearch = () => {
 
           {/* Guests & Rooms */}
           <div className="col-span-2 md:col-span-1 space-y-1">
-            <label className="block text-sm font-medium text-blue-950">
-              Guests & Rooms
-            </label>
+            <label className="block text-sm font-medium text-blue-950">Guests & Rooms</label>
             <div
               onClick={() => setShowGuestModal(true)}
               className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
             >
-              <div className="font-bold text-blue-950 text-sm sm:text-base">
-                {guestText}
-              </div>
+              <div className="font-bold text-blue-950 text-sm sm:text-base">{guestText}</div>
             </div>
           </div>
         </div>
 
-        {/* Date Range Picker Modal */}
+        {/* Date Picker Modal */}
         {showDatePicker && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div 
-              ref={datePickerRef}
-              className="bg-white rounded-lg p-4 shadow-lg mx-2 w-full max-w-[20rem] md:max-w-[33rem]"
-            >
-              <style jsx global>{`
-                .react-datepicker {
-                  font-size: 0.85rem;
-                  border: none;
-                }
-
-                .react-datepicker__month-container {
-                  padding: 0.3rem;
-                }
-
-                .react-datepicker__header {
-                  padding: 0.3rem;
-                  background-color: white;
-                  border-bottom: 1px solid #eee;
-                }
-
-                .react-datepicker__day-name,
-                .react-datepicker__day {
-                  width: 1.7rem;
-                  line-height: 1.7rem;
-                  margin: 0.1rem;
-                  font-weight: 500;
-                }
-
-                .react-datepicker__day--selected,
-                .react-datepicker__day--in-selecting-range,
-                .react-datepicker__day--in-range {
-                  background-color: #1e3a8a;
-                  color: white;
-                }
-
-                .react-datepicker__day--keyboard-selected {
-                  background-color: #3b82f6;
-                }
-
-                .react-datepicker__navigation {
-                  top: 8px;
-                }
-
-                @media (max-width: 768px) {
-                  .react-datepicker {
-                    font-size: 0.9rem;
-                  }
-
-                  .react-datepicker__month-container {
-                    padding: 0.5rem;
-                  }
-
-                  .react-datepicker__day-name,
-                  .react-datepicker__day {
-                    width: 2.1rem;
-                    line-height: 1.5rem;
-                  }
-
-                  .react-datepicker__navigation {
-                    top: 7px;
-                  }
-
-                  .react-datepicker__month {
-                    margin: 0;
-                  }
-
-                  .react-datepicker__header {
-                    padding: 0.5rem;
-                  }
-                }
-              `}</style>
-
+            <div ref={datePickerRef} className="bg-white rounded-lg p-4 shadow-lg mx-2 w-full max-w-[33rem]">
               <DatePicker
-                selectsRange={true}
+                selectsRange
                 startDate={dateRange[0]}
                 endDate={dateRange[1]}
                 onChange={handleDateChange}
                 minDate={new Date()}
                 monthsShown={2}
                 inline
-                className="border-0"
-                calendarClassName="w-full"
-                wrapperClassName="w-full"
               />
-
               <div className="flex justify-between mt-4">
                 <button
                   type="button"
                   onClick={() => setShowDatePicker(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={applyDateSelection}
-                  className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors"
+                  className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800"
                 >
                   Apply
                 </button>
@@ -284,36 +249,11 @@ const HotelSearch = () => {
           </div>
         )}
 
-        {/* Category Selection */}
-        <div className="mt-4">
-          <div className="flex flex-wrap gap-4">
-            <p className="text-sm font-bold text-blue-950">Search For</p>
-            {categories.map((category) => (
-              <div key={category.id} className="flex items-center">
-                <input
-                  type="checkbox"
-                  id={`category-${category.id}`}
-                  checked={selectedCategories.includes(category.id)}
-                  onChange={() => handleCategoryToggle(category.id)}
-                  className="h-4 w-4 text-blue-900 rounded border-gray-300 focus:ring-blue-900"
-                />
-                <label htmlFor={`category-${category.id}`} className="ml-2 text-sm text-blue-950">
-                  {category.name}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Guest Modal */}
         {showGuestModal && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div 
-              ref={guestModalRef}
-              className="bg-white rounded-lg p-6 w-80 space-y-4 shadow-lg"
-            >
+            <div ref={guestModalRef} className="bg-white rounded-lg p-6 w-80 space-y-4 shadow-lg">
               <h2 className="text-lg font-semibold text-blue-950">Guests & Rooms</h2>
-
               {[["Adults", adults, setAdults, 1], ["Children", children, setChildren, 0], ["Rooms", rooms, setRooms, 1]].map(
                 ([label, count, setter, min]) => (
                   <div key={label} className="flex justify-between items-center">
@@ -338,12 +278,11 @@ const HotelSearch = () => {
                   </div>
                 )
               )}
-
               <div className="text-right">
                 <button
                   type="button"
                   onClick={() => setShowGuestModal(false)}
-                  className="mt-4 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors text-sm sm:text-base"
+                  className="mt-4 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800"
                 >
                   Done
                 </button>

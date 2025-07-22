@@ -8,9 +8,11 @@ module.exports = {
   ],
   theme: {
     extend: {
-      screens: {
-        'xs': '350px', // Custom breakpoint
-      },
+     screens: {
+      'fold': '540px',
+      'hub': '1024px',
+       
+    },
       container: {
         center: true, // Centers the container
         padding: '0', // Removes default padding

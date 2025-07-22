@@ -272,7 +272,7 @@ const HotelListContent = () => {
 
       {/* Mobile Filters Panel */}
       {showMobileFilters && (
-        <div className="md:hidden mt-12 fixed inset-0 bg-black bg-opacity-50 z-30 flex justify-end">
+        <div className="md:hidden mt-12 fixed inset-0 bg-black bg-opacity-50 z-30 flex  justify-end">
           <div 
             ref={mobileFiltersRef}
             className="w-full max-w-sm bg-white h-full overflow-y-auto animate-slide-in"
@@ -423,12 +423,28 @@ const HotelListContent = () => {
           </div>
         </div>
       )}
+<style jsx>{`
+      .scrollbar-thin::-webkit-scrollbar {
+        width: 0px;
+      }
+      .scrollbar-thin::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+      }
+      .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+      }
+      .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+      }
+    `}</style>
 
-      <div className="flex flex-col md:flex-row bg-blue-100 p-4 rounded-lg gap-6">
+      <div className="flex sticky flex-col md:flex-row bg-blue-100 p-4 rounded-lg gap-6">
         {/* Filters Sidebar - Hidden on mobile */}
-        <div className='hidden md:block md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 h-fit top-28'>
+        <div className='sticky top-16 h-[calc(100vh)] overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 scrollbar-thumb-rounded md:block md:w-1/4 bg-white rounded-xl shadow-sm border border-gray-200 p-4 '>
           <div className="flex justify-between items-center mb-4 border-b pb-4">
-            <h3 className="font-semibold text-lg text-gray-800">Refine Your Search</h3>
+            <h3 className="font-bold text-lg text-blue-950">Refine Your Search</h3>
             {(selectedAmenities.length > 0 || selectedStars.length > 0 || priceRange[1] < maxPrice || searchQuery) && (
               <button
                 onClick={resetAllFilters}
@@ -441,7 +457,7 @@ const HotelListContent = () => {
           
           {/* Hotel Name Search with Suggestions */}
           <div className="mb-6 relative" ref={searchRef}>
-            <h4 className="font-medium text-sm text-gray-700 mb-2">Search by Hotel Name</h4>
+            <h4 className="font-bold text-sm text-blue-900 mb-2">Search by Hotel Name</h4>
             <div className="relative">
               <input
                 type="text"
@@ -483,7 +499,7 @@ const HotelListContent = () => {
           <div className="space-y-6">
             {/* Price Range */}
             <div>
-              <h4 className="font-medium text-sm text-gray-700 mb-3">Price Range</h4>
+              <h4 className="font-bold text-sm text-blue-950 mb-3">Price Range</h4>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Min: {formatPrice(priceRange[0])}</label>
@@ -512,7 +528,7 @@ const HotelListContent = () => {
 
             {/* Star Rating */}
             <div>
-              <h4 className="font-medium text-sm text-gray-700 mb-2">Star Rating</h4>
+              <h4 className="font-bold text-sm text-blue-950 mb-2">Star Rating</h4>
               {[5, 4, 3, 2, 1].map((star) => (
                 <div key={star} className="flex items-center mb-2">
                   <input
@@ -533,7 +549,7 @@ const HotelListContent = () => {
 
             {/* Amenities */}
             <div>
-              <h4 className="font-medium text-sm text-gray-700 mb-2">Amenities</h4>
+              <h4 className="font-bold text-sm text-blue-950 mb-2">Amenities</h4>
               <div className="max-h-60 overflow-y-auto pr-2">
                 {amenities.map((amenity) => (
                   <div key={amenity.id} className="flex items-center mb-2">
@@ -667,7 +683,7 @@ const HotelListContent = () => {
                                 <p className="text-xl font-bold text-blue-800">
                                   {formatPrice(hotel.price_after_discount)}
                                 </p>
-                                {hotel.discount && hotel.discount > 0 && (
+                                { hotel.discount > 0  && (
                                   <p className="text-sm text-gray-500 line-through">
                                     {formatPrice(hotel.regular_price)}
                                   </p>
@@ -677,7 +693,7 @@ const HotelListContent = () => {
                               <p className="text-sm text-blue-600">Contact for price</p>
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">for 1 Night, per room</p>
+                          <p className="text-xs text-gray-500 mt-1">for per Night, per room</p>
                         </div>
 
                         <button
