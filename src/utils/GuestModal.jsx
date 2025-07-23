@@ -27,7 +27,7 @@ const GuestModal = ({
       onClick={handleBackdropClick}
     >
       <div 
-        className="bg-white rounded-lg p-6 w-80 space-y-4 shadow-lg mx-2"
+        className="bg-white rounded-lg p-6 w-96 space-y-4 shadow-lg mx-2"
         onClick={handleModalClick}
       >
         <h2 className="text-lg font-semibold text-blue-950">Guests & Rooms</h2>

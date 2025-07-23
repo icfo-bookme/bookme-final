@@ -21,11 +21,11 @@ const DatePickerModal = ({
 
   return (
     <div 
-      className="fixed md:mt-0 inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-2"
       onClick={handleBackdropClick}
     >
       <div 
-        className="bg-white rounded-lg p-4 shadow-lg mx-2 w-full max-w-[20rem] md:max-w-[33rem]"
+        className="bg-white rounded-lg p-2 shadow-lg max-w-[22rem] sm:max-w-[36rem]"
         onClick={handleModalClick}
       >
         <style jsx global>{`
@@ -34,19 +34,20 @@ const DatePickerModal = ({
             border: none;
           }
           .react-datepicker__month-container {
-            padding: 0.3rem;
+            padding: 0.2rem;
           }
           .react-datepicker__header {
-            padding: 0.3rem;
+            padding: 0.2rem;
             background-color: white;
             border-bottom: 1px solid #eee;
           }
           .react-datepicker__day-name,
           .react-datepicker__day {
-            width: 1.7rem;
-            line-height: 1.7rem;
+            width: 1.5rem;
+            line-height: 1.5rem;
             margin: 0.1rem;
             font-weight: 500;
+            font-size: 0.75rem;
           }
           .react-datepicker__day--selected,
           .react-datepicker__day--in-selecting-range,
@@ -58,28 +59,38 @@ const DatePickerModal = ({
             background-color: #3b82f6;
           }
           .react-datepicker__navigation {
-            top: 8px;
+            top: 6px;
           }
-          @media (max-width: 768px) {
-            .react-datepicker {
-              font-size: 0.9rem;
-            }
+          .react-datepicker__month {
+            margin: 0;
+          }
+
+          /* Small devices (sm: 640px and up) */
+          @media (min-width: 640px) {
             .react-datepicker__month-container {
-              padding: 0.5rem;
+              float: left;
+              width: 50%;
             }
             .react-datepicker__day-name,
             .react-datepicker__day {
-              width: 2.1rem;
-              line-height: 1.5rem;
+              width: 1.8rem;
+              line-height: 1.8rem;
+              font-size: 0.8rem;
             }
-            .react-datepicker__navigation {
-              top: 7px;
+          }
+
+          /* Mobile devices */
+          @media (max-width: 639px) {
+            .react-datepicker {
+              width: 100%;
             }
-            .react-datepicker__month {
-              margin: 0;
+            .react-datepicker__month-container {
+              width: 100%;
             }
-            .react-datepicker__header {
-              padding: 0.5rem;
+            .react-datepicker__day-name,
+            .react-datepicker__day {
+              width: 2rem;
+              line-height: 2rem;
             }
           }
         `}</style>
@@ -93,22 +104,22 @@ const DatePickerModal = ({
           monthsShown={2}
           inline
           className="border-0"
-          calendarClassName="w-full"
+          calendarClassName="flex flex-wrap"
           wrapperClassName="w-full"
         />
 
-        <div className="flex justify-between mt-4">
+        <div className="flex justify-between mt-3 px-1">
           <button
             type="button"
             onClick={() => setShowDatePicker(false)}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+            className="px-3 py-1.5 text-sm bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={() => setShowDatePicker(false)}
-            className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors"
+            className="px-3 py-1.5 text-sm bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors"
           >
             Apply
           </button>

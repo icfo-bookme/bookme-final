@@ -3,9 +3,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import getDestination from "@/services/hotel/getDestination";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+
 import SearchButton from "../../../utils/SearchButton";
+import DatePickerModal from "@/utils/DatePickerModal";
+import GuestModal from "@/utils/GuestModal";
 
 const HotelSearch = () => {
   const router = useRouter();
@@ -21,16 +22,12 @@ const HotelSearch = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
 
-  const datePickerRef = useRef(null);
-  const guestModalRef = useRef(null);
   const searchRef = useRef(null);
 
   const today = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(today.getDate() + 1);
 
-  const [checkinDate, setCheckinDate] = useState(today);
-  const [checkoutDate, setCheckoutDate] = useState(tomorrow);
   const [dateRange, setDateRange] = useState([today, tomorrow]);
 
   useEffect(() => {
@@ -53,15 +50,9 @@ const HotelSearch = () => {
     fetchData();
   }, []);
 
-  // Close dropdowns/modals when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showDatePicker && datePickerRef.current && !datePickerRef.current.contains(event.target)) {
-        setShowDatePicker(false);
-      }
-      if (showGuestModal && guestModalRef.current && !guestModalRef.current.contains(event.target)) {
-        setShowGuestModal(false);
-      }
       if (showSuggestions && searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
       }
@@ -69,9 +60,9 @@ const HotelSearch = () => {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showDatePicker, showGuestModal, showSuggestions]);
+  }, [showSuggestions]);
 
-  const guestText = `${adults} Adult${adults > 1 ? "s" : ""}, ${rooms} Room${rooms > 1 ? "s" : ""}`;
+  const guestText = `${adults} Adult${adults > 1 ? "s" : ""}${children > 0 ? `, ${children} Child${children > 1 ? "ren" : ""}` : ""}, ${rooms} Room${rooms > 1 ? "s" : ""}`;
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
@@ -80,22 +71,19 @@ const HotelSearch = () => {
     setSelectedLocationId(""); // Clear selected location when typing
   };
 
-const handleSearchFocus = () => {
-  if (isFirstInputInteraction) {
-    setIsFirstInputInteraction(false);
-
-    // Clear input and show all suggestions
-    setSearchQuery("");
-    setSelectedLocationId("");
-    setSuggestions(destinations); // show full list immediately
-  } else {
-    // show suggestions for current input
-    updateSuggestions(searchQuery);
-  }
-
-  setShowSuggestions(true);
-};
-
+  const handleSearchFocus = () => {
+    if (isFirstInputInteraction) {
+      setIsFirstInputInteraction(false);
+      // Clear input and show all suggestions
+      setSearchQuery("");
+      setSelectedLocationId("");
+      setSuggestions(destinations); // show full list immediately
+    } else {
+      // show suggestions for current input
+      updateSuggestions(searchQuery);
+    }
+    setShowSuggestions(true);
+  };
 
   const updateSuggestions = (query) => {
     const queryLower = query.toLowerCase();
@@ -125,11 +113,11 @@ const handleSearchFocus = () => {
     }
 
     const query = new URLSearchParams({
-      checkin: checkinDate.toISOString().split("T")[0],
-      checkout: checkoutDate.toISOString().split("T")[0],
+      checkin: dateRange[0].toISOString().split("T")[0],
+      checkout: dateRange[1] ? dateRange[1].toISOString().split("T")[0] : "",
       locationID: String(selectedLocationId),
       rooms: String(rooms),
-      child_ages: "",
+      child_ages: Array(children).fill(0).join(","),
       adult: String(adults),
     }).toString();
 
@@ -138,19 +126,15 @@ const handleSearchFocus = () => {
 
   const handleDateChange = (update) => {
     setDateRange(update);
-    if (update[0]) setCheckinDate(update[0]);
-    if (update[1]) setCheckoutDate(update[1]);
   };
 
-  const applyDateSelection = () => setShowDatePicker(false);
-
   const formatDate = (date) =>
-    date.toLocaleDateString("en-US", {
+    date?.toLocaleDateString("en-US", {
       weekday: "short",
       month: "short",
       day: "numeric",
       year: "2-digit",
-    }).replace(",", "");
+    }).replace(",", "") || "";
 
   return (
     <div className="bg-white max-w-5xl mx-auto pb-6 text-blue-950 relative">
@@ -189,7 +173,7 @@ const handleSearchFocus = () => {
               onClick={() => setShowDatePicker(true)}
               className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white text-sm sm:text-base text-blue-950 font-bold"
             >
-              {formatDate(checkinDate)}
+              {formatDate(dateRange[0])}
             </div>
           </div>
 
@@ -200,7 +184,7 @@ const handleSearchFocus = () => {
               onClick={() => setShowDatePicker(true)}
               className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white text-sm sm:text-base text-blue-950 font-bold"
             >
-              {formatDate(checkoutDate)}
+              {formatDate(dateRange[1])}
             </div>
           </div>
 
@@ -217,78 +201,26 @@ const handleSearchFocus = () => {
         </div>
 
         {/* Date Picker Modal */}
+        <div className="lg:w-9">
         {showDatePicker && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div ref={datePickerRef} className="bg-white rounded-lg p-4 shadow-lg mx-2 w-full max-w-[33rem]">
-              <DatePicker
-                selectsRange
-                startDate={dateRange[0]}
-                endDate={dateRange[1]}
-                onChange={handleDateChange}
-                minDate={new Date()}
-                monthsShown={2}
-                inline
-              />
-              <div className="flex justify-between mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowDatePicker(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={applyDateSelection}
-                  className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800"
-                >
-                  Apply
-                </button>
-              </div>
-            </div>
-          </div>
+          <DatePickerModal
+            dateRange={dateRange}
+            handleDateChange={handleDateChange}
+            setShowDatePicker={setShowDatePicker}
+          />
         )}
-
+</div>
         {/* Guest Modal */}
         {showGuestModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div ref={guestModalRef} className="bg-white rounded-lg p-6 w-80 space-y-4 shadow-lg">
-              <h2 className="text-lg font-semibold text-blue-950">Guests & Rooms</h2>
-              {[["Adults", adults, setAdults, 1], ["Children", children, setChildren, 0], ["Rooms", rooms, setRooms, 1]].map(
-                ([label, count, setter, min]) => (
-                  <div key={label} className="flex justify-between items-center">
-                    <span className="text-sm sm:text-base">{label}</span>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        type="button"
-                        onClick={() => setter(Math.max(count - 1, min))}
-                        className="w-8 h-8 rounded bg-gray-200 text-gray-800 text-xl flex items-center justify-center"
-                      >
-                        −
-                      </button>
-                      <span className="w-6 text-center text-sm sm:text-base">{count}</span>
-                      <button
-                        type="button"
-                        onClick={() => setter(count + 1)}
-                        className="w-8 h-8 rounded bg-gray-200 text-gray-800 text-xl flex items-center justify-center"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                )
-              )}
-              <div className="text-right">
-                <button
-                  type="button"
-                  onClick={() => setShowGuestModal(false)}
-                  className="mt-4 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          </div>
+          <GuestModal
+            adults={adults}
+            setAdults={setAdults}
+            childrenNumber={children}
+            setChildren={setChildren}
+            rooms={rooms}
+            setRooms={setRooms}
+            setShowGuestModal={setShowGuestModal}
+          />
         )}
 
         {/* Search Button */}

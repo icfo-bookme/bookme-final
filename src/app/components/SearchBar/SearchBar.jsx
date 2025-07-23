@@ -17,7 +17,7 @@ const TravelBookingTabs = () => {
   return (
     <div className=" bg-white shadow-lg border rounded-lg text-blue-950">
       {/* Tabs Navigation - Responsive layout */}
-      <div className="flex lg:w-[50%] border-b">
+      <div className="flex lg:w-[35%] border-b">
         <TabButton
           icon={<FaHotel />}
           active={activeTab === "hotel"}
@@ -26,13 +26,7 @@ const TravelBookingTabs = () => {
           Hotel
         </TabButton>
         
-        <TabButton
-          icon={<FaPlaneDeparture />}
-          active={activeTab === "flight"}
-          onClick={() => setActiveTab("flight")}
-        >
-          Flight
-        </TabButton>
+       
         <TabButton
           icon={<FaMapMarkedAlt />}
           active={activeTab === "tour"}
