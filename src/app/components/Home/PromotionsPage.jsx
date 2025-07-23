@@ -10,6 +10,7 @@ import "swiper/css/navigation";
 import "swiper/css/free-mode";
 import { TailSpin } from "react-loader-spinner";
 import { Roboto } from "next/font/google";
+import LoadingSpinner from "@/utils/LoadingSpinner";
 const roboto = Roboto({ subsets: ["latin"], weight: ["400"] });
 
 export default function PromotionsPage() {
@@ -79,7 +80,7 @@ export default function PromotionsPage() {
 
     return (
         <div className={`${roboto.className} bg-white w-full mx-auto   max-w-7xl`}>
-            <div className="w-full text-center mb-8 md:mb-12">
+            <div className="w-full text-center mb-5">
                 <h2 className="text-xl md:text-2xl font-bold text-blue-800 mb-2">
                     Save & Explore Global Destinations!
                 </h2>
@@ -88,7 +89,7 @@ export default function PromotionsPage() {
 
             {loading ? (
                 <div className="flex justify-center items-center h-[300px]">
-                    <TailSpin height="60" width="60" color="#0678B4" ariaLabel="loading" />
+                    <LoadingSpinner height="60" width="60" color="#0678B4" ariaLabel="loading" />
                 </div>
             ) : error ? (
                 <div className="text-center py-10 text-red-500">
@@ -174,7 +175,7 @@ export default function PromotionsPage() {
                         className="w-full md:w-[90%] lg:w-[89%] mx-auto"
                     >
                         {promotions.slice(0, 12).map((promo) => (
-                            <SwiperSlide key={promo.id} className="pb-10 h-auto">
+                            <SwiperSlide key={promo.id} className=" h-auto">
                                 <div className="relative rounded-xl overflow-hidden shadow-lg h-72 group">
                                     <div className="absolute inset-0">
                                         <Image

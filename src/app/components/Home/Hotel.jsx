@@ -82,10 +82,10 @@ export default function Hotel() {
     };
 
     return (
-        <div className={`${roboto.className} bg-white w-full mx-auto sm:px-6 py-6 md:py-10 lg:py-12 max-w-7xl`}>
-            <div className="w-full text-center mb-8 md:mb-12">
+        <div className={`${roboto.className} bg-white w-full mx-auto  max-w-7xl`}>
+            <div className="w-full text-center mb-5">
                 <h2 className="text-xl md:text-2xl font-bold text-[#00026E] mb-2">
-                    POPULAR HOTELS
+                    POPULAR HOTELS & RESORTS
                 </h2>
                 <div className="w-20 h-1 bg-[#0678B4] mx-auto"></div>
             </div>
@@ -178,7 +178,7 @@ export default function Hotel() {
                         className="w-full md:w-[90%] lg:w-[89%] mx-auto"
                     >
                         {data.map((hotel) => (
-                            <SwiperSlide key={hotel.hotel_id} className="pb-10 h-auto">
+                            <SwiperSlide key={hotel.hotel_id} className=" h-auto">
                                 <div className="relative rounded-xl overflow-hidden shadow-lg h-full group flex flex-col">
                                     <div className="relative h-48 sm:h-56 md:h-64 lg:h-64 w-full bg-gray-200">
                                         {/* Replace with actual image when available */}

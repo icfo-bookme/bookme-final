@@ -73,8 +73,8 @@ export default function Visa() {
     };
 
     return (
-        <div className="bg-white w-full mx-auto  sm:px-6 py-6 md:py-10 lg:py-12 max-w-7xl">
-            <div className="w-full text-center mb-8 md:mb-12">
+        <div className="bg-white w-full mx-auto pt-6  max-w-7xl">
+            <div className="w-full text-center mb-5">
                 <h2 className="text-xl md:text-2xl font-bold text-[#00026E] mb-2">
                     Popular Visa Destinations
                 </h2>
@@ -165,7 +165,7 @@ export default function Visa() {
                         className="w-full md:w-[90%] lg:w-[89%] mx-auto"
                     >
                         {visaData.slice(0,12).map((country) => (
-                            <SwiperSlide key={country.id} className="pb-2 h-auto">
+                            <SwiperSlide key={country.id} className=" h-auto">
                                 <div className="shadow-custom flex flex-col gap-4 rounded-lg bg-white h-full transition-all duration-300 hover:shadow-lg hover:translate-y-[-4px]">
                                     <div className="w-full h-[180px] sm:h-[200px] md:h-[220px] lg:h-[240px] relative rounded-t-lg overflow-hidden">
                                         <Image
