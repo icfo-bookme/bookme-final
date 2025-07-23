@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import SearchField from "../../../utils/SearchField";
 import SearchButton from "../../../utils/SearchButton";
 import getTourDestination from "@/services/getTourDestination";
-import LoadingSpinner from "@/utils/LoadingSpinner";
 import { useRouter } from "next/navigation";
 
 const TourSearch = () => {
   const router = useRouter();
   const [destinations, setDestinations] = useState([]);
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocationId, setSelectedLocationId] = useState("");
   const [error, setError] = useState(null);
@@ -22,7 +20,7 @@ const TourSearch = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        
+
         const response = await getTourDestination();
 
         if (response?.success) {
@@ -103,8 +101,7 @@ const TourSearch = () => {
     setSelectedLocationId(destination.id);
     setShowSuggestions(false);
   };
-
-
+  
   if (error) return <div className="text-red-500 p-4">{error}</div>;
 
   return (

@@ -202,14 +202,14 @@ const HotelSearch = () => {
 
         {/* Date Picker Modal */}
         <div className="lg:w-9">
-        {showDatePicker && (
-          <DatePickerModal
-            dateRange={dateRange}
-            handleDateChange={handleDateChange}
-            setShowDatePicker={setShowDatePicker}
-          />
-        )}
-</div>
+          {showDatePicker && (
+            <DatePickerModal
+              dateRange={dateRange}
+              handleDateChange={handleDateChange}
+              setShowDatePicker={setShowDatePicker}
+            />
+          )}
+        </div>
         {/* Guest Modal */}
         {showGuestModal && (
           <GuestModal

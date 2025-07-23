@@ -45,7 +45,7 @@ export default async function Home() {
   return (
     <main className={`${roboto.className} bg-white`}>
       {/* Hero Section */}
-      <section className="relative w-full min-h-[70vh] sm:min-h-[75vh] md:min-h-[60vh] ">
+      <section className="relative w-full min-h-[60vh]  md:min-h-[60vh] ">
         {/* Banner Background */}
         <div className="absolute inset-0 z-0">
           <Banner />
