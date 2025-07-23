@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import LoadingSpinner from '@/utils/LoadingSpinner';
 
 const HotelListPage = () => {
   return (
@@ -231,11 +232,7 @@ const HotelListContent = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:pt-28 bg-white text-blue-950">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      </div>
+      <LoadingSpinner></LoadingSpinner>
     );
   }
 
