@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import SearchBar from '@/app/components/hotel/SearchBar';
+import SearchBar from '@/app/components/hotel/HotelListingSearch/SearchBar';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
