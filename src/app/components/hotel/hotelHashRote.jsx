@@ -168,11 +168,10 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
                   key={item.id}
                   href={`#${item.id}`}
                   onClick={(e) => handleNavClick(item.id, e)}
-                  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
-                    activeSection === item.id
+                  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${activeSection === item.id
                       ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-inner'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-                  }`}
+                    }`}
                 >
                   <i className={`fa-solid ${item.icon} text-xs`}></i>
                   {item.label}
@@ -184,7 +183,7 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
       </div>
 
       {/* Main Layout - Responsive grid */}
-      <section 
+      <section
         ref={(el) => (sectionsRef.current['overview'] = el)}
         id="overview"
         className="scroll-mt-24"
@@ -243,9 +242,9 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
       </section>
 
       {/* Rooms Section */}
-      <section 
+      <section
         ref={(el) => (sectionsRef.current['rooms'] = el)}
-        id="rooms" 
+        id="rooms"
         className="scroll-mt-24 mt-6"
       >
         <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
@@ -258,9 +257,9 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
       </section>
 
       {/* Nearby Locations Section */}
-      <section 
+      <section
         ref={(el) => (sectionsRef.current['nearby'] = el)}
-        id="nearby" 
+        id="nearby"
         className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 sm:p-6 scroll-mt-24 mt-6"
       >
         <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -293,9 +292,9 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
       </section>
 
       {/* Facilities Section */}
-      <section 
+      <section
         ref={(el) => (sectionsRef.current['facilities'] = el)}
-        id="facilities" 
+        id="facilities"
         className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24 mt-6"
       >
         <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
@@ -306,9 +305,9 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
       </section>
 
       {/* Policies Section */}
-      <section 
+      <section
         ref={(el) => (sectionsRef.current['policy'] = el)}
-        id="policy" 
+        id="policy"
         className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24 mt-6 mb-8"
       >
         <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">

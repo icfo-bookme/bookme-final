@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import SearchField from "./SearchField";
-import SearchButton from "./SearchButton";
+import SearchField from "../../../utils/SearchField";
+import SearchButton from "../../../utils/SearchButton";
 
 const VisaSearch = () => {
   const [nationality, setNationality] = useState("Bangladeshi");

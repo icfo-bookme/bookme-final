@@ -18,7 +18,7 @@ export default function HotelDetails({ hotel }) {
                         <span>{hotel.star} star</span>
                     </div>
                     <p className="text-gray-600 text-xs flex items-center gap-1">
-                        <i className="fa-solid fa-location-dot text-gray-400 text-xs"></i>
+                        <i className="fa-solid fa-location-dot text-gray-600 text-xs"></i>
                         <span>{hotel.location}</span>
                     </p>
                 </div>
@@ -26,12 +26,12 @@ export default function HotelDetails({ hotel }) {
                 {/* Nearby locations section */}
                 {nearbyLocations.length > 0 && (
                     <div className="mt-5">
-                        <h3 className="text-sm font-semibold text-gray-600 mb-1">Nearby Locations:</h3>
+                        <h3 className="text-sm font-semibold text-blue-950 mb-2">Nearby Locations:</h3>
                         <ul className="text-xs text-gray-600 space-y-1 ml-3">
                             {nearbyLocations.map((location, index) => (
-                                <li key={index} className="flex items-start gap-1">
-                                    <i className="fa-solid fa-location-dot text-gray-400 text-xs"></i>
-                                    <span>{location}</span>
+                                <li key={index} className="flex items-start gap-1 ">
+                                    <i className="fa-solid fa-location-dot text-gray-600 text-sm"></i>
+                                    <span className="text-gray-600">{location}</span>
                                 </li>
                             ))}
                         </ul>

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import getDestination from "@/services/hotel/getDestination";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import SearchButton from "./SearchButton";
+import SearchButton from "../../../utils/SearchButton";
 
 const HotelSearch = () => {
   const router = useRouter();

@@ -1,6 +1,6 @@
 "use client";
-import SearchField from "./SearchField";
-import SearchButton from "./SearchButton";
+import SearchField from "../../../utils/SearchField";
+import SearchButton from "../../../utils/SearchButton";
 
 const TourSearch = () => (
   <div className="bg-white max-w-5xl">

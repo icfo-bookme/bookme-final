@@ -1,6 +1,6 @@
 "use client";
-import SearchField from "./SearchField";
-import SearchButton from "./SearchButton";
+import SearchField from "../../../utils/SearchField";
+import SearchButton from "../../../utils/SearchButton";
 
 const FlightSearch = () => (
   <div className="bg-white   mx-auto pb-6 rounded-lg  text-blue-950">
