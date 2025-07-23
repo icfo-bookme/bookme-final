@@ -50,7 +50,7 @@ const MobileSearchForm = ({
             onChange={handleSearchChange}
             onFocus={handleSearchFocus}
             placeholder="Search destinations..."
-            className="p-3 h-8 border border-gray-300 rounded-lg focus:border-blue-900 focus:ring-0 transition-colors  w-full text-blue-950"
+            className="p-3 h-8 border border-gray-300 rounded-lg focus:border-blue-900 focus:ring-0 transition-colors  bg-gray-200 w-full text-blue-950"
           />
           {showSuggestions && suggestions.length > 0 && (
             <div className="absolute z-10 mt-1 w-full  border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
