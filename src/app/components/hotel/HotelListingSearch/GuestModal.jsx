@@ -3,7 +3,7 @@ import React from "react";
 const GuestModal = ({
   adults,
   setAdults,
-  children,
+  childrenNumber,
   setChildren,
   rooms,
   setRooms,
@@ -15,7 +15,7 @@ const GuestModal = ({
         <h2 className="text-lg font-semibold text-blue-950">Guests & Rooms</h2>
         {[
           { label: "Adults", count: adults, setter: setAdults, min: 1 },
-          { label: "Children", count: children, setter: setChildren, min: 0 },
+          { label: "Children", count: childrenNumber, setter: setChildren, min: 0 },
           { label: "Rooms", count: rooms, setter: setRooms, min: 1 }
         ].map(({ label, count, setter, min }) => (
           <div key={label} className="flex justify-between items-center">
@@ -31,7 +31,7 @@ const GuestModal = ({
               <span className="w-6 text-center">{count}</span>
               <button
                 type="button"
-                onClick={() => setter(count + 1)}
+                onClick={() => setter(+count + 1)}
                 className="w-8 h-8 rounded bg-gray-200 text-gray-800 text-xl flex items-center justify-center hover:bg-gray-300"
               >
                 +

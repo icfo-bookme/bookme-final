@@ -245,7 +245,7 @@ const SearchBar = ({ initialValues }) => {
         <GuestModal
           adults={adults}
           setAdults={setAdults}
-          children={children}
+          childrenNumber={children}
           setChildren={setChildren}
           rooms={rooms}
           setRooms={setRooms}

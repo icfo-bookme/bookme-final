@@ -15,10 +15,7 @@ const SearchForm = ({
   handleSearch,
   formatDate,
 }) => {
-  // ✅ Console here
-  console.log("Select Destination Function:", searchQuery);
-
-  // ✅ Default fallback formatDate
+ 
   const displayDate = formatDate || ((date) =>
     date.toLocaleDateString("en-US", {
       weekday: "short",
@@ -42,7 +39,7 @@ const SearchForm = ({
             onChange={handleSearchChange}
             onFocus={handleSearchFocus}
             placeholder="Search destinations..."
-            className="p-3 h-14 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors bg-white w-full text-blue-950 text-lg"
+            className="p-3 h-14 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors  w-full text-blue-950 text-lg"
           />
           {showSuggestions && suggestions.length > 0 && (
             <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
