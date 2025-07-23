@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 
 const SearchForm = ({
   searchQuery,
   handleSearchChange,
   handleSearchFocus,
   showSuggestions,
+  setShowSuggestions, // Add this prop
   suggestions,
   selectDestination,
   checkinDate,
@@ -15,7 +16,28 @@ const SearchForm = ({
   handleSearch,
   formatDate,
 }) => {
- 
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(event.target) &&
+        inputRef.current && 
+        !inputRef.current.contains(event.target)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [setShowSuggestions]);
+
   const displayDate = formatDate || ((date) =>
     date.toLocaleDateString("en-US", {
       weekday: "short",
@@ -25,40 +47,45 @@ const SearchForm = ({
     }).replace(",", "")
   );
 
+  const handleDestinationClick = (destination) => {
+    selectDestination(destination);
+    setShowSuggestions(false);
+  };
+
   return (
     <form onSubmit={handleSearch} className="w-full hidden md:block">
       <div className="flex flex-col md:flex-row gap-4 items-center w-full">
         {/* Destination Input */}
-        <div className="w-full md:w-2/5 relative">
+        <div className="w-full md:w-2/5 relative" ref={dropdownRef}>
           <label className="block text-xs font-medium text-gray-500 mb-1 uppercase">
             CITY/HOTEL/RESORT/AREA
           </label>
           <input
+            ref={inputRef}
             type="text"
             value={searchQuery}
             onChange={handleSearchChange}
             onFocus={handleSearchFocus}
             placeholder="Search destinations..."
-            className="p-3 h-14 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors  w-full text-blue-950 text-lg"
+            className="p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg"
           />
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-              {suggestions.map((destination) => (
-                <div
-                  key={destination.id}
-                  className="p-3 hover:bg-blue-50 cursor-pointer text-lg"
-                  onClick={() => selectDestination(destination)}
-                >
-                  {destination.name}, {destination.country}
+          {showSuggestions && (
+            <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+              {suggestions.length > 0 ? (
+                suggestions.map((destination) => (
+                  <div
+                    key={destination.id}
+                    className="p-3 hover:bg-blue-50 font-bold cursor-pointer text-lg"
+                    onClick={() => handleDestinationClick(destination)}
+                  >
+                    {destination.name}, {destination.country}
+                  </div>
+                ))
+              ) : (
+                <div className="p-3 text-lg text-gray-500">
+                  No destinations found
                 </div>
-              ))}
-            </div>
-          )}
-          {showSuggestions && suggestions.length === 0 && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg">
-              <div className="p-3 text-lg text-gray-500">
-                No destinations found
-              </div>
+              )}
             </div>
           )}
         </div>
@@ -70,9 +97,9 @@ const SearchForm = ({
           </label>
           <div
             onClick={() => setShowDatePicker(true)}
-            className="p-3 h-14 border border-gray-300 rounded-lg flex flex-col justify-center cursor-pointer hover:border-blue-900"
+            className="p-3 h-12 font-bold border border-gray-300 rounded-lg flex flex-col justify-center cursor-pointer hover:border-blue-900"
           >
-            <span className="text-lg font-medium">{displayDate(checkinDate)}</span>
+            <span className="text-lg font-bold">{displayDate(checkinDate)}</span>
           </div>
         </div>
 
@@ -83,9 +110,9 @@ const SearchForm = ({
           </label>
           <div
             onClick={() => setShowDatePicker(true)}
-            className="p-3 h-14 border border-gray-300 rounded-lg flex flex-col justify-center cursor-pointer hover:border-blue-900"
+            className="p-3 h-12 font-bold border border-gray-300 rounded-lg flex flex-col justify-center cursor-pointer hover:border-blue-900"
           >
-            <span className="text-lg font-medium">{displayDate(checkoutDate)}</span>
+            <span className="text-lg font-bold">{displayDate(checkoutDate)}</span>
           </div>
         </div>
 
@@ -96,9 +123,9 @@ const SearchForm = ({
           </label>
           <div
             onClick={() => setShowGuestModal(true)}
-            className="p-3 h-14 border border-gray-300 rounded-lg hover:border-blue-900 transition-colors bg-white w-full flex items-center cursor-pointer"
+            className="p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-900 transition-colors bg-white w-full flex items-center cursor-pointer"
           >
-            <span className="text-lg font-medium">{guestText}</span>
+            <span className="text-lg font-bold">{guestText}</span>
           </div>
         </div>
 
@@ -109,7 +136,7 @@ const SearchForm = ({
               background: "linear-gradient(90deg, #313881, #0678B4)",
             }}
             type="submit"
-            className="w-full h-14 text-lg px-4 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"
+            className="w-full h-12 text-lg px-4 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"
           >
             Modify Search
           </button>

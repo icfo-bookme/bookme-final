@@ -213,6 +213,7 @@ const SearchBar = ({ initialValues }) => {
         guestText={guestText}
         setShowGuestModal={setShowGuestModal}
         handleSearch={handleSearch}
+        setShowSuggestions={setShowSuggestions}
       />
 
       {showMobileSearch && (

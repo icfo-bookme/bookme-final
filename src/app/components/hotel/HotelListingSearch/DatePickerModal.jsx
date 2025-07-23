@@ -7,9 +7,27 @@ const DatePickerModal = ({
   handleDateChange,
   setShowDatePicker
 }) => {
+  // Close modal when clicking on backdrop
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setShowDatePicker(false);
+    }
+  };
+
+  // Prevent closing when clicking inside modal
+  const handleModalClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="fixed md:mt-0 inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-4 shadow-lg mx-2 w-full max-w-[20rem] md:max-w-[33rem]">
+    <div 
+      className="fixed md:mt-0 inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+      onClick={handleBackdropClick}
+    >
+      <div 
+        className="bg-white rounded-lg p-4 shadow-lg mx-2 w-full max-w-[20rem] md:max-w-[33rem]"
+        onClick={handleModalClick}
+      >
         <style jsx global>{`
           .react-datepicker {
             font-size: 0.85rem;
