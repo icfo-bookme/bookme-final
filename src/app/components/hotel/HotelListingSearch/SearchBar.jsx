@@ -42,13 +42,13 @@ const SearchBar = ({ initialValues }) => {
 
   const guestText = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Adult${adults > 1 ? 's' : ''}`;
 
-  // ✅ Destination name finder
+  // Destination name finder
   const getDestinationNameById = (locationID) => {
     const destination = destinations.find(d => d.id === locationID);
     return destination ? `${destination.name}, ${destination.country}` : "Edit Search Information";
   };
 
-  // ✅ Fetch destinations only once
+  // Fetch destinations
   useEffect(() => {
     const fetchDestinations = async () => {
       setIsLoading(true);
@@ -56,12 +56,11 @@ const SearchBar = ({ initialValues }) => {
         const data = await getDestination();
         setDestinations(data);
 
-        // ✅ Check if there's a matching initial location
         if (initialValues?.locationID) {
           const selected = data.find(d => String(d.id) === String(initialValues.locationID));
           if (selected) {
             setSelectedDestination(selected);
-            setSearchQuery(`${selected.name}, ${selected.country}`); // ✅ Set visible value
+            setSearchQuery(`${selected.name}, ${selected.country}`);
             setSelectedLocationId(selected.id);
           }
         }
@@ -77,28 +76,59 @@ const SearchBar = ({ initialValues }) => {
     fetchDestinations();
   }, [initialValues?.locationID]);
 
-  // ✅ Check if at least 2 consecutive characters match
-  const hasConsecutiveMatch = (query, text) => {
+  // Advanced fuzzy matching with scoring
+  const calculateMatchScore = (destination, query) => {
     const queryLower = query.toLowerCase();
-    const textLower = text.toLowerCase();
+    const fullText = `${destination.name}, ${destination.country}`.toLowerCase();
     
-    // If query is too short, only check full inclusion
-    if (queryLower.length < 2) {
-      return textLower.includes(queryLower);
-    }
+    // If query is empty, return lowest priority
+    if (!queryLower) return 0;
     
-    // Check for at least 2 consecutive matching characters
-    for (let i = 0; i <= queryLower.length - 2; i++) {
-      const pair = queryLower.substr(i, 2);
-      if (textLower.includes(pair)) {
-        return true;
+    // Exact match at start gets highest score
+    if (fullText.startsWith(queryLower)) return 100;
+    
+    // Exact match anywhere gets high score
+    if (fullText.includes(queryLower)) return 90;
+    
+    // Calculate character matches (fuzzy matching)
+    let qIndex = 0;
+    let matchPositions = [];
+    let totalMatches = 0;
+    
+    for (let i = 0; i < fullText.length && qIndex < queryLower.length; i++) {
+      if (fullText[i] === queryLower[qIndex]) {
+        matchPositions.push(i);
+        qIndex++;
+        totalMatches++;
       }
     }
     
-    return false;
+    // No matches found
+    if (totalMatches === 0) return 0;
+    
+    // Calculate score based on:
+    // 1. Percentage of query characters matched
+    const matchPercentage = (totalMatches / queryLower.length) * 50;
+    
+    // 2. How close the matches are (closer = better)
+    const spread = matchPositions.length > 1 ? 
+      matchPositions[matchPositions.length - 1] - matchPositions[0] : 0;
+    const proximityScore = 50 / (spread + 1);
+    
+    // 3. Bonus for matches at word starts
+    let wordStartBonus = 0;
+    const words = fullText.split(/[\s,]+/);
+    words.forEach(word => {
+      if (word.startsWith(queryLower[0])) {
+        wordStartBonus += 10;
+      }
+    });
+    
+    const totalScore = matchPercentage + proximityScore + wordStartBonus;
+    return Math.min(100, Math.round(totalScore));
   };
 
-  // ✅ Search handlers
+  // Search handlers
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -124,12 +154,19 @@ const SearchBar = ({ initialValues }) => {
       return;
     }
     
-    const matched = destinations.filter(dest => {
-      const fullText = `${dest.name}, ${dest.country}`;
-      return hasConsecutiveMatch(query, fullText);
-    });
-    
-    setSuggestions(matched);
+    // Calculate scores for all destinations
+    const scoredDestinations = destinations.map(dest => ({
+      ...dest,
+      score: calculateMatchScore(dest, query)
+    }));
+
+    // Filter and sort by score
+    const matched = scoredDestinations
+      .filter(dest => dest.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    // Always show at least top 5 destinations, even with low scores
+    setSuggestions(matched.length > 0 ? matched.slice(0, 10) : destinations.slice(0, 5));
   };
 
   const selectDestination = (destination) => {
@@ -163,7 +200,7 @@ const SearchBar = ({ initialValues }) => {
     if (update[1]) setCheckoutDate(update[1]);
   };
 
-  // ✅ UI Loading/Error
+  // UI Loading/Error
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl max-w-7xl mx-auto p-4 text-center">
@@ -186,7 +223,6 @@ const SearchBar = ({ initialValues }) => {
     );
   }
 
-  // ✅ Render full SearchBar
   return (
     <div className="bg-white rounded-xl max-w-7xl mx-auto">
       {!showMobileSearch && (

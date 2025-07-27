@@ -54,7 +54,7 @@ const MobileSearchForm = ({
         handleSearch(e);
         setShowMobileSearch(false);
       }} 
-      className="w-full md:hidden p-4 bg-gray-200 rounded-lg"
+      className=" md:hidden w-[95%] mx-auto p-4 bg-gray-200 rounded-lg"
     >
       <div className="flex flex-col gap-4">
         {/* Header with title and close button */}
@@ -84,7 +84,7 @@ const MobileSearchForm = ({
             onChange={handleSearchChange}
             onFocus={handleSearchFocus}
             placeholder="Search destinations..."
-            className="p-3 h-12 border border-gray-300 rounded-lg focus:border-blue-900 focus:ring-0 transition-colors bg-white w-full text-blue-950"
+            className="p-3 h-8 border border-gray-300 rounded-lg focus:border-blue-900 focus:ring-0 transition-colors bg-white w-full text-blue-950"
           />
           {showSuggestions && suggestions.length > 0 && (
             <div 
@@ -113,7 +113,7 @@ const MobileSearchForm = ({
             <button
               type="button"
               onClick={() => setShowDatePicker(true)}
-              className="w-full p-3 h-12 border border-gray-300 rounded-lg flex items-center justify-start text-blue-950 bg-white"
+              className="w-full p-3 h-8 border border-gray-300 rounded-lg flex items-center justify-start text-blue-950 bg-white"
             >
               {formatMobileDate(checkinDate)}
             </button>
@@ -125,7 +125,7 @@ const MobileSearchForm = ({
             <button
               type="button"
               onClick={() => setShowDatePicker(true)}
-              className="w-full p-3 h-12 border border-gray-300 rounded-lg flex items-center justify-start text-blue-950 bg-white"
+              className="w-full p-3 h-8 border border-gray-300 rounded-lg flex items-center justify-start text-blue-950 bg-white"
             >
               {formatMobileDate(checkoutDate)}
             </button>
@@ -138,7 +138,7 @@ const MobileSearchForm = ({
           <button
             type="button"
             onClick={() => setShowGuestModal(true)}
-            className="w-full p-3 h-12 border border-gray-300 rounded-lg flex items-center justify-start text-blue-950 bg-white"
+            className="w-full p-3 h-8 border border-gray-300 rounded-lg flex items-center justify-start text-blue-950 bg-white"
           >
             {guestText}
           </button>
@@ -148,13 +148,13 @@ const MobileSearchForm = ({
           <button
             type="button"
             onClick={() => setShowMobileSearch(false)}
-            className="flex-1 h-12 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+            className="flex-1 h-8 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="flex-1 h-12 px-4 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"
+            className="flex-1 h-8 px-4 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"
           >
             Search
           </button>

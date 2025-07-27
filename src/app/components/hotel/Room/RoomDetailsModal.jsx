@@ -32,30 +32,44 @@ const RoomDetailsModal = ({ room, onClose }) => {
                         </div>
 
                         <hr />
-                        <div className='flex justify-between gap-2'>
-                            <p> <span className='font-semibold text-xs'>Adult Occupancy: </span> {room.max_adults}</p>
-                            <p className='mr-5'> <span className='font-semibold text-xs'>
-                                Complementary Child Occupancy: </span> {room.complementary_child_occupancy}</p>
+                        <div className="flex justify-start gap-2 -mt-5">
+                            <p className="w-[40%]">
+                                <span className="font-bold text-sm">Adult Occupancy: </span> {room.max_adults}
+                            </p>
+                            <p className="w-[60%]">
+                                <span className="font-bold text-sm">Complementary Child Occupancy: </span> {room.complementary_child_occupancy}
+                            </p>
                         </div>
-                        <div className='flex justify-between -mt-5 gap-2'>
-                            <p> <span className='font-semibold text-xs'>On Demand Extra Bed: </span> {room.on_demand_extra_bed}</p>
-                            <p className='mr-5'> <span className='font-semibold text-xs'>
-                                Maximum Number of Guests Allowed: </span> {room.max_guests_allowed}</p>
+
+                        <div className="flex justify-start gap-2 -mt-5">
+                            <p className="w-[40%]">
+                                <span className="font-bold text-sm">On Demand Extra Bed: </span> {room.on_demand_extra_bed}
+                            </p>
+                            <p className="w-[60%]">
+                                <span className="font-bold text-sm">Maximum Number of Guests Allowed: </span> {room.max_guests_allowed}
+                            </p>
                         </div>
                         <hr />
 
-                        <div className='flex justify-between text-xs gap-2'>
-                            <p> <span className='font-semibold text-xs'>Room Type: </span> {room.room_type}</p>
-                            <p className="mr-5 text-xs">
-                                <span className="font-semibold text-xs">Smoking status: </span>
-                                {room.smoking_status == 1 ? "Yes" : "No"}
+
+                        <div className="flex justify-between text-xs gap-2 -mt-5">
+                            <p className="w-[40%]">
+                                <span className="font-semibold text-sm">Room Type: </span> {room.room_type}
+                            </p>
+                            <p className="w-[60%] font-bold text-sm ">
+                                <span className="font-bold text-sm"> </span> {room.smoking_status == 1 ? "Yes" : "Non-Smoking Room"}
                             </p>
                         </div>
-                        <div className='flex justify-between -mt-5 gap-2'>
-                            <p> <span className='font-semibold text-xs'>Room Characteristics: </span> {room.room_characteristics}</p>
-                            <p className='mr-5'> <span className='font-semibold text-xs'>
-                                Room Size: </span> {room.room_size_sqft} Sqft</p>
+
+                        <div className="flex justify-between text-xs gap-2 -mt-5">
+                            <p className="w-[40%]">
+                                <span className="font-bold text-sm">Room View: </span> {room.room_view}
+                            </p>
+                            <p className="w-[60%]">
+                                <span className="font-bold text-sm">Room Size: </span> {room.room_size_sqft} Sqft
+                            </p>
                         </div>
+
                         <hr />
                     </div>
 

@@ -27,6 +27,7 @@ module.exports = {
       fontFamily: {
         heading: ['heading',],
       },
+     
     },
   },
   plugins: [

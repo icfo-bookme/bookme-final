@@ -61,6 +61,48 @@ const VisaSearch = () => {
     router.push(`/visa/${selectedLocationId}`);
   };
 
+  const calculateMatchScore = (destination, query) => {
+    const queryLower = query.toLowerCase();
+    const fullText = destination.name.toLowerCase();
+    
+    // Exact match at start gets highest score
+    if (fullText.startsWith(queryLower)) {
+      return 100;
+    }
+    
+    // Contains the query as substring
+    if (fullText.includes(queryLower)) {
+      return 90;
+    }
+    
+    // Check if at least 2 characters match in order (fuzzy match)
+    let matchedChars = 0;
+    let lastMatchPos = -1;
+    
+    for (let qIndex = 0; qIndex < queryLower.length; qIndex++) {
+      const char = queryLower[qIndex];
+      const foundPos = fullText.indexOf(char, lastMatchPos + 1);
+      
+      if (foundPos > -1) {
+        matchedChars++;
+        lastMatchPos = foundPos;
+      }
+    }
+    
+    // If at least 2 characters matched in order
+    if (matchedChars >= 2) {
+      // Calculate score based on how many characters matched and how close they are
+      const charMatchRatio = matchedChars / queryLower.length;
+      const spread = lastMatchPos - fullText.indexOf(queryLower[0]);
+      const proximityScore = spread > 0 ? (1 / spread) : 1;
+      
+      return 50 + (50 * charMatchRatio * proximityScore);
+    }
+    
+    // No match
+    return 0;
+  };
+
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -81,17 +123,22 @@ const VisaSearch = () => {
   };
 
   const updateSuggestions = (query) => {
-    const queryLower = query.toLowerCase();
-    const matched = destinations.filter((dest) => {
-      const fullName = dest.name.toLowerCase();
-      let qIndex = 0;
-      for (let i = 0; i < fullName.length && qIndex < queryLower.length; i++) {
-        if (fullName[i] === queryLower[qIndex]) qIndex++;
-      }
-      return qIndex === queryLower.length;
-    });
+    if (!query || query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
 
-    setSuggestions(query.length === 0 ? destinations : matched);
+    const scoredDestinations = destinations.map(dest => ({
+      ...dest,
+      score: calculateMatchScore(dest, query)
+    }));
+
+    // Filter out destinations with score 0 and sort by score descending
+    const matched = scoredDestinations
+      .filter(dest => dest.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    setSuggestions(matched);
   };
 
   const selectDestination = (destination) => {
@@ -133,8 +180,18 @@ const VisaSearch = () => {
                     aria-selected={selectedLocationId === destination.id}
                   >
                     {destination.name}
+                    {destination.score && (
+                      <span className="text-xs text-gray-500 ml-2">
+                        ({Math.round(destination.score)}% match)
+                      </span>
+                    )}
                   </div>
                 ))}
+              </div>
+            )}
+            {showSuggestions && searchQuery.length >= 2 && suggestions.length === 0 && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-sm text-gray-500">
+                No matching destinations found
               </div>
             )}
           </div>

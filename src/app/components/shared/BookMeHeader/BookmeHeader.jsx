@@ -103,7 +103,7 @@ const BookMeHeader = () => {
               {/* Desktop Navigation */}
               <div className="hidden lg:flex items-center gap-6">
                 <Link
-                  href="/contact"
+                  href="/hotel"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
                   HOTEL
@@ -278,7 +278,7 @@ const BookMeHeader = () => {
                 <ul className="space-y-1 px-2">
                   <li>
                     <Link
-                      href="/contact"
+                      href="/hotel"
                       className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                       onClick={closeMobileMenu}
                     >

@@ -9,7 +9,7 @@ import HotelDetails from './hoteldetails';
 
 export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
   const [hotelDetails, setHotelDetails] = useState(initialHotelDetails);
-  const [activeSection, setActiveSection] = useState('overview');
+  const [activeSection, setActiveSection] = useState('Summary');
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(!initialHotelDetails);
@@ -76,7 +76,7 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
     });
 
     const handleInitialHash = () => {
-      const hash = window.location.hash.substring(1) || 'overview';
+      const hash = window.location.hash.substring(1) || 'Summary';
       if (sectionsRef.current[hash]) {
         setTimeout(() => scrollToSection(hash, false), 100);
       }
@@ -136,7 +136,7 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
     : [];
 
   const navItems = [
-    { id: 'overview', label: 'Overview', icon: 'fa-info-circle' },
+    { id: 'Summary', label: 'Summary', icon: 'fa-info-circle' },
     { id: 'rooms', label: 'Rooms', icon: 'fa-bed' },
     { id: 'nearby', label: "What's Nearby", icon: 'fa-location-dot' },
     { id: 'facilities', label: 'Facilities', icon: 'fa-wifi' },
@@ -184,8 +184,8 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
 
       {/* Main Layout - Responsive grid */}
       <section
-        ref={(el) => (sectionsRef.current['overview'] = el)}
-        id="overview"
+        ref={(el) => (sectionsRef.current['Summary'] = el)}
+        id="Summary"
         className="scroll-mt-24"
       >
         <div className="p-2 md:p-4 rounded-lg mx-auto grid grid-cols-1 bg-white md:grid-cols-10 gap-4">
@@ -201,18 +201,24 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
         <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm mt-4">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Hotel Description</h1>
           <div className='flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6'>
-            <div className='rounded-lg flex items-center gap-1 font-medium'>
-              <i className="fa-solid fa-door-closed"></i>
-              <span>Rooms: {hotelDetails.number_of_rooms || 'N/A'}</span>
-            </div>
-            <div className="text-gray-600 flex items-center gap-1 font-medium">
-              <i className="fa-solid fa-building"></i>
-              <span>Floors: {hotelDetails.Number_of_Floors || 'N/A'}</span>
-            </div>
-            <div className="text-gray-600 flex items-center gap-1 font-medium">
-              <i className="fa-solid fa-calendar"></i>
-              <span>Built: {hotelDetails.Year_of_construction || 'N/A'}</span>
-            </div>
+           {hotelDetails?.number_of_rooms && (
+             <div className='rounded-lg flex items-center gap-1 font-medium'>
+               <i className="fa-solid fa-door-closed"></i>
+               <span>Rooms: {hotelDetails.number_of_rooms || 'N/A'}</span>
+             </div>
+           )}
+           {hotelDetails?.Number_of_Floors && (
+             <div className="text-gray-600 flex items-center gap-1 font-medium">
+               <i className="fa-solid fa-building"></i>
+               <span>Floors: {hotelDetails.Number_of_Floors || 'N/A'}</span>
+             </div>
+           )}
+           {hotelDetails?.Year_of_construction && (
+             <div className="text-gray-600 flex items-center gap-1 font-medium">
+               <i className="fa-solid fa-calendar"></i>
+               <span>Built: {hotelDetails.Year_of_construction || 'N/A'}</span>
+             </div>
+           )}
           </div>
 
           {hotelDetails.description && (

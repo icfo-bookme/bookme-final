@@ -109,6 +109,7 @@ export default function VisaDetailsPage({ params }) {
         <div className="lg:col-span-7 xl:col-span-8">
 
           <h3 className=" p-2 font-semibold w-full  rounded-lg">{visaDetails?.country?.name}</h3>
+         
           <h1 className="lg:text-4xl text-3xl font-normal mt-1">{visaDetails?.property_name}</h1>
           <div className="flex  items-center lg:gap-4 mt-4">
             {visaDetails?.property_summaries?.slice().reverse().map((details, index) => (

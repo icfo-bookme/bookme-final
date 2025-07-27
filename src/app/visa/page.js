@@ -73,10 +73,10 @@ export default async function Home() {
 
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen ">
       {/* Background image section */}
       <div
-        className="xs:h-[30vh] lg:h-[60vh]  w-full bg-cover bg-center relative"
+        className="h-[30vh] lg:h-[60vh]  w-full bg-cover bg-center relative"
         style={{
           backgroundImage: "url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80')"
         }}
@@ -99,7 +99,7 @@ export default async function Home() {
       <div className="lg:container mx-auto px-4 lg:py-12">
         <h2 className="text-xl -mt-3 lg:-mt-0  md:text-3xl font-bold text-center mb-8 text-black">Popular Visa Destinations</h2>
         <div className="flex justify-center items-center ">
-          <div className='grid xs:grid-cols-2 grid-cols-1 gap-5 md:grid-cols-4'>
+          <div className='grid xs:grid-cols-2 grid-cols-2 gap-5 md:grid-cols-4'>
             {visaData.map((country, ind) => (
               <Link
                 key={ind}

@@ -21,20 +21,22 @@ const DatePickerModal = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-2"
+      className="fixed inset-0   flex items-center justify-center z-20  p-2"
       onClick={handleBackdropClick}
     >
       <div 
-        className="bg-white rounded-lg p-2 shadow-lg max-w-[22rem] sm:max-w-[36rem]"
+        className="bg-white rounded-lg p-2 shadow-lg max-w-[22rem] sm:max-w-[36rem] "
         onClick={handleModalClick}
       >
         <style jsx global>{`
           .react-datepicker {
-            font-size: 0.85rem;
+            font-size: 1rem;
             border: none;
+             
           }
           .react-datepicker__month-container {
             padding: 0.2rem;
+            
           }
           .react-datepicker__header {
             padding: 0.2rem;
@@ -82,7 +84,7 @@ const DatePickerModal = ({
           /* Mobile devices */
           @media (max-width: 639px) {
             .react-datepicker {
-              width: 100%;
+              width: 50%;
             }
             .react-datepicker__month-container {
               width: 100%;

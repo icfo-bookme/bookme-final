@@ -26,10 +26,10 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                     <h2 className="text-xl font-semibold mb-2">{room.room_name}</h2>
                     <div className="text-sm">
                         <p className="text-gray-600 mb-1">
-                            <i className="fa-solid fa-flag"></i> {room.room_type}
+                           <i className="fa-solid fa-bed mt-1 mr-2"></i> {room.room_type}
                         </p>
                         <p className="text-gray-600">
-                            <i className="fa-solid fa-users"></i> Maximum Room Capacity: {room.max_adults} Adult {room.complementary_child_occupancy} Child
+                            <i className="fa-solid fa-user mt-1 mr-2"></i> Maximum Room Capacity: {room.max_adults} Adult {room.complementary_child_occupancy} Child
                         </p>
                         <button
                             className="text-blue-900 py-2 rounded font-bold underline transition"
@@ -67,10 +67,7 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                         <div>
                           
                             <p className='font-bold mt-2 text-lg'>Refundable <i className="fa fa-info-circle" aria-hidden="true"></i></p>
-                            <p className="text-gray-600 mt-2 text-sm flex items-center gap-2">
-                                <i className="fa-solid fa-user-group"></i>
-                                {room.max_adults} Adults , {room.complementary_child_occupancy} Children
-                            </p>
+                            
                             <p className="text-gray-600 mt-2 text-sm flex items-center gap-2">
                                 <i className="fa-solid fa-utensils"></i>
                                 Breakfast {room.breakfast_status === 'included' ? 'Included' : 'Not Included'}
@@ -134,7 +131,7 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                                 <i className="fa-solid fa-flag mr-1"></i>{room.room_type}
                             </p>
                              <p className="text-gray-600">
-                            <i className="fa-solid fa-users"></i> Maximum Room Capacity: {room.max_adults} Adult {room.complementary_child_occupancy} Child
+                             <i className="fa-solid fa-user mt-1 mr-2"></i> Maximum Room Capacity: {room.max_adults} Adult {room.complementary_child_occupancy} Child
                         </p>
                         </div>
                         <div className="text-right">
@@ -157,10 +154,7 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                             </div>
 
                             <div className="space-y-3">
-                                <p className="text-gray-600 text-sm flex items-center gap-2">
-                                    <i className="fa-solid fa-user-group text-gray-500"></i>
-                                    {room.max_adults} Adults, {room.complementary_child_occupancy} Children
-                                </p>
+                               
                                 <p className="text-gray-600 text-sm flex items-center gap-2">
                                     <i className="fa-solid fa-utensils text-gray-500"></i>
                                     Breakfast {room.breakfast_status === 'included' ? 'Included' : 'Not Included'}
