@@ -106,14 +106,14 @@ const BookMeHeader = () => {
                   href="/hotel"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
-                  HOTEL
+                  HOTELS
                 </Link>
                <div className="relative group" ref={packageTourRef}>
                   <button
                     onClick={togglePackageTour}
                     className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200 flex items-center gap-1"
                   >
-                    SHIP DETAILS
+                    SHIP TICKETS
                     <FaChevronDown className={`text-xs transition-transform duration-200 ${isPackageTourOpen ? 'rotate-180' : ''}`} />
                   </button>
 
@@ -141,7 +141,7 @@ const BookMeHeader = () => {
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
-                  FLIGHT
+                  FLIGHTS
                 </Link>
  <Link
                   href="/visa"
@@ -154,7 +154,7 @@ const BookMeHeader = () => {
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
-                  Package Tour
+                  TOUR PACKAGES 
                 </Link>
 
                
@@ -322,7 +322,7 @@ const BookMeHeader = () => {
                         onClick={togglePackageTour}
                         className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                       >
-                        <span className="font-medium">Package Tour</span>
+                        <span className="font-medium">PACKAGE TOUR</span>
                         <FaChevronRight className={`text-blue-400 transition-transform duration-200 ${isPackageTourOpen ? 'rotate-90' : ''}`} />
                       </button>
 

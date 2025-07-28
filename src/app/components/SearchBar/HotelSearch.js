@@ -35,10 +35,9 @@ const HotelSearch = () => {
   const [checkinDate, setCheckinDate] = useState(today);
   const [checkoutDate, setCheckoutDate] = useState(tomorrow);
 
-  // Fetch destinations
   useEffect(() => {
     const fetchData = async () => {
-      
+      setIsLoading(true);
       try {
         const destinationsData = await getDestination();
         setDestinations(destinationsData);
@@ -72,94 +71,56 @@ const HotelSearch = () => {
 
   const guestText = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Adult${adults > 1 ? 's' : ''}${children > 0 ? `, ${children} Child${children > 1 ? 'ren' : ''}` : ''}`;
 
-  // Advanced fuzzy matching with scoring
   const calculateMatchScore = (destination, query) => {
     const queryLower = query.toLowerCase();
     const fullText = `${destination.name}, ${destination.country}`.toLowerCase();
-    
+
     if (!queryLower) return 0;
-    
-    // Calculate character matches (fuzzy matching)
-    let qIndex = 0;
-    let matchPositions = [];
-    let totalMatches = 0;
-    
-    // Find all matching characters in order
-    for (let i = 0; i < fullText.length && qIndex < queryLower.length; i++) {
-      if (fullText[i] === queryLower[qIndex]) {
-        matchPositions.push(i);
-        qIndex++;
-        totalMatches++;
+
+    let matchCount = 0;
+    for (let i = 0; i < queryLower.length; i++) {
+      if (fullText.includes(queryLower[i])) {
+        matchCount++;
       }
     }
-    
-    // No matches found
-    if (totalMatches === 0) return 0;
-    
-    // Calculate score based on:
-    // 1. Percentage of query characters matched (50% weight)
-    const matchPercentage = (totalMatches / queryLower.length) * 50;
-    
-    // 2. How close the matches are (closer = better) (30% weight)
-    const spread = matchPositions.length > 1 ? 
-      matchPositions[matchPositions.length - 1] - matchPositions[0] : 0;
-    const proximityScore = 30 / (spread + 1);
-    
-    // 3. Bonus for matches at word starts (20% weight)
-    let wordStartBonus = 0;
-    const words = fullText.split(/[\s,]+/);
-    words.forEach(word => {
-      if (word.startsWith(queryLower[0])) {
-        wordStartBonus += 20;
-      }
-    });
-    
-    // 4. Exact match bonus
-    const exactMatchBonus = fullText.includes(queryLower) ? 50 : 0;
-    
-    const totalScore = matchPercentage + proximityScore + wordStartBonus + exactMatchBonus;
-    return Math.min(100, Math.round(totalScore));
+
+    return Math.round((matchCount / queryLower.length) * 100);
   };
 
-  // Highlight matching characters in the suggestion
   const highlightMatches = (text, query) => {
     if (!query) return text;
-    
-    const queryLower = query.toLowerCase();
-    const textLower = text.toLowerCase();
-    const result = [];
-    let lastIndex = 0;
-    
-    for (let i = 0; i < queryLower.length; i++) {
-      const char = queryLower[i];
-      const index = textLower.indexOf(char, lastIndex);
-      
-      if (index !== -1) {
-        // Add non-matched text before this match
-        if (index > lastIndex) {
-          result.push(text.substring(lastIndex, index));
-        }
-        
-        // Add matched character with highlighting
-        result.push(
-          <span key={index} className="font-bold text-blue-600">
-            {text.substring(index, index + 1)}
-          </span>
-        );
-        
-        lastIndex = index + 1;
-      }
-    }
-    
-    // Add remaining text
-    if (lastIndex < text.length) {
-      result.push(text.substring(lastIndex));
-    }
-    
-    return result.length > 0 ? result : text;
+
+    const queryChars = new Set(query.toLowerCase());
+    return text.split("").map((char, idx) =>
+      queryChars.has(char.toLowerCase()) ? (
+        <span key={idx} className="font-bold text-blue-600">
+          {char}
+        </span>
+      ) : (
+        char
+      )
+    );
   };
 
-  // Search handlers
+  const updateSuggestions = (query) => {
+    if (!query) {
+      setSuggestions(destinations);
+      return;
+    }
+
+    const scoredDestinations = destinations.map(dest => ({
+      ...dest,
+      score: calculateMatchScore(dest, query),
+      displayName: `${dest.name}, ${dest.country}`
+    }));
+
+    const sorted = scoredDestinations
+      .filter(dest => dest.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+     setSuggestions(sorted);
+  };
+
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
@@ -177,27 +138,6 @@ const HotelSearch = () => {
       updateSuggestions(searchQuery);
     }
     setShowSuggestions(true);
-  };
-
-  const updateSuggestions = (query) => {
-    if (!query) {
-      setSuggestions(destinations);
-      return;
-    }
-    
-    // Calculate scores for all destinations
-    const scoredDestinations = destinations.map(dest => ({
-      ...dest,
-      score: calculateMatchScore(dest, query),
-      displayName: `${dest.name}, ${dest.country}`
-    }));
-
-    // Filter and sort by score
-    const matched = scoredDestinations
-      .filter(dest => dest.score > 0)
-      .sort((a, b) => b.score - a.score);
-
-    setSuggestions(matched.length > 0 ? matched.slice(0, 10) : []);
   };
 
   const selectDestination = (destination) => {
@@ -239,7 +179,6 @@ const HotelSearch = () => {
       year: "2-digit",
     }).replace(",", "") || "";
 
-  // UI Loading/Error
   if (isLoading) {
     return (
       <div className="bg-white max-w-5xl mx-auto pb-6 text-center">
@@ -266,7 +205,6 @@ const HotelSearch = () => {
     <div className="bg-white max-w-5xl mx-auto pb-6 text-blue-950 relative">
       <form onSubmit={handleSearch}>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Destination Input */}
           <div className="col-span-2 md:col-span-1 space-y-1 relative" ref={searchRef}>
             <label className="block text-sm text-blue-950">City/Hotel/Resort/Area</label>
             <input
@@ -286,7 +224,8 @@ const HotelSearch = () => {
                     onClick={() => selectDestination(destination)}
                   >
                     <div>
-                      {highlightMatches(destination.name, searchQuery)}, {highlightMatches(destination.country, searchQuery)}
+                      {highlightMatches(destination.name, searchQuery)},{" "}
+                      {highlightMatches(destination.country, searchQuery)}
                     </div>
                     {index === 0 && (
                       <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded whitespace-nowrap">

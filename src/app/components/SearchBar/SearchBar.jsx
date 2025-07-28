@@ -23,7 +23,7 @@ const TravelBookingTabs = () => {
           active={activeTab === "hotel"}
           onClick={() => setActiveTab("hotel")}
         >
-          Hotel
+          Hotels
         </TabButton>
         
        
@@ -32,7 +32,7 @@ const TravelBookingTabs = () => {
           active={activeTab === "tour"}
           onClick={() => setActiveTab("tour")}
         >
-          Tour
+          Tours
         </TabButton>
         <TabButton
           icon={<FaPassport />}

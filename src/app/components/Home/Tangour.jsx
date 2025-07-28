@@ -96,7 +96,7 @@ export default function Tangour() {
         <div className={`${roboto.className} bg-white w-full mx-auto  max-w-7xl`}>
             <div className="w-full text-center mb-5">
                 <h2 className="text-xl md:text-2xl font-bold text-[#00026E] mb-2">
-                    POPULAR TANGOUR HAOR BOATS
+                    Popular Tangour Haor Boats 
                 </h2>
                 <div className="w-20 h-1 bg-[#0678B4] mx-auto"></div>
             </div>
