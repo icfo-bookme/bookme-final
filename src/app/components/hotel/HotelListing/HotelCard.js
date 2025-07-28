@@ -42,7 +42,7 @@ const HotelCard = ({
             </div>
           )}
           {hotel.label && (
-            <div className="absolute top-24 right-0 bg-gray-200 text-blur-950 font-bold text-sm px-1 py-1 shadow-md z-10">
+            <div className="absolute top-16 rounded-r-lg bg-white text-blur-950 font-bold text-sm px-2 py-1 shadow-md z-10">
               <i className="fa-solid fa-fire"></i> <span className="relative z-10">{hotel.label}</span>
             </div>
           )}

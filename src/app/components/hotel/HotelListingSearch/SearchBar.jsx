@@ -13,58 +13,71 @@ import GuestModal from "../../../../utils/GuestModal";
 const SearchBar = ({ initialValues }) => {
   const router = useRouter();
 
+  // Modal states
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
+  // Guest counts
   const [adults, setAdults] = useState(initialValues?.adults || 2);
-  const [children, setChildren] = useState(0);
+  const [children, setChildren] = useState(initialValues?.children || 0);
   const [rooms, setRooms] = useState(initialValues?.rooms || 1);
 
+  // Destinations & selection
   const [destinations, setDestinations] = useState([]);
   const [selectedLocationId, setSelectedLocationId] = useState(initialValues?.locationID || "");
   const [selectedDestination, setSelectedDestination] = useState(null);
 
+  // Search input and suggestions
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Loading and error states
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Date handling
   const today = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(today.getDate() + 1);
 
-  const [checkinDate, setCheckinDate] = useState(initialValues?.checkin ? new Date(initialValues.checkin) : today);
-  const [checkoutDate, setCheckoutDate] = useState(initialValues?.checkout ? new Date(initialValues.checkout) : tomorrow);
+  const [checkinDate, setCheckinDate] = useState(
+    initialValues?.checkin ? new Date(initialValues.checkin) : today
+  );
+  const [checkoutDate, setCheckoutDate] = useState(
+    initialValues?.checkout ? new Date(initialValues.checkout) : tomorrow
+  );
   const [dateRange, setDateRange] = useState([checkinDate, checkoutDate]);
 
-  const guestText = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Adult${adults > 1 ? 's' : ''}`;
+  // Guest summary text
+  const guestText = `${rooms} Room${rooms > 1 ? "s" : ""}, ${adults} Adult${adults > 1 ? "s" : ""}${
+    children > 0 ? `, ${children} Child${children > 1 ? "ren" : ""}` : ""
+  }`;
 
-  // Destination name finder
+  // Get destination display name by id
   const getDestinationNameById = (locationID) => {
-    const destination = destinations.find(d => d.id === locationID);
+    const destination = destinations.find((d) => d.id === locationID);
     return destination ? `${destination.name}, ${destination.country}` : "Edit Search Information";
   };
 
-  // Fetch destinations
+  // Load destinations
   useEffect(() => {
     const fetchDestinations = async () => {
-     
+      setIsLoading(true);
       try {
         const data = await getDestination();
         setDestinations(data);
 
         if (initialValues?.locationID) {
-          const selected = data.find(d => String(d.id) === String(initialValues.locationID));
+          const selected = data.find((d) => String(d.id) === String(initialValues.locationID));
           if (selected) {
             setSelectedDestination(selected);
             setSearchQuery(`${selected.name}, ${selected.country}`);
             setSelectedLocationId(selected.id);
           }
         }
-
       } catch (error) {
         console.error("Failed to load destinations:", error);
         setError("Failed to load destinations");
@@ -76,99 +89,116 @@ const SearchBar = ({ initialValues }) => {
     fetchDestinations();
   }, [initialValues?.locationID]);
 
-  // Advanced fuzzy matching with scoring
+ 
   const calculateMatchScore = (destination, query) => {
+    if (!query) return 0;
+
     const queryLower = query.toLowerCase();
     const fullText = `${destination.name}, ${destination.country}`.toLowerCase();
-    
-    // If query is empty, return lowest priority
-    if (!queryLower) return 0;
-    
-    // Exact match at start gets highest score
-    if (fullText.startsWith(queryLower)) return 100;
-    
-    // Exact match anywhere gets high score
-    if (fullText.includes(queryLower)) return 90;
-    
-    // Calculate character matches (fuzzy matching)
-    let qIndex = 0;
-    let matchPositions = [];
-    let totalMatches = 0;
-    
-    for (let i = 0; i < fullText.length && qIndex < queryLower.length; i++) {
-      if (fullText[i] === queryLower[qIndex]) {
-        matchPositions.push(i);
-        qIndex++;
-        totalMatches++;
+
+    let matchCount = 0;
+    const fullTextChars = fullText.split("");
+    const usedIndices = new Set();
+
+    // Count how many characters of query appear anywhere in fullText (ignoring order)
+    for (const char of queryLower) {
+      // Find first unused matching character
+      const index = fullTextChars.findIndex(
+        (c, i) => c === char && !usedIndices.has(i)
+      );
+      if (index !== -1) {
+        matchCount++;
+        usedIndices.add(index);
       }
     }
-    
-    // No matches found
-    if (totalMatches === 0) return 0;
-    
-    // Calculate score based on:
-    // 1. Percentage of query characters matched
-    const matchPercentage = (totalMatches / queryLower.length) * 50;
-    
-    // 2. How close the matches are (closer = better)
-    const spread = matchPositions.length > 1 ? 
-      matchPositions[matchPositions.length - 1] - matchPositions[0] : 0;
-    const proximityScore = 50 / (spread + 1);
-    
-    // 3. Bonus for matches at word starts
-    let wordStartBonus = 0;
-    const words = fullText.split(/[\s,]+/);
-    words.forEach(word => {
-      if (word.startsWith(queryLower[0])) {
-        wordStartBonus += 10;
-      }
-    });
-    
-    const totalScore = matchPercentage + proximityScore + wordStartBonus;
-    return Math.min(100, Math.round(totalScore));
+
+    if (matchCount === 0) return 0;
+
+    // Calculate base score by match percentage of query characters found
+    const matchPercentage = (matchCount / queryLower.length) * 70;
+
+    // Penalize by length difference between query and fullText (the smaller the better)
+    const lengthDifference = Math.abs(fullText.length - queryLower.length);
+    const lengthPenalty = Math.min(30, lengthDifference * 2); // max 30 penalty
+
+    // Final score
+    const score = matchPercentage - lengthPenalty;
+    return Math.max(0, Math.min(100, Math.round(score)));
   };
 
-  // Search handlers
+  // Highlight matched letters in suggestion text
+  const highlightMatches = (text, query) => {
+    if (!query) return text;
+
+    const queryLower = query.toLowerCase();
+    const textLower = text.toLowerCase();
+
+    let result = [];
+    let queryIndex = 0;
+
+    for (let i = 0; i < text.length; i++) {
+      if (
+        queryIndex < query.length &&
+        textLower[i] === queryLower[queryIndex]
+      ) {
+        result.push(
+          <mark key={i} className="bg-yellow-300">
+            {text[i]}
+          </mark>
+        );
+        queryIndex++;
+      } else {
+        result.push(text[i]);
+      }
+    }
+    return result;
+  };
+
+  // Update suggestions based on query using the new scoring method
+  const updateSuggestions = (query) => {
+    if (!query) {
+      setSuggestions(destinations.slice(0, 5));
+      return;
+    }
+
+    const scored = destinations
+      .map((dest) => ({
+        ...dest,
+        score: calculateMatchScore(dest, query),
+      }))
+      .filter((dest) => dest.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    setSuggestions(scored.length > 0 ? scored.slice(0, 10) : destinations.slice(0, 5));
+  };
+
+  // Input change handler
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
     updateSuggestions(query);
-    if (!query) setSelectedLocationId("");
+
+    if (!query) {
+      setSelectedLocationId("");
+      setSelectedDestination(null);
+    }
   };
 
+  // On input focus
   const handleSearchFocus = () => {
     if (isFirstInputInteraction) {
       setIsFirstInputInteraction(false);
       setSearchQuery("");
       setSelectedLocationId("");
-      setSuggestions(destinations);
+      setSelectedDestination(null);
+      setSuggestions(destinations.slice(0, 5));
     } else {
       updateSuggestions(searchQuery);
     }
     setShowSuggestions(true);
   };
 
-  const updateSuggestions = (query) => {
-    if (!query) {
-      setSuggestions(destinations);
-      return;
-    }
-    
-    // Calculate scores for all destinations
-    const scoredDestinations = destinations.map(dest => ({
-      ...dest,
-      score: calculateMatchScore(dest, query)
-    }));
-
-    // Filter and sort by score
-    const matched = scoredDestinations
-      .filter(dest => dest.score > 0)
-      .sort((a, b) => b.score - a.score);
-
-    // Always show at least top 5 destinations, even with low scores
-    setSuggestions(matched.length > 0 ? matched.slice(0, 10) : destinations.slice(0, 5));
-  };
-
+  // When user picks a suggestion
   const selectDestination = (destination) => {
     setSearchQuery(`${destination.name}, ${destination.country}`);
     setSelectedLocationId(destination.id);
@@ -176,31 +206,35 @@ const SearchBar = ({ initialValues }) => {
     setShowSuggestions(false);
   };
 
+  // Submit handler
   const handleSearch = (e) => {
     e.preventDefault();
+
     if (!selectedLocationId) {
       alert("Please select a valid destination");
       return;
     }
 
-    const query = new URLSearchParams({
+    const queryParams = new URLSearchParams({
       checkin: checkinDate.toISOString().split("T")[0],
       checkout: checkoutDate.toISOString().split("T")[0],
       locationID: String(selectedLocationId),
       rooms: String(rooms),
       adult: String(adults),
+      children: String(children),
     }).toString();
 
-    router.push(`/hotel/list?${query}`);
+    router.push(`/hotel/list?${queryParams}`);
   };
 
+  // Date change from modal
   const handleDateChange = (update) => {
     setDateRange(update);
     if (update[0]) setCheckinDate(update[0]);
     if (update[1]) setCheckoutDate(update[1]);
   };
 
-  // UI Loading/Error
+  // Loading UI
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl max-w-7xl mx-auto p-4 text-center">
@@ -209,6 +243,7 @@ const SearchBar = ({ initialValues }) => {
     );
   }
 
+  // Error UI
   if (error) {
     return (
       <div className="bg-white rounded-xl max-w-7xl mx-auto p-4 text-center">
@@ -250,6 +285,7 @@ const SearchBar = ({ initialValues }) => {
         setShowGuestModal={setShowGuestModal}
         handleSearch={handleSearch}
         setShowSuggestions={setShowSuggestions}
+        highlightMatches={highlightMatches}
       />
 
       {showMobileSearch && (
@@ -267,6 +303,7 @@ const SearchBar = ({ initialValues }) => {
           setShowGuestModal={setShowGuestModal}
           handleSearch={handleSearch}
           setShowMobileSearch={setShowMobileSearch}
+          highlightMatches={highlightMatches}
         />
       )}
 

@@ -70,7 +70,7 @@ const HotelFilters = ({
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
-              className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 text-sm border border-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {searchQuery && (
               <button

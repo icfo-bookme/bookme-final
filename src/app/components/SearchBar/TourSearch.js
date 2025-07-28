@@ -14,19 +14,15 @@ const TourSearch = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+
   const searchRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      
       try {
         const response = await getTourDestination();
-
         if (response?.success) {
-          const visibleDestinations = response.data.filter(
-            (dest) => dest.isShow === "yes"
-          );
+          const visibleDestinations = response.data.filter((dest) => dest.isShow === "yes");
           setDestinations(visibleDestinations);
 
           if (visibleDestinations.length > 0) {
@@ -39,7 +35,7 @@ const TourSearch = () => {
         setError("Failed to load destinations");
         console.error("Error loading destinations:", error);
       } finally {
-        setIsLoading(false);
+
       }
     };
 
@@ -66,54 +62,90 @@ const TourSearch = () => {
     router.push(`/tour/${selectedLocationId}`);
   };
 
-  // Enhanced fuzzy matching with scoring
-  const calculateMatchScore = (destination, query) => {
-    const queryLower = query.toLowerCase();
-    const fullText = `${destination.name}, ${destination.country}`.toLowerCase();
-    
-    if (!queryLower) return 0;
-    
-    // Exact match at start gets highest score
-    if (fullText.startsWith(queryLower)) return 100;
-    
-    // Exact match anywhere gets high score
-    if (fullText.includes(queryLower)) return 90;
-    
-    // Fuzzy matching
-    let qIndex = 0;
-    let matchPositions = [];
-    let totalMatches = 0;
-    
-    for (let i = 0; i < fullText.length && qIndex < queryLower.length; i++) {
-      if (fullText[i] === queryLower[qIndex]) {
-        matchPositions.push(i);
-        qIndex++;
-        totalMatches++;
+  // Levenshtein Distance
+  const levenshteinDistance = (a, b) => {
+    const m = a.length;
+    const n = b.length;
+    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        if (a[i - 1] === b[j - 1]) {
+          dp[i][j] = dp[i - 1][j - 1];
+        } else {
+          dp[i][j] = Math.min(
+            dp[i - 1][j] + 1,
+            dp[i][j - 1] + 1,
+            dp[i - 1][j - 1] + 1
+          );
+        }
       }
     }
-    
-    if (totalMatches === 0) return 0;
-    
-    // Calculate score based on:
-    // 1. Percentage of query characters matched
-    const matchPercentage = (totalMatches / queryLower.length) * 50;
-    
-    // 2. How close the matches are (closer = better)
-    const spread = matchPositions.length > 1 ? 
-      matchPositions[matchPositions.length - 1] - matchPositions[0] : 0;
-    const proximityScore = 50 / (spread + 1);
-    
-    // 3. Bonus for matches at word starts
-    let wordStartBonus = 0;
-    const words = fullText.split(/[\s,]+/);
-    words.forEach(word => {
-      if (word.startsWith(queryLower[0])) {
-        wordStartBonus += 10;
-      }
-    });
-    
-    const totalScore = matchPercentage + proximityScore + wordStartBonus;
-    return Math.min(100, Math.round(totalScore));
+
+    return dp[m][n];
+  };
+
+  const calculateMatchScore = (destination, query) => {
+    const destText = `${destination.name}, ${destination.country}`.toLowerCase().replace(/[^a-z]/g, "");
+    const queryText = query.toLowerCase().replace(/[^a-z]/g, "");
+    if (!queryText) return 0;
+
+    const levDist = levenshteinDistance(queryText, destText);
+    const maxLen = Math.max(destText.length, queryText.length);
+    const levScore = Math.max(0, 100 - (levDist / maxLen) * 100);
+
+    const destFreq = {};
+    const queryFreq = {};
+    for (const char of destText) destFreq[char] = (destFreq[char] || 0) + 1;
+    for (const char of queryText) queryFreq[char] = (queryFreq[char] || 0) + 1;
+
+    let matchScore = 0;
+    let totalPossible = 0;
+    for (const char in destFreq) {
+      const matchCount = Math.min(destFreq[char], queryFreq[char] || 0);
+      matchScore += matchCount;
+      totalPossible += destFreq[char];
+    }
+
+    const overlapScore = (matchScore / totalPossible) * 100;
+    return Math.round(0.6 * levScore + 0.4 * overlapScore);
+  };
+
+  const highlightMatches = (text, query) => {
+    if (!query) return text;
+
+    const queryChars = new Set(query.toLowerCase());
+    return (
+      <>
+        {text.split("").map((char, idx) => (
+          queryChars.has(char.toLowerCase()) ? (
+            <span key={idx} className="font-bold text-blue-600">{char}</span>
+          ) : (
+            <span key={idx}>{char}</span>
+          )
+        ))}
+      </>
+    );
+  };
+
+  const updateSuggestions = (query) => {
+    if (!query) {
+      setSuggestions(destinations);
+      return;
+    }
+
+    const scored = destinations.map(dest => ({
+      ...dest,
+      score: calculateMatchScore(dest, query)
+    }));
+
+    const matched = scored
+      .filter(dest => dest.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    setSuggestions(matched);
   };
 
   const handleSearchChange = (e) => {
@@ -135,39 +167,13 @@ const TourSearch = () => {
     setShowSuggestions(true);
   };
 
-  const updateSuggestions = (query) => {
-    if (!query) {
-      setSuggestions(destinations);
-      return;
-    }
-
-    const scoredDestinations = destinations.map(dest => ({
-      ...dest,
-      score: calculateMatchScore(dest, query)
-    }));
-
-    // Filter and sort by score
-    const matched = scoredDestinations
-      .filter(dest => dest.score > 0)
-      .sort((a, b) => b.score - a.score);
-
-    // Always show at least top 5 destinations if no matches
-    setSuggestions(matched.length > 0 ? matched.slice(0, 10) : destinations.slice(0, 5));
-  };
-
   const selectDestination = (destination) => {
     setSearchQuery(`${destination.name}, ${destination.country}`);
     setSelectedLocationId(destination.id);
     setShowSuggestions(false);
   };
 
-  if (isLoading) {
-    return (
-      <div className="bg-white max-w-5xl mx-auto pb-6 text-center">
-        <div className="animate-pulse text-blue-950">Loading destinations...</div>
-      </div>
-    );
-  }
+
 
   if (error) {
     return (
@@ -187,7 +193,6 @@ const TourSearch = () => {
     <div className="bg-white max-w-5xl mx-auto pb-6 text-blue-950 relative">
       <form onSubmit={handleSearch}>
         <div className="grid grid-cols-1 gap-4 relative" ref={searchRef}>
-          {/* Destination Input */}
           <div className="space-y-1">
             <label className="block text-sm text-blue-950">Location/Tour</label>
             <input
@@ -196,17 +201,25 @@ const TourSearch = () => {
               onChange={handleSearchChange}
               onFocus={handleSearchFocus}
               placeholder="Search destinations..."
-              className="p-3 font-bold border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white w-full text-blue-950 text-sm sm:text-base"
+              className="p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg"
             />
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                {suggestions.map((destination) => (
+                {suggestions.map((destination, idx) => (
                   <div
                     key={destination.id}
-                    className="p-3 hover:bg-blue-50 cursor-pointer text-sm sm:text-base"
+                    className="p-3 hover:bg-blue-50 cursor-pointer text-sm sm:text-base flex justify-between items-center"
                     onClick={() => selectDestination(destination)}
                   >
-                    {destination.name}, {destination.country}
+                    <div>
+                      {highlightMatches(destination.name, searchQuery)},{" "}
+                      {highlightMatches(destination.country, searchQuery)}
+                    </div>
+                    {idx === 0 && (
+                      <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded whitespace-nowrap">
+                        Best match
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -214,7 +227,6 @@ const TourSearch = () => {
           </div>
         </div>
 
-        {/* Search Button */}
         <div className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2 -translate-x-1/2 flex justify-end">
           <SearchButton type="submit">Search Tours</SearchButton>
         </div>

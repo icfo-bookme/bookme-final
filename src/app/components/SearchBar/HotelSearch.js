@@ -37,7 +37,7 @@ const HotelSearch = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true);
+     
       try {
         const destinationsData = await getDestination();
         setDestinations(destinationsData);
@@ -71,21 +71,66 @@ const HotelSearch = () => {
 
   const guestText = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Adult${adults > 1 ? 's' : ''}${children > 0 ? `, ${children} Child${children > 1 ? 'ren' : ''}` : ''}`;
 
-  const calculateMatchScore = (destination, query) => {
-    const queryLower = query.toLowerCase();
-    const fullText = `${destination.name}, ${destination.country}`.toLowerCase();
+  // Levenshtein Distance for fuzzy typo handling
+  const levenshteinDistance = (a, b) => {
+    const m = a.length;
+    const n = b.length;
+    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
 
-    if (!queryLower) return 0;
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
 
-    let matchCount = 0;
-    for (let i = 0; i < queryLower.length; i++) {
-      if (fullText.includes(queryLower[i])) {
-        matchCount++;
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        if (a[i - 1] === b[j - 1]) {
+          dp[i][j] = dp[i - 1][j - 1];
+        } else {
+          dp[i][j] = Math.min(
+            dp[i - 1][j] + 1,
+            dp[i][j - 1] + 1,
+            dp[i - 1][j - 1] + 1
+          );
+        }
       }
     }
 
-    return Math.round((matchCount / queryLower.length) * 100);
+    return dp[m][n];
   };
+
+  // Final scoring algorithm: fuzzy + character match
+  const calculateMatchScore = (destination, query) => {
+    const destText = `${destination.name}, ${destination.country}`.toLowerCase().replace(/[^a-z]/g, "");
+    const queryText = query.toLowerCase().replace(/[^a-z]/g, "");
+
+    if (!queryText) return 0;
+
+    // Levenshtein Distance Score
+    const levDist = levenshteinDistance(queryText, destText);
+    const maxLen = Math.max(destText.length, queryText.length);
+    const levScore = Math.max(0, 100 - (levDist / maxLen) * 100);
+
+    // Character Overlap Score
+    const destFreq = {};
+    const queryFreq = {};
+    for (const char of destText) destFreq[char] = (destFreq[char] || 0) + 1;
+    for (const char of queryText) queryFreq[char] = (queryFreq[char] || 0) + 1;
+
+    let matchScore = 0;
+    let totalPossible = 0;
+
+    for (const char in destFreq) {
+      const matchCount = Math.min(destFreq[char], queryFreq[char] || 0);
+      matchScore += matchCount;
+      totalPossible += destFreq[char];
+    }
+
+    const overlapScore = (matchScore / totalPossible) * 100;
+
+    // Weighted total score
+    const finalScore = 0.6 * levScore + 0.4 * overlapScore;
+    return Math.round(finalScore);
+  };
+
 
   const highlightMatches = (text, query) => {
     if (!query) return text;
@@ -118,7 +163,7 @@ const HotelSearch = () => {
       .filter(dest => dest.score > 0)
       .sort((a, b) => b.score - a.score);
 
-     setSuggestions(sorted);
+    setSuggestions(sorted);
   };
 
   const handleSearchChange = (e) => {
@@ -208,13 +253,14 @@ const HotelSearch = () => {
           <div className="col-span-2 md:col-span-1 space-y-1 relative" ref={searchRef}>
             <label className="block text-sm text-blue-950">City/Hotel/Resort/Area</label>
             <input
-              type="text"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              onFocus={handleSearchFocus}
-              placeholder={isFirstInputInteraction ? "" : "Search destinations..."}
-              className="p-3 font-bold border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white w-full text-blue-950 text-sm sm:text-base"
-            />
+       
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onFocus={handleSearchFocus}
+            placeholder="Search destinations..."
+            className="p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg"
+          />
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
                 {suggestions.map((destination, index) => (
