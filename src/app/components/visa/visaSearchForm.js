@@ -10,8 +10,10 @@ export default function VisaSearchForm({ countryData }) {
   const [travelers, setTravelers] = useState(1);
   const [isEditing, setIsEditing] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const counterRef = useRef(null);
   const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -31,9 +33,56 @@ export default function VisaSearchForm({ countryData }) {
   }, []);
 
   useEffect(() => {
-    const filtered = countryData.filter(country =>
-      country.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    if (searchQuery === '') {
+      setFilteredCountries(countryData);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const queryChars = query.split('');
+    
+    const filtered = countryData
+      .map(country => {
+        const name = country.name.toLowerCase();
+        
+        // Calculate match score:
+        // 1. Count how many query characters appear in the name (in any order)
+        // 2. Give bonus for consecutive matches
+        let score = 0;
+        let consecutiveBonus = 0;
+        let lastMatchIndex = -2;
+        
+        queryChars.forEach((char, i) => {
+          const charIndex = name.indexOf(char);
+          if (charIndex !== -1) {
+            score += 1;
+            // Give bonus for consecutive characters
+            if (lastMatchIndex === charIndex - 1 || lastMatchIndex === charIndex) {
+              consecutiveBonus += 1;
+            }
+            lastMatchIndex = charIndex;
+          }
+        });
+        
+        // Total score gives more weight to consecutive matches
+        const totalScore = score + (consecutiveBonus * 0.5);
+        
+        return {
+          ...country,
+          score: totalScore,
+          isMatch: score > 0
+        };
+      })
+      .filter(country => country.isMatch)
+      .sort((a, b) => {
+        // Sort by score descending
+        if (a.score !== b.score) {
+          return b.score - a.score;
+        }
+        // Then by country name length ascending
+        return a.name.length - b.name.length;
+      });
+
     setFilteredCountries(filtered);
   }, [searchQuery, countryData]);
 
@@ -49,6 +98,44 @@ export default function VisaSearchForm({ countryData }) {
   const incrementTravelers = () => setTravelers(prev => Math.min(prev + 1, 10));
   const decrementTravelers = () => setTravelers(prev => Math.max(prev - 1, 1));
 
+  const handleInputClick = () => {
+    if (!isInputFocused) {
+      setSearchQuery('');
+      setIsInputFocused(true);
+    }
+    setIsOpen(true);
+  };
+
+  const highlightMatches = (name) => {
+    if (!searchQuery) return name;
+    
+    const query = searchQuery.toLowerCase();
+    const queryChars = [...new Set(query.split(''))]; // Get unique chars
+    let result = [];
+    let currentText = '';
+    
+    for (let i = 0; i < name.length; i++) {
+      const char = name[i];
+      const lowerChar = char.toLowerCase();
+      
+      if (queryChars.includes(lowerChar)) {
+        if (currentText) {
+          result.push(currentText);
+          currentText = '';
+        }
+        result.push(<span key={i} className="font-bold text-blue-600">{char}</span>);
+      } else {
+        currentText += char;
+      }
+    }
+    
+    if (currentText) {
+      result.push(currentText);
+    }
+    
+    return <>{result}</>;
+  };
+
   return (
     <form onSubmit={handleSearch} className="font-sans text-black relative -mt-32 md:-mt-20 w-full bg-white max-w-4xl px-3 py-2 md:px-4 md:py-3 rounded-lg shadow-md mx-auto">
       <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-4">
@@ -59,15 +146,25 @@ export default function VisaSearchForm({ countryData }) {
             <div className="flex items-center">
               <span className="text-xs text-gray-500 font-bold mr-2">{currentCountryCode}</span>
               <input
+                ref={inputRef}
                 type="text"
-                placeholder="Select country"
-                value={searchQuery}
+                placeholder={isInputFocused ? "Select country" : ""}
+                value={isInputFocused ? searchQuery : departure}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setIsOpen(true);
-                  setDeparture(e.target.value);
+                  if (isInputFocused) {
+                    setDeparture(e.target.value);
+                  }
                 }}
-                onFocus={() => setIsOpen(true)}
+                onFocus={() => {
+                  setIsInputFocused(true);
+                  setIsOpen(true);
+                  if (inputRef.current) {
+                    inputRef.current.select();
+                  }
+                }}
+                onClick={handleInputClick}
                 className="w-full outline-none text-base md:text-[18px]"
               />
               <svg
@@ -83,7 +180,7 @@ export default function VisaSearchForm({ countryData }) {
             {isOpen && (
               <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
                 {filteredCountries.length > 0 ? (
-                  filteredCountries.map((country) => (
+                  filteredCountries.map((country, index) => (
                     <div
                       key={country?.id}
                       className={`px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center ${
@@ -94,14 +191,18 @@ export default function VisaSearchForm({ countryData }) {
                         setDeparture(country?.name);
                         setSearchQuery(country?.name);
                         setIsOpen(false);
+                        setIsInputFocused(true);
                       }}
                     >
                       <span className="text-gray-500 font-bold mr-2 w-6">{country?.code}</span>
-                      <span className="flex-1 truncate">{country?.name}</span>
+                      <span className="flex-1 truncate">{highlightMatches(country?.name)}</span>
+                      {index === 0 && (
+                        <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Best match</span>
+                      )}
                     </div>
                   ))
                 ) : (
-                  <div className="px-4 py-2 text-gray-500">No country found</div>
+                  <div className="px-4 py-2 text-gray-500">No matches found</div>
                 )}
               </div>
             )}

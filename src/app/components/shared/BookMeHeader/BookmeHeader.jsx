@@ -108,31 +108,12 @@ const BookMeHeader = () => {
                 >
                   HOTEL
                 </Link>
-                <Link
-                  href="/contact"
-                  className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
-                >
-                  SHIP DETAILS
-                </Link>
-                <Link
-                  href="/contact"
-                  className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
-                >
-                  FLIGHT
-                </Link>
- <Link
-                  href="/visa"
-                  className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
-                >
-                  VISA
-                </Link>
-                {/* Package Tour with Dropdown */}
-                <div className="relative group" ref={packageTourRef}>
+               <div className="relative group" ref={packageTourRef}>
                   <button
                     onClick={togglePackageTour}
                     className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200 flex items-center gap-1"
                   >
-                    PACKAGE TOUR
+                    SHIP DETAILS
                     <FaChevronDown className={`text-xs transition-transform duration-200 ${isPackageTourOpen ? 'rotate-180' : ''}`} />
                   </button>
 
@@ -156,6 +137,25 @@ const BookMeHeader = () => {
                     </div>
                   )}
                 </div>
+                <Link
+                  href="/contact"
+                  className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
+                >
+                  FLIGHT
+                </Link>
+ <Link
+                  href="/visa"
+                  className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
+                >
+                  VISA
+                </Link>
+                {/* Package Tour with Dropdown */}
+                 <Link
+                  href="/contact"
+                  className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
+                >
+                  Package Tour
+                </Link>
 
                
                 <Link

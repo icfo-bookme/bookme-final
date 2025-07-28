@@ -38,7 +38,7 @@ const HotelSearch = () => {
   // Fetch destinations
   useEffect(() => {
     const fetchData = async () => {
-    
+      
       try {
         const destinationsData = await getDestination();
         setDestinations(destinationsData);
@@ -77,20 +77,14 @@ const HotelSearch = () => {
     const queryLower = query.toLowerCase();
     const fullText = `${destination.name}, ${destination.country}`.toLowerCase();
     
-    // If query is empty, return lowest priority
     if (!queryLower) return 0;
-    
-    // Exact match at start gets highest score
-    if (fullText.startsWith(queryLower)) return 100;
-    
-    // Exact match anywhere gets high score
-    if (fullText.includes(queryLower)) return 90;
     
     // Calculate character matches (fuzzy matching)
     let qIndex = 0;
     let matchPositions = [];
     let totalMatches = 0;
     
+    // Find all matching characters in order
     for (let i = 0; i < fullText.length && qIndex < queryLower.length; i++) {
       if (fullText[i] === queryLower[qIndex]) {
         matchPositions.push(i);
@@ -103,25 +97,66 @@ const HotelSearch = () => {
     if (totalMatches === 0) return 0;
     
     // Calculate score based on:
-    // 1. Percentage of query characters matched
+    // 1. Percentage of query characters matched (50% weight)
     const matchPercentage = (totalMatches / queryLower.length) * 50;
     
-    // 2. How close the matches are (closer = better)
+    // 2. How close the matches are (closer = better) (30% weight)
     const spread = matchPositions.length > 1 ? 
       matchPositions[matchPositions.length - 1] - matchPositions[0] : 0;
-    const proximityScore = 50 / (spread + 1);
+    const proximityScore = 30 / (spread + 1);
     
-    // 3. Bonus for matches at word starts
+    // 3. Bonus for matches at word starts (20% weight)
     let wordStartBonus = 0;
     const words = fullText.split(/[\s,]+/);
     words.forEach(word => {
       if (word.startsWith(queryLower[0])) {
-        wordStartBonus += 10;
+        wordStartBonus += 20;
       }
     });
     
-    const totalScore = matchPercentage + proximityScore + wordStartBonus;
+    // 4. Exact match bonus
+    const exactMatchBonus = fullText.includes(queryLower) ? 50 : 0;
+    
+    const totalScore = matchPercentage + proximityScore + wordStartBonus + exactMatchBonus;
     return Math.min(100, Math.round(totalScore));
+  };
+
+  // Highlight matching characters in the suggestion
+  const highlightMatches = (text, query) => {
+    if (!query) return text;
+    
+    const queryLower = query.toLowerCase();
+    const textLower = text.toLowerCase();
+    const result = [];
+    let lastIndex = 0;
+    
+    for (let i = 0; i < queryLower.length; i++) {
+      const char = queryLower[i];
+      const index = textLower.indexOf(char, lastIndex);
+      
+      if (index !== -1) {
+        // Add non-matched text before this match
+        if (index > lastIndex) {
+          result.push(text.substring(lastIndex, index));
+        }
+        
+        // Add matched character with highlighting
+        result.push(
+          <span key={index} className="font-bold text-blue-600">
+            {text.substring(index, index + 1)}
+          </span>
+        );
+        
+        lastIndex = index + 1;
+      }
+    }
+    
+    // Add remaining text
+    if (lastIndex < text.length) {
+      result.push(text.substring(lastIndex));
+    }
+    
+    return result.length > 0 ? result : text;
   };
 
   // Search handlers
@@ -153,7 +188,8 @@ const HotelSearch = () => {
     // Calculate scores for all destinations
     const scoredDestinations = destinations.map(dest => ({
       ...dest,
-      score: calculateMatchScore(dest, query)
+      score: calculateMatchScore(dest, query),
+      displayName: `${dest.name}, ${dest.country}`
     }));
 
     // Filter and sort by score
@@ -161,8 +197,7 @@ const HotelSearch = () => {
       .filter(dest => dest.score > 0)
       .sort((a, b) => b.score - a.score);
 
-    // Always show at least top 5 destinations, even with low scores
-    setSuggestions(matched.length > 0 ? matched.slice(0, 10) : destinations.slice(0, 5));
+    setSuggestions(matched.length > 0 ? matched.slice(0, 10) : []);
   };
 
   const selectDestination = (destination) => {
@@ -239,18 +274,25 @@ const HotelSearch = () => {
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={handleSearchFocus}
-              placeholder="Search destinations..."
+              placeholder={isFirstInputInteraction ? "" : "Search destinations..."}
               className="p-3 font-bold border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white w-full text-blue-950 text-sm sm:text-base"
             />
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                {suggestions.map((destination) => (
+                {suggestions.map((destination, index) => (
                   <div
                     key={destination.id}
-                    className="p-3 hover:bg-blue-50 cursor-pointer text-sm sm:text-base"
+                    className="p-3 hover:bg-blue-50 cursor-pointer text-sm sm:text-base flex justify-between items-center"
                     onClick={() => selectDestination(destination)}
                   >
-                    {destination.name}, {destination.country}
+                    <div>
+                      {highlightMatches(destination.name, searchQuery)}, {highlightMatches(destination.country, searchQuery)}
+                    </div>
+                    {index === 0 && (
+                      <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded whitespace-nowrap">
+                        Best match
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>

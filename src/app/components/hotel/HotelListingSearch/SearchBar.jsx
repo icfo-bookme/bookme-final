@@ -51,7 +51,7 @@ const SearchBar = ({ initialValues }) => {
   // Fetch destinations
   useEffect(() => {
     const fetchDestinations = async () => {
-      setIsLoading(true);
+     
       try {
         const data = await getDestination();
         setDestinations(data);

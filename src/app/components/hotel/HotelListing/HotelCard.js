@@ -1,7 +1,16 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 
-const HotelCard = ({ hotel, amenities, checkin, checkout, rooms, adult }) => {
+const HotelCard = ({ 
+  hotel, 
+  amenities, 
+  checkin, 
+  checkout, 
+  rooms, 
+  adult 
+}) => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-BD', {
       style: 'currency',
@@ -32,6 +41,11 @@ const HotelCard = ({ hotel, amenities, checkin, checkout, rooms, adult }) => {
               <div className="absolute right-0 top-0 w-0 h-0 border-l-[12px] border-l-transparent border-t-[20px] border-t-[#FD7E14] border-b-0 border-r-0 transform translate-x-full"></div>
             </div>
           )}
+          {hotel.label && (
+            <div className="absolute top-24 right-0 bg-gray-200 text-blur-950 font-bold text-sm px-1 py-1 shadow-md z-10">
+              <i className="fa-solid fa-fire"></i> <span className="relative z-10">{hotel.label}</span>
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>
         </div>
 
@@ -42,7 +56,8 @@ const HotelCard = ({ hotel, amenities, checkin, checkout, rooms, adult }) => {
               <h3 className="font-bold text-xl text-gray-800 mb-1">{hotel.name}</h3>
               <div className="flex items-center bg-blue-50 px-2 py-1 rounded-md">
                 <i className="fa-solid fa-star text-yellow-400 text-sm mr-1"></i>
-                <span className="text-sm font-medium">{hotel.star} star</span>
+                <span className="text-sm hidden md:block font-medium">{hotel.star} star</span>
+                <span className="md:hidden text-sm font-medium">{hotel.star} </span>
               </div>
             </div>
 
@@ -95,7 +110,7 @@ const HotelCard = ({ hotel, amenities, checkin, checkout, rooms, adult }) => {
                     <p className="text-xl font-bold text-blue-800">
                       {formatPrice(hotel.price_after_discount)}
                     </p>
-                    { hotel.discount > 0  && (
+                    {hotel.discount > 0 && (
                       <p className="text-sm text-gray-500 line-through">
                         {formatPrice(hotel.regular_price)}
                       </p>

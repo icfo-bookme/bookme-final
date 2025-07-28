@@ -61,53 +61,100 @@ const VisaSearch = () => {
     router.push(`/visa/${selectedLocationId}`);
   };
 
+  // Enhanced fuzzy matching algorithm
   const calculateMatchScore = (destination, query) => {
     const queryLower = query.toLowerCase();
     const fullText = destination.name.toLowerCase();
     
+    if (!queryLower) return 0;
+    
     // Exact match at start gets highest score
-    if (fullText.startsWith(queryLower)) {
-      return 100;
-    }
+    if (fullText.startsWith(queryLower)) return 100;
     
-    // Contains the query as substring
-    if (fullText.includes(queryLower)) {
-      return 90;
-    }
+    // Exact match anywhere gets high score
+    if (fullText.includes(queryLower)) return 90;
     
-    // Check if at least 2 characters match in order (fuzzy match)
-    let matchedChars = 0;
-    let lastMatchPos = -1;
+    // Calculate character matches (fuzzy matching)
+    let qIndex = 0;
+    let matchPositions = [];
+    let totalMatches = 0;
     
-    for (let qIndex = 0; qIndex < queryLower.length; qIndex++) {
-      const char = queryLower[qIndex];
-      const foundPos = fullText.indexOf(char, lastMatchPos + 1);
-      
-      if (foundPos > -1) {
-        matchedChars++;
-        lastMatchPos = foundPos;
+    for (let i = 0; i < fullText.length && qIndex < queryLower.length; i++) {
+      if (fullText[i] === queryLower[qIndex]) {
+        matchPositions.push(i);
+        qIndex++;
+        totalMatches++;
       }
     }
     
-    // If at least 2 characters matched in order
-    if (matchedChars >= 2) {
-      // Calculate score based on how many characters matched and how close they are
-      const charMatchRatio = matchedChars / queryLower.length;
-      const spread = lastMatchPos - fullText.indexOf(queryLower[0]);
-      const proximityScore = spread > 0 ? (1 / spread) : 1;
+    // No matches found
+    if (totalMatches === 0) return 0;
+    
+    // Calculate score based on:
+    // 1. Percentage of query characters matched
+    const matchPercentage = (totalMatches / queryLower.length) * 50;
+    
+    // 2. How close the matches are (closer = better)
+    const spread = matchPositions.length > 1 ? 
+      matchPositions[matchPositions.length - 1] - matchPositions[0] : 0;
+    const proximityScore = 30 / (spread + 1);
+    
+    // 3. Bonus for matches at word starts
+    let wordStartBonus = 0;
+    const words = fullText.split(/[\s,]+/);
+    words.forEach(word => {
+      if (word.startsWith(queryLower[0])) {
+        wordStartBonus += 20;
+      }
+    });
+    
+    const totalScore = matchPercentage + proximityScore + wordStartBonus;
+    return Math.min(100, Math.round(totalScore));
+  };
+
+  // Highlight matching characters in the suggestion
+  const highlightMatches = (text, query) => {
+    if (!query) return text;
+    
+    const queryLower = query.toLowerCase();
+    const textLower = text.toLowerCase();
+    const result = [];
+    let lastIndex = 0;
+    
+    for (let i = 0; i < queryLower.length; i++) {
+      const char = queryLower[i];
+      const index = textLower.indexOf(char, lastIndex);
       
-      return 50 + (50 * charMatchRatio * proximityScore);
+      if (index !== -1) {
+        // Add non-matched text before this match
+        if (index > lastIndex) {
+          result.push(text.substring(lastIndex, index));
+        }
+        
+        // Add matched character with highlighting
+        result.push(
+          <span key={index} className="font-bold text-blue-600">
+            {text.substring(index, index + 1)}
+          </span>
+        );
+        
+        lastIndex = index + 1;
+      }
     }
     
-    // No match
-    return 0;
+    // Add remaining text
+    if (lastIndex < text.length) {
+      result.push(text.substring(lastIndex));
+    }
+    
+    return result.length > 0 ? result : text;
   };
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
     updateSuggestions(query);
-    setSelectedLocationId("");
+    if (!query) setSelectedLocationId("");
   };
 
   const handleSearchFocus = () => {
@@ -123,22 +170,23 @@ const VisaSearch = () => {
   };
 
   const updateSuggestions = (query) => {
-    if (!query || query.length < 2) {
-      setSuggestions([]);
+    if (!query) {
+      setSuggestions(destinations);
       return;
     }
 
+    // Calculate scores for all destinations
     const scoredDestinations = destinations.map(dest => ({
       ...dest,
       score: calculateMatchScore(dest, query)
     }));
 
-    // Filter out destinations with score 0 and sort by score descending
+    // Filter and sort by score
     const matched = scoredDestinations
       .filter(dest => dest.score > 0)
       .sort((a, b) => b.score - a.score);
 
-    setSuggestions(matched);
+    setSuggestions(matched.length > 0 ? matched.slice(0, 10) : []);
   };
 
   const selectDestination = (destination) => {
@@ -157,10 +205,10 @@ const VisaSearch = () => {
             <label className="block text-sm text-blue-950">Destination Country</label>
             <input
               type="text"
-              value={searchQuery}
+              value={isFirstInputInteraction && !searchQuery ? destinations[0]?.name || '' : searchQuery}
               onChange={handleSearchChange}
               onFocus={handleSearchFocus}
-              placeholder="Search visa destinations..."
+              placeholder={isFirstInputInteraction ? "" : "Search visa destinations..."}
               className="p-3 font-bold border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white w-full text-blue-950 text-sm sm:text-base"
               aria-autocomplete="list"
               aria-controls="visa-suggestions"
@@ -168,21 +216,25 @@ const VisaSearch = () => {
             {showSuggestions && suggestions.length > 0 && (
               <div 
                 id="visa-suggestions"
-                className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
+                className="absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
                 role="listbox"
               >
-                {suggestions.map((destination) => (
+                {suggestions.map((destination, index) => (
                   <div
                     key={destination.id}
-                    className="p-3 hover:bg-blue-50 cursor-pointer text-sm sm:text-base"
+                    className={`p-3 hover:bg-blue-50 cursor-pointer text-sm sm:text-base flex justify-between items-center ${
+                      selectedLocationId === destination.id ? 'bg-blue-50' : ''
+                    }`}
                     onClick={() => selectDestination(destination)}
                     role="option"
                     aria-selected={selectedLocationId === destination.id}
                   >
-                    {destination.name}
-                    {destination.score && (
-                      <span className="text-xs text-gray-500 ml-2">
-                        ({Math.round(destination.score)}% match)
+                    <div>
+                      {highlightMatches(destination.name, searchQuery)}
+                    </div>
+                    {index === 0 && (
+                      <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded whitespace-nowrap">
+                        Best match
                       </span>
                     )}
                   </div>

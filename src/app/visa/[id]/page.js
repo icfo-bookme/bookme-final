@@ -109,7 +109,7 @@ export default function VisaDetailsPage({ params }) {
         <div className="lg:col-span-7 xl:col-span-8">
 
           <h3 className=" p-2 font-semibold w-full  rounded-lg">{visaDetails?.country?.name}</h3>
-         
+
           <h1 className="lg:text-4xl text-3xl font-normal mt-1">{visaDetails?.property_name}</h1>
           <div className="flex  items-center lg:gap-4 mt-4">
             {visaDetails?.property_summaries?.slice().reverse().map((details, index) => (
@@ -150,7 +150,47 @@ export default function VisaDetailsPage({ params }) {
               </div>
             ))}
           </div>
+<div className="block md:hidden">
+            {/* Unit Cards */}
+            {visaDetails?.property_uinit?.map((unit, index) => (
+              <div key={unit?.id || index}>
 
+                <div className="bg-white border rounded shadow-md p-4">
+                  <h1 className="font-medium text-lg mb-1">
+                    {unit?.unit_name}
+                    <span className="ml-2 text-gray-600">Type: {unit?.unit_type}</span>
+                  </h1>
+                  <div className="text-sm space-y-1 my-2">
+                    <div className="flex mb-4">
+                      <div className="flex-1">
+                        <div className="text-sm text-gray-500 mb-1">Validity</div>
+                        <div className="text-base font-bold">{unit?.Validity} Days</div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm text-gray-500 mb-1">Max Stay</div>
+                        <div className="text-base font-bold">{unit?.Max_Stay} Days</div>
+                      </div>
+                    </div>
+                    <p className="text-lg font-semibold">BDT {Math.ceil(unit?.price[0]?.price)} <span className="text-base font-light">/person</span></p>
+                  </div>
+                  <p className="text-[#f59d3f]  text-sm mt-2">
+                    ⚠️ Please contact our Visa department for Document processing.
+                  </p>
+
+                </div>
+                <button
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #313881, #0678B4)",
+                  }}
+
+                  className="mt-[-5px] w-full font-semibold bg-[#3a8ff0] text-white text-sm py-2 rounded hover:bg-blue-700"
+                >
+                  SELECT OFFER
+                </button>
+              </div>
+            ))}
+          </div>
 
           <div className="bg-white  rounded-lg p-4 mt-6 shadow-md">
             {visaDetails?.facilities?.map((facility, index) => (
@@ -199,70 +239,71 @@ export default function VisaDetailsPage({ params }) {
             </div>
           </div>
 
-          {/* Unit Cards */}
-          {visaDetails?.property_uinit?.map((unit, index) => (
-            <div key={unit?.id || index}>
+          <div className="hidden md:block">
+            {/* Unit Cards */}
+            {visaDetails?.property_uinit?.map((unit, index) => (
+              <div key={unit?.id || index}>
 
-              <div className="bg-white border rounded shadow-md p-4">
-                <h1 className="font-medium text-lg mb-1">
-                  {unit?.unit_name}
-                  <span className="ml-2 text-gray-600">Type: {unit?.unit_type}</span>
-                </h1>
-                <div className="text-sm space-y-1 my-2">
-                  <div className="flex mb-4">
-                    <div className="flex-1">
-                      <div className="text-sm text-gray-500 mb-1">Validity</div>
-                      <div className="text-base font-bold">{unit?.Validity} Days</div>
+                <div className="bg-white border rounded shadow-md p-4">
+                  <h1 className="font-medium text-lg mb-1">
+                    {unit?.unit_name}
+                    <span className="ml-2 text-gray-600">Type: {unit?.unit_type}</span>
+                  </h1>
+                  <div className="text-sm space-y-1 my-2">
+                    <div className="flex mb-4">
+                      <div className="flex-1">
+                        <div className="text-sm text-gray-500 mb-1">Validity</div>
+                        <div className="text-base font-bold">{unit?.Validity} Days</div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-sm text-gray-500 mb-1">Max Stay</div>
+                        <div className="text-base font-bold">{unit?.Max_Stay} Days</div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-sm text-gray-500 mb-1">Max Stay</div>
-                      <div className="text-base font-bold">{unit?.Max_Stay} Days</div>
-                    </div>
+                    <p className="text-lg font-semibold">BDT {Math.ceil(unit?.price[0]?.price)} <span className="text-base font-light">/person</span></p>
                   </div>
-                  <p className="text-lg font-semibold">BDT {Math.ceil(unit?.price[0]?.price)} <span className="text-base font-light">/person</span></p>
+                  <p className="text-[#f59d3f]  text-sm mt-2">
+                    ⚠️ Please contact our Visa department for Document processing.
+                  </p>
+
                 </div>
-                <p className="text-[#f59d3f]  text-sm mt-2">
-                  ⚠️ Please contact our Visa department for Document processing.
-                </p>
+                <button
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #313881, #0678B4)",
+                  }}
 
+                  className="mt-[-5px] w-full font-semibold bg-[#3a8ff0] text-white text-sm py-2 rounded hover:bg-blue-700"
+                >
+                  SELECT OFFER
+                </button>
               </div>
-              <button
-                style={{
-                  background:
-                    "linear-gradient(90deg, #313881, #0678B4)",
-                }}
-
-                className="mt-[-5px] w-full font-semibold bg-[#3a8ff0] text-white text-sm py-2 rounded hover:bg-blue-700"
-              >
-                SELECT OFFER
-              </button>
-            </div>
-          ))}
-
+            ))}
+          </div>
           <ToastContainer />
           {/* Modal */}
           <div className="fixed md:hidden bottom-6 right-6 z-50">
-  <button
-    onClick={() => setShowForm(true)}
-    className="visa-assistance-btn visa-animate-btn-shake visa-assistance-pulse"
-  >
-    <svg
-      className="w-5 h-5 mr-2 visa-icon-animate"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M9 5l7 7-7 7"
-      />
-    </svg>
-    Request Visa Assistance
-  </button>
-</div>
+            <button
+              onClick={() => setShowForm(true)}
+              className="visa-assistance-btn visa-animate-btn-shake visa-assistance-pulse"
+            >
+              <svg
+                className="w-5 h-5 mr-2 visa-icon-animate"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+              Request Visa Assistance
+            </button>
+          </div>
           <div className="hidden md:block shadow-md">
             <ContactForm category={"visa"} propertyDetails={visaDetails?.property_name} headline={"Request Visa Assistance"} />
           </div>
