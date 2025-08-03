@@ -17,7 +17,7 @@ const TravelBookingTabs = () => {
   return (
     <div className=" md:bg-white   shadow-sm rounded-lg text-blue-950">
       {/* Tabs Navigation - Responsive layout */}
-      <div className="flex lg:w-[35%] bg-white w-[80%] px-1 rounded-t-lg mx-auto md:mx-0 border-b">
+      <div className="flex lg:w-[35%] -mb-2 bg-white w-[80%] px-1 rounded-t-lg mx-auto md:mx-0 border-b">
         <TabButton
           icon={<FaHotel />}
           active={activeTab === "hotel"}
