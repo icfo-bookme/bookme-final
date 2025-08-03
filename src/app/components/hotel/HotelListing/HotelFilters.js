@@ -27,7 +27,7 @@ const HotelFilters = ({
   return (
     <div 
       ref={searchRef}
-      className={`${isMobile ? 'w-full max-w-sm bg-white h-full overflow-y-auto animate-slide-in' : 'sticky top-16 h-[calc(100vh-64px)] mb-3 overflow-y-auto w-full bg-white rounded-xl shadow-sm border border-gray-200 p-4 custom-scrollbar'}`}
+      className={`${isMobile ? 'w-full mt-12 max-w-sm bg-white h-full overflow-y-auto animate-slide-in' : 'sticky top-16 h-[calc(100vh-64px)] mb-3 overflow-y-auto w-full bg-white rounded-xl shadow-sm border border-gray-200 p-4 custom-scrollbar'}`}
     >
       {isMobile && (
         <div className="p-4 sticky top-0 bg-white border-b flex justify-between items-center z-10">

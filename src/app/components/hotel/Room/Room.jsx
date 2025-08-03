@@ -9,7 +9,7 @@ import ErrorMessage from './ErrorMessage';
 import NoRoomsAvailable from './NoRoomsAvailable';
 import CartButton from './CartButton';
 
-const RoomComponent = ({ hotel_id }) => {
+const RoomComponent = ({ hotel_id, checkin, checkout }) => {
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -59,7 +59,7 @@ const RoomComponent = ({ hotel_id }) => {
         const discountedPrice = Math.round(room.price - (room.price * room.discount / 100));
         const taxes = Math.round(discountedPrice * 0.265);
         const totalPrice = discountedPrice + taxes;
-        
+
         const cartItem = {
             id: room.id,
             name: room.room_name,
@@ -93,41 +93,43 @@ const RoomComponent = ({ hotel_id }) => {
     if (!rooms?.length) return <NoRoomsAvailable />;
 
     return (
-        <div className="md:container w-[98%] lg:w-[100%] mx-auto text-blue-950 grid grid-cols-1 md:grid-cols-6 md:gap-4 mb-6 relative">
+        <div className="md:container w-[98%] lg:w-[100%] mx-auto text-blue-950 grid grid-cols-1 md:grid-cols-6 md:gap-4  relative">
             {/* Floating Cart Button */}
             {(cart.length > 0 && (isLargeScreen || window.innerWidth < 768)) && (
-                <CartButton 
-                    cartCount={cart.length} 
-                    isLargeScreen={isLargeScreen} 
-                    onClick={() => setShowCart(!showCart)} 
+                <CartButton
+                    cartCount={cart.length}
+                    isLargeScreen={isLargeScreen}
+                    onClick={() => setShowCart(!showCart)}
                 />
             )}
 
             {/* Room Details Modal */}
             {isModalOpen && selectedRoom && (
-                <RoomDetailsModal 
-                    room={selectedRoom} 
-                    onClose={closeModal} 
+                <RoomDetailsModal
+                    room={selectedRoom}
+                    onClose={closeModal}
                 />
             )}
 
             {/* Main Room Listing */}
-            <RoomList 
-                rooms={rooms} 
-                cart={cart} 
-                isLargeScreen={isLargeScreen} 
-                onShowCart={() => setShowCart(!showCart)} 
-                onViewDetails={openRoomDetails} 
-                onAddToCart={addToCart} 
+            <RoomList
+                rooms={rooms}
+                cart={cart}
+                isLargeScreen={isLargeScreen}
+                onShowCart={() => setShowCart(!showCart)}
+                onViewDetails={openRoomDetails}
+                onAddToCart={addToCart}
             />
 
-            {/* Floating Cart Panel */}
+         
             {(showCart && cart.length > 0) && (
-                <Cart 
-                    cart={cart} 
-                    isLargeScreen={isLargeScreen} 
-                    onClose={() => setShowCart(false)} 
-                    onRemoveItem={removeFromCart} 
+                <Cart
+                    cart={cart}
+                    isLargeScreen={isLargeScreen}
+                    onClose={() => setShowCart(false)}
+                    onRemoveItem={removeFromCart}
+                    checkin={checkin}
+        checkout={checkout}
                 />
             )}
         </div>

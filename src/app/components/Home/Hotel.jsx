@@ -21,7 +21,8 @@ export default function Hotel() {
     const [isMobile, setIsMobile] = useState(false);
     const swiperRef = useRef(null);
     const touchTimeoutRef = useRef(null);
-
+console.log(data);
+   
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 640);
@@ -38,12 +39,10 @@ export default function Hotel() {
         async function fetchData() {
             try {
                 setLoading(true);
-                const result = await getAllHotels();
+                const result = (await getAllHotels()).slice(0, 21);
                 // Filter out hotels with null prices or invalid data
-                const validHotels = result.filter(hotel => 
-                    hotel.lowest_price && hotel.lowest_price > 0
-                );
-                setData(validHotels);
+               
+                setData(result);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -77,7 +76,7 @@ export default function Hotel() {
             if (touchTimeoutRef.current) clearTimeout(touchTimeoutRef.current);
             touchTimeoutRef.current = setTimeout(() => {
                 startAutoplay();
-            }, 3000);
+            }, 5000);
         }
     };
 
@@ -110,7 +109,7 @@ export default function Hotel() {
                         initialSlide={1}
                         speed={isMobile ? 1000 : 1000}
                         autoplay={{
-                            delay: 2000,
+                            delay: 5000,
                             disableOnInteraction: false,
                             pauseOnMouseEnter: true,
                         }}
@@ -177,7 +176,7 @@ export default function Hotel() {
                         }}
                         className="w-full md:w-[90%] lg:w-[89%] mx-auto"
                     >
-                        {data.map((hotel) => (
+                        {data.slice(0, 21).map((hotel) => (
                             <SwiperSlide key={hotel.hotel_id} className=" h-auto">
                                 <div className="relative rounded-xl overflow-hidden shadow-lg h-full group flex flex-col">
                                     <div className="relative h-48 sm:h-56 md:h-64 lg:h-64 w-full bg-gray-200">
@@ -218,7 +217,7 @@ export default function Hotel() {
                                                     }}
                                                     className="text-sm px-4 py-2 text-white font-medium rounded-md hover:opacity-90 transition-opacity flex items-center"
                                                 >
-                                                    See Details
+                                                    Details
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 ml-1">
                                                         <path fillRule="evenodd" d="M5 10a.75.75 0 01.75-.75h6.638L10.23 7.29a.75.75 0 111.04-1.08l3.5 3.25a.75.75 0 010 1.08l-3.5 3.25a.75.75 0 11-1.04-1.08l2.158-1.96H5.75A.75.75 0 015 10z" clipRule="evenodd" />
                                                     </svg>

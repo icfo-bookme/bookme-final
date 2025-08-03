@@ -97,7 +97,7 @@ export default function Visa() {
                         initialSlide={1}
                         speed={isMobile ? 1000 : 1000}
                         autoplay={{
-                            delay: 2000,
+                            delay: 5000,
                             disableOnInteraction: false,
                             pauseOnMouseEnter: true,
                         }}
@@ -201,7 +201,7 @@ export default function Visa() {
                                                 style={{
                                                     background: "linear-gradient(90deg, #313881, #0678B4)",
                                                 }}
-                                                className="text-xs sm:text-sm lg:text-[15px] px-3 sm:px-4 py-2 lg:py-2.5 text-white font-semibold rounded-md hover:opacity-90 transition-opacity flex items-center"
+                                                 className="text-sm px-4 py-2 mr-3 text-white font-medium rounded-md hover:opacity-90 transition-opacity flex items-center"
                                             >
                                                 Details
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 ml-1 lg:w-4 lg:h-4">

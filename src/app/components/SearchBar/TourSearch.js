@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import SearchButton from "../../../utils/SearchButton";
 import getTourDestination from "@/services/getTourDestination";
 import { useRouter } from "next/navigation";
+import { LuMapPin } from "react-icons/lu";
 
 const TourSearch = () => {
   const router = useRouter();
@@ -34,8 +35,6 @@ const TourSearch = () => {
       } catch (error) {
         setError("Failed to load destinations");
         console.error("Error loading destinations:", error);
-      } finally {
-
       }
     };
 
@@ -173,8 +172,6 @@ const TourSearch = () => {
     setShowSuggestions(false);
   };
 
-
-
   if (error) {
     return (
       <div className="bg-white max-w-5xl mx-auto pb-6 text-center">
@@ -193,16 +190,21 @@ const TourSearch = () => {
     <div className="bg-white max-w-5xl mx-auto pb-6 text-blue-950 relative">
       <form onSubmit={handleSearch}>
         <div className="grid grid-cols-1 gap-4 relative" ref={searchRef}>
-          <div className="space-y-1">
+          <div className="space-y-1 relative">
             <label className="block text-sm text-blue-950">Location/Tour</label>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              onFocus={handleSearchFocus}
-              placeholder="Search destinations..."
-              className="p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg"
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <LuMapPin className="h-5 w-5 text-blue-600" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onFocus={handleSearchFocus}
+                placeholder="Search destinations..."
+                className="p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg pl-10"
+              />
+            </div>
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
                 {suggestions.map((destination, idx) => (

@@ -1,14 +1,41 @@
-import Image from 'next/image';
+import { useEffect } from 'react';
 
 const RoomDetailsModal = ({ room, onClose }) => {
+    // Handle click outside the modal
+    const handleOutsideClick = (e) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
+    useEffect(() => {
+        const handleEscapeKey = (e) => {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        document.addEventListener('keydown', handleEscapeKey);
+        return () => {
+            document.removeEventListener('keydown', handleEscapeKey);
+        };
+    }, [onClose]);
+
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 md:p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 md:p-4"
+            onClick={handleOutsideClick}
+        >
+            <div 
+                className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <div className="bg-gray-300 flex justify-between items-center border-b p-4">
                     <h2 className="text-xl font-bold">Room Details</h2>
                     <button
                         onClick={onClose}
                         className="text-gray-500 hover:text-gray-700"
+                        aria-label="Close modal"
                     >
                         <i className="fa-solid fa-times text-2xl"></i>
                     </button>
@@ -51,7 +78,6 @@ const RoomDetailsModal = ({ room, onClose }) => {
                         </div>
                         <hr />
 
-
                         <div className="flex justify-between text-xs gap-2 -mt-5">
                             <p className="w-[40%]">
                                 <span className="font-semibold text-sm">Room Type: </span> {room.room_type}
@@ -73,6 +99,25 @@ const RoomDetailsModal = ({ room, onClose }) => {
                         <hr />
                     </div>
 
+                    {/* Feature Summary */}
+                    {room.feature_summary?.length > 0 && (
+                        <div className="mb-6">
+                            <h4 className="font-medium text-blue-900 border-b pb-1 mb-3">Key Features</h4>
+                            <div className="flex flex-wrap gap-3">
+                                {room.feature_summary.map((feature) => (
+                                    <div key={feature.id} className="flex items-center bg-gray-100 px-3 py-1 rounded-full">
+                                        {feature.icon_class ? (
+                                            <i className={`${feature.icon_class} mr-2 text-blue-600 text-sm`}></i>
+                                        ) : (
+                                            <i className="fa fa-check mr-2 text-blue-600 text-sm"></i>
+                                        )}
+                                        <span className="text-sm">{feature.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Features by Category */}
                     {room.features_by_category?.length > 0 ? (
                         <div className="mb-6">
@@ -84,15 +129,23 @@ const RoomDetailsModal = ({ room, onClose }) => {
                                             {Array.isArray(category.features) ? (
                                                 category.features.map((feature) => (
                                                     <div key={feature.id} className="flex items-start">
-                                                        <i className="fa fa-check mt-1 mr-2 text-blue-900 text-sm"></i>
-                                                        <span>{feature.name}</span>
+                                                        {feature.icon_class ? (
+                                                            <i className={`${feature.icon_class} mt-1 mr-2 text-blue-900 text-sm`}></i>
+                                                        ) : (
+                                                            <i className="fa fa-check mt-1 mr-2 text-blue-900 text-sm"></i>
+                                                        )}
+                                                        <span className="text-sm">{feature.name}</span>
                                                     </div>
                                                 ))
                                             ) : (
                                                 Object.values(category.features).map((feature) => (
                                                     <div key={feature.id} className="flex items-start">
-                                                        <i className="fa fa-check mt-1 mr-2 text-blue-900 text-sm"></i>
-                                                        <span>{feature.name}</span>
+                                                        {feature.icon_class ? (
+                                                            <i className={`${feature.icon_class} mt-1 mr-2 text-blue-900 text-sm`}></i>
+                                                        ) : (
+                                                            <i className="fa fa-check mt-1 mr-2 text-blue-900 text-sm"></i>
+                                                        )}
+                                                        <span className="text-sm">{feature.name}</span>
                                                     </div>
                                                 ))
                                             )}

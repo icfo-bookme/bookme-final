@@ -74,7 +74,7 @@ export default function PromotionsPage() {
             if (touchTimeoutRef.current) clearTimeout(touchTimeoutRef.current);
             touchTimeoutRef.current = setTimeout(() => {
                 startAutoplay();
-            }, 3000);
+            }, 5000);
         }
     };
 
@@ -107,7 +107,7 @@ export default function PromotionsPage() {
                         initialSlide={1}
                         speed={isMobile ? 1000 : 1000}
                         autoplay={{
-                            delay: 2000,
+                            delay: 5000,
                             disableOnInteraction: false,
                             pauseOnMouseEnter: true,
                         }}

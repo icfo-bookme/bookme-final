@@ -54,7 +54,7 @@ const MobileSearchForm = ({
         handleSearch(e);
         setShowMobileSearch(false);
       }} 
-      className=" md:hidden w-[95%] mx-auto p-4 bg-gray-200 rounded-lg"
+      className=" md:hidden  mx-auto p-4 w-[95%] border border-gray-200 rounded-lg"
     >
       <div className="flex flex-col gap-4">
         {/* Header with title and close button */}

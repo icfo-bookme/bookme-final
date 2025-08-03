@@ -7,7 +7,7 @@ const HotelHeroSection = () => {
       <div
         className="h-[30vh] md:h-[60vh] w-full bg-cover bg-center"
         style={{
-          backgroundImage: "url('/hotel.jpg')",
+          backgroundImage: "url('/image.png')",
         }}
       >
         <div className="absolute inset-0"></div>

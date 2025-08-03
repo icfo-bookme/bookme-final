@@ -7,16 +7,26 @@ import HotelPolicies from './Policies';
 import HotelCarousel from './HotelSlider';
 import HotelDetails from './hoteldetails';
 
-export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
+export default function HotelHashRoute({ hotelId, initialHotelDetails, checkin, checkout }) {
   const [hotelDetails, setHotelDetails] = useState(initialHotelDetails);
-  const [activeSection, setActiveSection] = useState('Summary');
+  const [activeSection, setActiveSection] = useState('rooms');
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(!initialHotelDetails);
+  const [navScrollIndex, setNavScrollIndex] = useState(0);
 
   const sectionsRef = useRef({});
   const observerRef = useRef(null);
   const navRef = useRef(null);
+  const navContainerRef = useRef(null);
+
+  const navItems = [
+    { id: 'rooms', label: 'Rooms', icon: 'fa-bed' },
+    { id: 'facilities', label: 'Facilities', icon: 'fa-wifi' },
+    { id: 'Summary', label: 'Summary', icon: 'fa-info-circle' },
+    { id: 'nearby', label: "What's Nearby", icon: 'fa-location-dot' },
+    { id: 'policy', label: 'Policies', icon: 'fa-clipboard-list' }
+  ];
 
   useEffect(() => {
     const checkMobile = () => {
@@ -75,15 +85,6 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
       if (section) observerRef.current.observe(section);
     });
 
-    const handleInitialHash = () => {
-      const hash = window.location.hash.substring(1) || 'Summary';
-      if (sectionsRef.current[hash]) {
-        setTimeout(() => scrollToSection(hash, false), 100);
-      }
-    };
-
-    handleInitialHash();
-
     return () => {
       if (observerRef.current) observerRef.current.disconnect();
     };
@@ -109,6 +110,23 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
     scrollToSection(sectionId);
   };
 
+  const handleNavScroll = (direction) => {
+    if (direction === 'prev' && navScrollIndex > 0) {
+      setNavScrollIndex(navScrollIndex - 1);
+    } else if (direction === 'next' && navScrollIndex < navItems.length - 3) {
+      setNavScrollIndex(navScrollIndex + 1);
+    }
+  };
+
+  const toggleDescription = () => {
+    setShowFullDescription(!showFullDescription);
+  };
+
+  const getVisibleNavItems = () => {
+    if (!isMobile) return navItems;
+    return navItems.slice(navScrollIndex, navScrollIndex + 3);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -125,7 +143,7 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
         </div>
         <h3 className="text-lg font-medium text-gray-800 mb-2">Failed to load hotel details</h3>
         <p className="text-gray-600 max-w-md">
-          We couldnot load the hotel information. Please try refreshing the page.
+          We could not load the hotel information. Please try refreshing the page.
         </p>
       </div>
     );
@@ -134,18 +152,6 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
   const nearbyLocations = hotelDetails.near_by
     ? hotelDetails.near_by.split('|').map(loc => loc.trim()).filter(loc => loc)
     : [];
-
-  const navItems = [
-    { id: 'Summary', label: 'Summary', icon: 'fa-info-circle' },
-    { id: 'rooms', label: 'Rooms', icon: 'fa-bed' },
-    { id: 'nearby', label: "What's Nearby", icon: 'fa-location-dot' },
-    { id: 'facilities', label: 'Facilities', icon: 'fa-wifi' },
-    { id: 'policy', label: 'Policies', icon: 'fa-clipboard-list' }
-  ];
-
-  const toggleDescription = () => {
-    setShowFullDescription(!showFullDescription);
-  };
 
   const truncatedDescription = hotelDetails.description
     ? hotelDetails.description.length > 290
@@ -158,29 +164,83 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
       {/* Navigation Bar - Sticky and responsive */}
       <div
         ref={navRef}
-        className="sticky top-14 bg-white z-30 border-b shadow-sm"
+        className="sticky top-14 bg-white z-30 border-b rounded-lg shadow-sm"
       >
         <div className="container mx-auto px-2 sm:px-4">
-          <div className="flex overflow-x-auto py-3 hide-scrollbar">
-            <div className="flex space-x-1 min-w-max">
-              {navItems.map((item) => (
-                <a
-                  key={item.id}
-                  href={`#${item.id}`}
-                  onClick={(e) => handleNavClick(item.id, e)}
-                  className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${activeSection === item.id
-                      ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-inner'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+          <div className="flex py-3">
+            {isMobile && navScrollIndex > 0 && (
+              <button
+                onClick={() => handleNavScroll('prev')}
+                className="p-2 rounded-full hover:bg-gray-100 mr-1"
+                aria-label="Previous navigation items"
+              >
+                <i className="fa-solid fa-chevron-left text-gray-600"></i>
+              </button>
+            )}
+
+            <div
+              ref={navContainerRef}
+              className="flex-1 flex overflow-x-auto hide-scrollbar"
+            >
+              <div className="flex space-x-1 min-w-max ">
+                {getVisibleNavItems().map((item) => (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    onClick={(e) => handleNavClick(item.id, e)}
+                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
+                      activeSection === item.id
+                        ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-inner'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
                     }`}
-                >
-                  <i className={`fa-solid ${item.icon} text-xs`}></i>
-                  {item.label}
-                </a>
-              ))}
+                  >
+                    <i className={`fa-solid ${item.icon} text-xs`}></i>
+                    {item.label}
+                  </a>
+                ))}
+              </div>
             </div>
+
+            {isMobile && navScrollIndex < navItems.length - 3 && (
+              <button
+                onClick={() => handleNavScroll('next')}
+                className="p-2 rounded-full hover:bg-gray-100 ml-1"
+                aria-label="Next navigation items"
+              >
+                <i className="fa-solid fa-chevron-right text-gray-600"></i>
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Rooms Section */}
+      <section
+        ref={(el) => (sectionsRef.current['rooms'] = el)}
+        id="rooms"
+        className="scroll-mt-26 mt-6"
+      >
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
+            <i className="fa-solid fa-bed text-blue-600"></i>
+            Available Rooms
+          </h2>
+          <RoomComponent hotel_id={hotelId} checkin={checkin} checkout={checkout} />
+        </div>
+      </section>
+
+      {/* Facilities Section */}
+      <section
+        ref={(el) => (sectionsRef.current['facilities'] = el)}
+        id="facilities"
+        className="bg-white rounded-lg shadow-sm mt-5 scroll-mt-24"
+      >
+        <h2 className="text-lg sm:text-xl pt-4 font-bold text-gray-800 m-4 sm:mb-6 flex items-center gap-2">
+          <i className="fa-solid fa-wifi text-blue-600"></i>
+          Hotel Facilities
+        </h2>
+        <FacilitiesByCategory categories={hotelDetails.category_wise_features || {}} />
+      </section>
 
       {/* Main Layout - Responsive grid */}
       <section
@@ -188,37 +248,41 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
         id="Summary"
         className="scroll-mt-24"
       >
-        <div className="p-2 md:p-4 rounded-lg mx-auto grid grid-cols-1 bg-white md:grid-cols-10 gap-4">
+        <div className="p-2 md:p-4 mt-5 rounded-lg mx-auto grid grid-cols-1 bg-white md:grid-cols-10 gap-4">
           <div className="col-span-1 md:col-span-7">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
+              <i className="fa-solid fa-info-circle text-blue-600"></i>
+              Hotel Summary
+            </h2>
             <HotelCarousel images={hotelDetails?.images || []} />
           </div>
-          <div className="col-span-1 md:col-span-3">
+          <div className="col-span-1 pt-8 md:col-span-3">
             <HotelDetails hotel={hotelDetails} />
           </div>
         </div>
 
         {/* Hotel Description Section */}
         <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm mt-4">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">Hotel Description</h1>
+          <h1 className="text-xl sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">Hotel Description</h1>
           <div className='flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6'>
-           {hotelDetails?.number_of_rooms && (
-             <div className='rounded-lg flex items-center gap-1 font-medium'>
-               <i className="fa-solid fa-door-closed"></i>
-               <span>Rooms: {hotelDetails.number_of_rooms || 'N/A'}</span>
-             </div>
-           )}
-           {hotelDetails?.Number_of_Floors && (
-             <div className="text-gray-600 flex items-center gap-1 font-medium">
-               <i className="fa-solid fa-building"></i>
-               <span>Floors: {hotelDetails.Number_of_Floors || 'N/A'}</span>
-             </div>
-           )}
-           {hotelDetails?.Year_of_construction && (
-             <div className="text-gray-600 flex items-center gap-1 font-medium">
-               <i className="fa-solid fa-calendar"></i>
-               <span>Built: {hotelDetails.Year_of_construction || 'N/A'}</span>
-             </div>
-           )}
+            {hotelDetails?.number_of_rooms && (
+              <div className='rounded-lg flex items-center gap-1 font-medium'>
+                <i className="fa-solid fa-door-closed"></i>
+                <span>Rooms: {hotelDetails.number_of_rooms || 'N/A'}</span>
+              </div>
+            )}
+            {hotelDetails?.Number_of_Floors && (
+              <div className="text-gray-600 flex items-center gap-1 font-medium">
+                <i className="fa-solid fa-building"></i>
+                <span>Floors: {hotelDetails.Number_of_Floors || 'N/A'}</span>
+              </div>
+            )}
+            {hotelDetails?.Year_of_construction && (
+              <div className="text-gray-600 flex items-center gap-1 font-medium">
+                <i className="fa-solid fa-calendar"></i>
+                <span>Built: {hotelDetails.Year_of_construction || 'N/A'}</span>
+              </div>
+            )}
           </div>
 
           {hotelDetails.description && (
@@ -244,21 +308,6 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
               )}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Rooms Section */}
-      <section
-        ref={(el) => (sectionsRef.current['rooms'] = el)}
-        id="rooms"
-        className="scroll-mt-24 mt-6"
-      >
-        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
-            <i className="fa-solid fa-bed text-blue-600"></i>
-            Available Rooms
-          </h2>
-          <RoomComponent hotel_id={hotelId} />
         </div>
       </section>
 
@@ -295,19 +344,6 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails }) {
             <p className="text-gray-500 text-sm sm:text-base">No nearby locations information available</p>
           </div>
         )}
-      </section>
-
-      {/* Facilities Section */}
-      <section
-        ref={(el) => (sectionsRef.current['facilities'] = el)}
-        id="facilities"
-        className="bg-white rounded-lg shadow-sm p-4 sm:p-6 scroll-mt-24 mt-6"
-      >
-        <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
-          <i className="fa-solid fa-wifi text-blue-600"></i>
-          Hotel Facilities
-        </h2>
-        <FacilitiesByCategory categories={hotelDetails.category_wise_features || {}} />
       </section>
 
       {/* Policies Section */}

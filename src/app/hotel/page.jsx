@@ -36,9 +36,9 @@ export default async function HotelHome() {
       <HotelHeroSection />
 
       <DestinationSlider />
-      <main className="container mx-auto px-4 xs:px-6 mt-12  pb-12 sm:pb-16">
-        <section className=" sm:mb-16">
-          <h2 className="text-xl sm:text-2xl md:text-2xl font-bold text-center mb-6 sm:mb-8 text-blue-950">
+      <main className="container mx-auto ">
+        <section className=" ">
+          <h2 className="text-xl sm:text-2xl md:text-2xl font-bold text-center mb-2 text-blue-950">
             Best Hotels for Your Next Trip
           </h2>
 

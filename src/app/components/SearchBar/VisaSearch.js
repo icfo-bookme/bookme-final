@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import SearchButton from "../../../utils/SearchButton";
 import getCountries from "@/services/visa/getCountries";
+import { LuMapPin } from "react-icons/lu";
 
 const VisaSearch = () => {
   const router = useRouter();
@@ -148,16 +149,19 @@ const VisaSearch = () => {
       <form onSubmit={onSubmit}>
         <div className="space-y-1">
           <label className="block text-sm text-blue-950">Destination Country</label>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={onChange}
-            onFocus={onFocus}
-            placeholder="Search visa destinations..."
-            className="p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg"
-            aria-autocomplete="list"
-            aria-controls="visa-suggestions"
-          />
+           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <LuMapPin className="h-5 w-5 text-blue-600" />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={onChange}
+              onFocus={onFocus}
+              placeholder="Search visa destinations..."
+              className="p-2 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg pl-10"
+              aria-autocomplete="list"
+              aria-controls="visa-suggestions"
+            />
           {showSuggestions && suggestions.length > 0 && (
             <div
               id="visa-suggestions"

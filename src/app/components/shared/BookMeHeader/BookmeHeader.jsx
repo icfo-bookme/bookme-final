@@ -108,7 +108,9 @@ const BookMeHeader = () => {
                 >
                   HOTELS
                 </Link>
-               <div className="relative group" ref={packageTourRef}>
+                
+                {/* Ship Tickets Dropdown */}
+                <div className="relative group" ref={packageTourRef}>
                   <button
                     onClick={togglePackageTour}
                     className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200 flex items-center gap-1"
@@ -137,39 +139,40 @@ const BookMeHeader = () => {
                     </div>
                   )}
                 </div>
+                
                 <Link
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
                   FLIGHTS
                 </Link>
- <Link
+                
+                <Link
                   href="/visa"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
                   VISA
                 </Link>
-                {/* Package Tour with Dropdown */}
-                 <Link
-                  href="/contact"
-                  className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
-                >
-                  TOUR PACKAGES 
-                </Link>
-
-               
+                
                 <Link
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
-                  ACTIVITY
+                  TOUR PACKAGES
                 </Link>
-
+                
                 <Link
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
-                  CARS
+                  ACTIVITIES
+                </Link>
+                
+                <Link
+                  href="/contact"
+                  className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
+                >
+                  CAR RENTAL
                 </Link>
               </div>
 
@@ -282,47 +285,19 @@ const BookMeHeader = () => {
                       className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                       onClick={closeMobileMenu}
                     >
-                      <span className="font-medium">Hotel</span>
+                      <span className="font-medium">Hotels</span>
                       <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </li>
-                  <li>
-                    <Link
-                      href="/contact"
-                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
-                      onClick={closeMobileMenu}
-                    >
-                      <span className="font-medium">Ship Details</span>
-                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/contact"
-                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
-                      onClick={closeMobileMenu}
-                    >
-                      <span className="font-medium">Flight</span>
-                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/visa"
-                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
-                      onClick={closeMobileMenu}
-                    >
-                      <span className="font-medium">VISA</span>
-                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </li>
+                  
+                  {/* Ship Tickets Dropdown */}
                   <li>
                     <div className="flex flex-col">
                       <button
                         onClick={togglePackageTour}
                         className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                       >
-                        <span className="font-medium">PACKAGE TOUR</span>
+                        <span className="font-medium">Ship Tickets</span>
                         <FaChevronRight className={`text-blue-400 transition-transform duration-200 ${isPackageTourOpen ? 'rotate-90' : ''}`} />
                       </button>
 
@@ -350,17 +325,51 @@ const BookMeHeader = () => {
                       className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                       onClick={closeMobileMenu}
                     >
-                      <span className="font-medium">Activity</span>
+                      <span className="font-medium">Flights</span>
                       <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </li>
-                   <li>
+                  
+                  <li>
+                    <Link
+                      href="/visa"
+                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
+                      onClick={closeMobileMenu}
+                    >
+                      <span className="font-medium">Visa</span>
+                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </li>
+                  
+                  <li>
                     <Link
                       href="/contact"
                       className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                       onClick={closeMobileMenu}
                     >
-                      <span className="font-medium">Cars</span>
+                      <span className="font-medium">Tour Packages</span>
+                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </li>
+                  
+                  <li>
+                    <Link
+                      href="/contact"
+                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
+                      onClick={closeMobileMenu}
+                    >
+                      <span className="font-medium">Activities</span>
+                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                  </li>
+                  
+                  <li>
+                    <Link
+                      href="/contact"
+                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
+                      onClick={closeMobileMenu}
+                    >
+                      <span className="font-medium">Car Rental</span>
                       <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </li>

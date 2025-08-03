@@ -86,7 +86,7 @@ export default async function Home() {
       </section>
 
       {/* Blog Section */}
-      <section className="bg-gray-100 py-10">
+      <section className="bg-white py-10">
         <div className="w-full max-w-screen-xl mx-auto px-4">
           <HpmepageBlog />
         </div>

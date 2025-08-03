@@ -20,7 +20,7 @@ export default function DestinationSlider() {
     const [isMobile, setIsMobile] = useState(false);
     const swiperRef = useRef(null);
     const touchTimeoutRef = useRef(null);
-
+   
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 640);
@@ -41,7 +41,7 @@ export default function DestinationSlider() {
                 if (!response.ok) throw new Error('Failed to fetch promotions');
               
                 const data = await response.json();
-                
+                 console.log(data);
                 setPromotions(data);
             } catch (err) {
                 setError(err.message);
@@ -172,7 +172,7 @@ export default function DestinationSlider() {
                         }} 
                         className="w-full md:w-[90%] lg:w-[95%] rounded-lg mx-auto"
                     >
-                         {promotions.slice(0, 12).map((promo) => (
+                         {promotions.map((promo) => (
                             <SwiperSlide key={promo.id} className="h-full">
                                 <Link href={`/hotel/list?locationID=${promo.id}`} className="h-full block">
                                     <div className="relative rounded-xl overflow-hidden shadow-lg h-72 group transition-transform duration-300 hover:shadow-xl">

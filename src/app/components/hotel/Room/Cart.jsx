@@ -1,9 +1,25 @@
+'use client';
 import Image from 'next/image';
 import { Button } from 'flowbite-react';
 
-const Cart = ({ cart, isLargeScreen, onClose, onRemoveItem }) => {
+const Cart = ({ cart, isLargeScreen, onClose, onRemoveItem, checkin, checkout }) => {
+    // Calculate number of nights
+    const calculateNights = () => {
+        if (!checkin || !checkout) return 1;
+        const diffTime = Math.abs(new Date(checkout) - new Date(checkin));
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    };
+
+    // Calculate total price for each item including nights
+    const calculateItemTotal = (item) => {
+        const nights = calculateNights();
+        return item.total * nights;
+    };
+
+    // Calculate grand total
     const calculateTotal = () => {
-        return cart.reduce((sum, item) => sum + item.total, 0);
+        const nights = calculateNights();
+        return cart.reduce((sum, item) => sum + (item.total * nights), 0);
     };
 
     return (
@@ -19,6 +35,22 @@ const Cart = ({ cart, isLargeScreen, onClose, onRemoveItem }) => {
                     </button>
                 </div>
                 <div className={`overflow-y-auto ${isLargeScreen ? 'h-[calc(80vh-120px)]' : 'max-h-[60vh]'} p-3`}>
+                    {/* Display check-in/check-out dates */}
+                    <div className="bg-blue-50 p-2 mb-3 rounded">
+                        <div className="flex justify-between text-sm">
+                            <span className="font-medium">Check-in:</span>
+                            <span>{new Date(checkin).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm mt-1">
+                            <span className="font-medium">Check-out:</span>
+                            <span>{new Date(checkout).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm mt-1 font-semibold">
+                            <span>Nights:</span>
+                            <span>{calculateNights()}</span>
+                        </div>
+                    </div>
+
                     {cart.map((item, index) => (
                         <div key={index} className="border-b border-gray-200 py-3 flex items-start">
                             {item.image && (
@@ -37,9 +69,12 @@ const Cart = ({ cart, isLargeScreen, onClose, onRemoveItem }) => {
                                 <p className="text-xs text-gray-600">{item.type}</p>
                                 <p className="text-xs text-gray-600">{item.adults} Adults, {item.children} Children</p>
                                 <p className="text-xs text-gray-600">Breakfast: {item.breakfast}</p>
+                                <p className="text-xs mt-1">
+                                    <span className="font-medium">BDT {item.price}</span> × {calculateNights()} nights
+                                </p>
                             </div>
                             <div className="text-right">
-                                <p className="font-bold text-sm">BDT {item.price}</p>
+                                <p className="font-bold text-sm">BDT {calculateItemTotal(item)}</p>
                                 <button 
                                     onClick={() => onRemoveItem(index)}
                                     className="text-red-500 text-xs hover:text-red-700"

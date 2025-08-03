@@ -3,11 +3,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import getDestination from "@/services/hotel/getDestination";
-
 import SearchButton from "../../../utils/SearchButton";
 import DatePickerModal from "@/utils/DatePickerModal";
 import GuestModal from "@/utils/GuestModal";
-
+import { FaStar, FaMapMarkerAlt, FaSearch, FaMapMarker } from "react-icons/fa";
+import { LuMapPin } from "react-icons/lu";
 const HotelSearch = () => {
   const router = useRouter();
   const [showGuestModal, setShowGuestModal] = useState(false);
@@ -37,7 +37,7 @@ const HotelSearch = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-     
+      setIsLoading(true);
       try {
         const destinationsData = await getDestination();
         setDestinations(destinationsData);
@@ -71,85 +71,186 @@ const HotelSearch = () => {
 
   const guestText = `${rooms} Room${rooms > 1 ? 's' : ''}, ${adults} Adult${adults > 1 ? 's' : ''}${children > 0 ? `, ${children} Child${children > 1 ? 'ren' : ''}` : ''}`;
 
-  // Levenshtein Distance for fuzzy typo handling
-  const levenshteinDistance = (a, b) => {
-    const m = a.length;
-    const n = b.length;
-    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  const calculateMatchScore = (destination, query) => {
+    if (!query) return 0;
 
-    for (let i = 0; i <= m; i++) dp[i][0] = i;
-    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    const destName = destination?.name?.toLowerCase() || '';
+    const destCountry = destination?.country?.toLowerCase() || '';
+    const destFullText = `${destName}, ${destCountry}`.toLowerCase();
+    const queryText = query.toLowerCase().trim();
 
-    for (let i = 1; i <= m; i++) {
-      for (let j = 1; j <= n; j++) {
-        if (a[i - 1] === b[j - 1]) {
-          dp[i][j] = dp[i - 1][j - 1];
-        } else {
-          dp[i][j] = Math.min(
-            dp[i - 1][j] + 1,
-            dp[i][j - 1] + 1,
-            dp[i - 1][j - 1] + 1
-          );
+    if (destFullText === queryText) return 1000;
+
+    const destWords = destFullText.split(/[,\s]+/);
+    const startsWithWord = destWords.some(word => word.startsWith(queryText));
+    if (startsWithWord) return 800;
+
+    const queryWords = queryText.split(/\s+/);
+    const exactWordMatches = queryWords.filter(qw =>
+      destWords.some(dw => dw === qw)
+    ).length;
+    if (exactWordMatches > 0) return 700 + (exactWordMatches * 50);
+
+    const substringMatches = [];
+    for (let i = 0; i <= queryText.length - 2; i++) {
+      for (let j = i + 2; j <= queryText.length; j++) {
+        const substring = queryText.substring(i, j);
+        const regex = new RegExp(substring, 'gi');
+        let match;
+        while ((match = regex.exec(destFullText)) !== null) {
+          substringMatches.push({
+            substring,
+            position: match.index,
+            length: substring.length
+          });
         }
       }
     }
 
-    return dp[m][n];
-  };
+    if (substringMatches.length > 0) {
+      const longestMatch = substringMatches.reduce((longest, current) =>
+        current.length > longest.length ? current : longest
+        , { length: 0 });
 
-  // Final scoring algorithm: fuzzy + character match
-  const calculateMatchScore = (destination, query) => {
-    const destText = `${destination.name}, ${destination.country}`.toLowerCase().replace(/[^a-z]/g, "");
-    const queryText = query.toLowerCase().replace(/[^a-z]/g, "");
+      const positionBonus = longestMatch.position === 0 ? 100 :
+        (longestMatch.position < 5 ? 50 : 0);
 
-    if (!queryText) return 0;
+      const lengthBonus = Math.pow(longestMatch.length, 2) * 5;
 
-    // Levenshtein Distance Score
-    const levDist = levenshteinDistance(queryText, destText);
-    const maxLen = Math.max(destText.length, queryText.length);
-    const levScore = Math.max(0, 100 - (levDist / maxLen) * 100);
+      const countBonus = Math.min(substringMatches.length * 15, 100);
 
-    // Character Overlap Score
-    const destFreq = {};
-    const queryFreq = {};
-    for (const char of destText) destFreq[char] = (destFreq[char] || 0) + 1;
-    for (const char of queryText) queryFreq[char] = (queryFreq[char] || 0) + 1;
+      const isWordBoundary = destFullText[longestMatch.position - 1] === ' ' ||
+        longestMatch.position === 0;
+      const boundaryBonus = isWordBoundary ? 50 : 0;
 
-    let matchScore = 0;
-    let totalPossible = 0;
-
-    for (const char in destFreq) {
-      const matchCount = Math.min(destFreq[char], queryFreq[char] || 0);
-      matchScore += matchCount;
-      totalPossible += destFreq[char];
+      return 500 + positionBonus + lengthBonus + countBonus + boundaryBonus;
     }
 
-    const overlapScore = (matchScore / totalPossible) * 100;
+    let sequenceScore = 0;
+    let queryPos = 0;
+    let consecutiveMatches = 0;
+    let maxConsecutive = 0;
 
-    // Weighted total score
-    const finalScore = 0.6 * levScore + 0.4 * overlapScore;
-    return Math.round(finalScore);
+    for (let i = 0; i < queryText.length; i++) {
+      const queryChar = queryText[i];
+      const foundPos = destFullText.indexOf(queryChar, queryPos);
+
+      if (foundPos !== -1) {
+        if (foundPos === queryPos) {
+          consecutiveMatches++;
+          maxConsecutive = Math.max(maxConsecutive, consecutiveMatches);
+          sequenceScore += 10;
+        } else if (foundPos - queryPos <= 2) {
+          sequenceScore += 5;
+          consecutiveMatches = 1;
+        } else {
+          sequenceScore += 2;
+          consecutiveMatches = 0;
+        }
+        queryPos = foundPos + 1;
+      } else {
+        consecutiveMatches = 0;
+      }
+    }
+
+    const consecutiveBonus = maxConsecutive >= 3 ? maxConsecutive * 5 : 0;
+    const normalizedSequenceScore = (sequenceScore / queryText.length) * 100 + consecutiveBonus;
+
+    const commonPrefixLength = () => {
+      let i = 0;
+      while (i < queryText.length && i < destFullText.length &&
+        queryText[i] === destFullText[i]) {
+        i++;
+      }
+      return i;
+    };
+
+    const prefixLength = commonPrefixLength();
+    const prefixBonus = prefixLength >= 3 ? prefixLength * 10 : 0;
+
+    const phoneticScore = () => {
+      if (queryText.length < 3) return 0;
+      const firstCharMatch = queryText[0] === destFullText[0] ? 20 : 0;
+      const vowelMatch = queryText.match(/[aeiou]/gi)?.length ===
+        destFullText.match(/[aeiou]/gi)?.length ? 10 : 0;
+      return firstCharMatch + vowelMatch;
+    };
+
+    return Math.min(
+      normalizedSequenceScore + prefixBonus + phoneticScore(),
+      900
+    );
   };
 
-
   const highlightMatches = (text, query) => {
-    if (!query) return text;
+    if (!query || !text) return text;
 
-    const queryChars = new Set(query.toLowerCase());
-    return text.split("").map((char, idx) =>
-      queryChars.has(char.toLowerCase()) ? (
-        <span key={idx} className="font-bold text-blue-600">
-          {char}
+    const lowerText = text.toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    const result = [];
+    let lastIndex = 0;
+
+    const matches = [];
+    for (let i = 0; i <= lowerQuery.length - 2; i++) {
+      for (let j = i + 2; j <= lowerQuery.length; j++) {
+        const substring = lowerQuery.substring(i, j);
+        let pos = lowerText.indexOf(substring);
+        while (pos !== -1) {
+          matches.push({ start: pos, end: pos + substring.length });
+          pos = lowerText.indexOf(substring, pos + 1);
+        }
+      }
+    }
+
+    matches.sort((a, b) => {
+      if (a.start !== b.start) return a.start - b.start;
+      return b.end - a.end;
+    });
+
+    const mergedMatches = [];
+    if (matches.length > 0) {
+      let current = matches[0];
+      for (let i = 1; i < matches.length; i++) {
+        if (matches[i].start <= current.end) {
+          if (matches[i].end > current.end) {
+            current.end = matches[i].end;
+          }
+        } else {
+          mergedMatches.push(current);
+          current = matches[i];
+        }
+      }
+      mergedMatches.push(current);
+    }
+
+    for (const match of mergedMatches) {
+      if (match.start > lastIndex) {
+        result.push(text.substring(lastIndex, match.start));
+      }
+      result.push(
+        <span key={match.start} className="font-bold text-blue-600">
+          {text.substring(match.start, match.end)}
         </span>
-      ) : (
-        char
-      )
-    );
+      );
+      lastIndex = match.end;
+    }
+
+    if (lastIndex < text.length) {
+      result.push(text.substring(lastIndex));
+    }
+
+    return result.length > 0 ? result : text;
   };
 
   const updateSuggestions = (query) => {
     if (!query) {
-      setSuggestions(destinations);
+      const defaultSuggestions = destinations
+        .map(dest => ({
+          ...dest,
+          score: 0,
+          displayName: `${dest.name}, ${dest.country}`
+        }));
+      setSuggestions(defaultSuggestions);
       return;
     }
 
@@ -160,8 +261,17 @@ const HotelSearch = () => {
     }));
 
     const sorted = scoredDestinations
-      .filter(dest => dest.score > 0)
-      .sort((a, b) => b.score - a.score);
+      .filter(dest => dest.score > 50)
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        const aPos = a.displayName.toLowerCase().indexOf(query.toLowerCase());
+        const bPos = b.displayName.toLowerCase().indexOf(query.toLowerCase());
+        if (aPos !== bPos) return aPos - bPos;
+        if (a.displayName.length !== b.displayName.length) {
+          return a.displayName.length - b.displayName.length;
+        }
+        return a.displayName.localeCompare(b.displayName);
+      })
 
     setSuggestions(sorted);
   };
@@ -221,25 +331,24 @@ const HotelSearch = () => {
       weekday: "short",
       month: "short",
       day: "numeric",
-      year: "2-digit",
     }).replace(",", "") || "";
-
-  if (isLoading) {
-    return (
-      <div className="bg-white max-w-5xl mx-auto pb-6 text-center">
-        <div className="animate-pulse text-blue-950">Loading destinations...</div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
       <div className="bg-white max-w-5xl mx-auto pb-6 text-center">
-        <div className="text-red-500">{error}</div>
+        <div className="text-red-500 p-4 bg-red-50 rounded-lg inline-block">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {error}
+        </div>
         <button
           onClick={() => window.location.reload()}
-          className="mt-2 px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800"
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto"
         >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+          </svg>
           Retry
         </button>
       </div>
@@ -247,78 +356,86 @@ const HotelSearch = () => {
   }
 
   return (
-    <div className="bg-white max-w-5xl mx-auto pb-6 text-blue-950 relative">
+    <div className=" max-w-5xl rounded-t-lg mx-auto pb-6 text-blue-950 relative">
       <form onSubmit={handleSearch}>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="col-span-2 md:col-span-1 space-y-1 relative" ref={searchRef}>
-            <label className="block text-sm text-blue-950">City/Hotel/Resort/Area</label>
-            <input
-       
-            type="text"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onFocus={handleSearchFocus}
-            placeholder="Search destinations..."
-            className="p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg"
-          />
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-30 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                {suggestions.map((destination, index) => (
-                  <div
-                    key={destination.id}
-                    className="p-3 hover:bg-blue-50 cursor-pointer text-sm sm:text-base flex justify-between items-center"
-                    onClick={() => selectDestination(destination)}
-                  >
-                    <div>
-                      {highlightMatches(destination.name, searchQuery)},{" "}
-                      {highlightMatches(destination.country, searchQuery)}
-                    </div>
-                    {index === 0 && (
-                      <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded whitespace-nowrap">
-                        Best match
-                      </span>
-                    )}
-                  </div>
-                ))}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 rounded-xl shadow-sm">
+          <div className="col-span-2 sm:col-span-1 space-y-1 relative" ref={searchRef}>
+            <label className="block text-sm font-medium text-blue-950">Destination</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <LuMapPin className="h-5 w-5 text-blue-600" />
               </div>
-            )}
-          </div>
-
-          {/* Check-in Date */}
-          <div className="sm:col-span-1 space-y-1 relative">
-            <label className="block text-sm text-blue-950">Check In</label>
-            <div
-              onClick={() => setShowDatePicker(true)}
-              className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white text-sm sm:text-base text-blue-950 font-bold"
-            >
-              {formatDate(checkinDate)}
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onFocus={handleSearchFocus}
+                placeholder="City, hotel, or area"
+                className="pl-9 p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-colors w-full font-medium text-blue-950 text-base"
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute z-30 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-auto">
+                  {suggestions.map((destination) => (
+                    <div
+                      key={destination.id}
+                      className="p-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors flex justify-between items-center"
+                      onClick={() => selectDestination(destination)}
+                    >
+                      <div className="flex-1">
+                        <div className="font-medium text-blue-900">
+                          {highlightMatches(destination.name, searchQuery)}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {highlightMatches(destination.country, searchQuery)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Check-out Date */}
-          <div className="sm:col-span-1 space-y-1 relative">
-            <label className="block text-sm text-blue-950">Check Out</label>
+          <div className="space-y-1 relative">
+            <label className="block text-sm font-medium text-blue-950">Check In</label>
             <div
               onClick={() => setShowDatePicker(true)}
-              className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white text-sm sm:text-base text-blue-950 font-bold"
+              className="p-3 h-12 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-600 transition-colors bg-white flex items-center"
             >
-              {formatDate(checkoutDate)}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="font-medium text-blue-950">{formatDate(checkinDate)}</span>
             </div>
           </div>
 
-          {/* Guests & Rooms */}
-          <div className="col-span-2 md:col-span-1 space-y-1">
+          <div className="space-y-1 relative">
+            <label className="block text-sm font-medium text-blue-950">Check Out</label>
+            <div
+              onClick={() => setShowDatePicker(true)}
+              className="p-3 h-12 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-600 transition-colors bg-white flex items-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="font-medium text-blue-950">{formatDate(checkoutDate)}</span>
+            </div>
+          </div>
+
+          <div className="col-span-2 sm:col-span-1 space-y-1">
             <label className="block text-sm font-medium text-blue-950">Guests & Rooms</label>
             <div
               onClick={() => setShowGuestModal(true)}
-              className="p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-900 transition-colors bg-white"
+              className="p-3 h-12 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-600 transition-colors bg-white flex items-center"
             >
-              <div className="font-bold text-blue-950 text-sm sm:text-base">{guestText}</div>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <span className="font-medium text-blue-950 ">{guestText}</span>
             </div>
           </div>
         </div>
 
-        {/* Date Picker Modal */}
         {showDatePicker && (
           <DatePickerModal
             dateRange={dateRange}
@@ -328,7 +445,6 @@ const HotelSearch = () => {
           />
         )}
 
-        {/* Guest Modal */}
         {showGuestModal && (
           <GuestModal
             adults={adults}
@@ -341,7 +457,6 @@ const HotelSearch = () => {
           />
         )}
 
-        {/* Search Button */}
         <div className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2 -translate-x-1/2 flex justify-end">
           <SearchButton type="submit">Search Hotels</SearchButton>
         </div>

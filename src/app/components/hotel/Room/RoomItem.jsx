@@ -15,18 +15,18 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
     const taxesAndFees = Math.round(discountedPrice * 0.265);
 
     return (
-        <div className="py-4 rounded-lg bg-gray-100 border border-gray-300 mb-4">
+        <div className=" rounded-lg bg-gray-100 border border-gray-300 mb-4">
             {/* Mobile View (sm) */}
             <div className="md:hidden">
                 <div className="border-b border-gray-300">
                     <RoomCarousel images={room.images} key={room.id} />
                 </div>
                 <div className="p-4">
-  <p className='bg-gray-300 text-xs text-gray-800 w-16 rounded-md p-1 font-semibold'>Option {index + 1}</p>
+                    <p className='bg-gray-300 text-xs text-gray-800 w-16 rounded-md p-1 font-semibold'>Option {index + 1}</p>
                     <h2 className="text-xl font-semibold mb-2">{room.room_name}</h2>
                     <div className="text-sm">
                         <p className="text-gray-600 mb-1">
-                           <i className="fa-solid fa-bed mt-1 mr-2"></i> {room.room_type}
+                            <i className="fa-solid fa-bed mt-1 mr-2"></i> {room.room_type}
                         </p>
                         <p className="text-gray-600">
                             <i className="fa-solid fa-user mt-1 mr-2"></i> Maximum Room Capacity: {room.max_adults} Adult {room.complementary_child_occupancy} Child
@@ -47,7 +47,7 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                                         key={amenity.id}
                                         className="flex items-center text-sm bg-gray-200 px-2 py-1 rounded-full"
                                     >
-                                        <i className={`fa fa-check mr-1 text-blue-900`}></i>
+                                        <i className={`${amenity.icon_class} mr-1 text-blue-600`}></i>
                                         {amenity.name}
                                     </span>
                                 ))}
@@ -65,9 +65,9 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
                         <div>
-                          
+
                             <p className='font-bold mt-2 text-lg'>Refundable <i className="fa fa-info-circle" aria-hidden="true"></i></p>
-                            
+
                             <p className="text-gray-600 mt-2 text-sm flex items-center gap-2">
                                 <i className="fa-solid fa-utensils"></i>
                                 Breakfast {room.breakfast_status === 'included' ? 'Included' : 'Not Included'}
@@ -118,9 +118,9 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                 </div>
 
                 {/* Right side - All other information */}
-                <div className="col-span-5 pr-4">
+                <div className="col-span-5 px-4 py-2">
                     {/* Room header section */}
-                    <span className='bg-gray-200 text-gray-800 text-xs rounded-md px-2 py-1  font-semibold'>
+                    <span className='bg-gray-200 text-gray-800 text-xs rounded-md p-2 mt-2  font-semibold'>
                         Option {index + 1}
                     </span>
                     <div className="flex justify-between items-start mb-4">
@@ -128,11 +128,11 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                         <div>
                             <h2 className="text-xl font-bold text-gray-800 mt-1 mb-1">{room.room_name}</h2>
                             <p className="text-gray-600 text-sm">
-                                <i className="fa-solid fa-flag mr-1"></i>{room.room_type}
+                                <i className="fa-solid fa-bed mt-1 mr-2"></i>{room.room_type}
                             </p>
-                             <p className="text-gray-600">
-                             <i className="fa-solid fa-user mt-1 mr-2"></i> Maximum Room Capacity: {room.max_adults} Adult {room.complementary_child_occupancy} Child
-                        </p>
+                            <p className="text-gray-600">
+                                <i className="fa-solid fa-user mt-1 mr-2"></i> Maximum Room Capacity: {room.max_adults} Adult {room.complementary_child_occupancy} Child
+                            </p>
                         </div>
                         <div className="text-right">
                             {room.discount > 0 && (
@@ -154,7 +154,7 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                             </div>
 
                             <div className="space-y-3">
-                               
+
                                 <p className="text-gray-600 text-sm flex items-center gap-2">
                                     <i className="fa-solid fa-utensils text-gray-500"></i>
                                     Breakfast {room.breakfast_status === 'included' ? 'Included' : 'Not Included'}
@@ -201,8 +201,12 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                                         key={amenity.id}
                                         className="flex items-center  border border-gray-300 text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-700"
                                     >
-                                        <i className={`fa fa-check mr-1 text-blue-600`}></i>
-                                        {amenity.name}
+                                        {amenity.icon_class ? (
+                        <i className={`${amenity.icon_class} mr-1 text-blue-600`}></i>
+                    ) : (
+                        <i className="fa fa-check mr-1 text-blue-600"></i>
+                    )}
+                    {amenity.name}
                                     </span>
                                 ))}
                                 {room.feature_summary.length > 6 && (
@@ -220,10 +224,10 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                     {/* Action buttons */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-6">
                         <button
-                            className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1"
+                            className="text-blue-950 hover:text-blue-800 font-medium text-sm flex items-center gap-1"
                             onClick={() => onViewDetails(room)}
                         >
-                            <i className="fa-regular fa-file-lines"></i> View Room Details
+                            <i className="fas fa-eye"></i> View Room Details
                         </button>
 
                         <PrimaryButton onClick={() => onAddToCart(room)}>Add Room</PrimaryButton>

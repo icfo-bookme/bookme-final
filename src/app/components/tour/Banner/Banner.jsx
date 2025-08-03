@@ -31,7 +31,7 @@ export default function Banner({id}) {
   }, []);
 
   return (
-    <section className={`${raleway.className} relative z-10 h-[30vh] lg:h-[70vh]`}>
+    <section className={`${raleway.className} relative z-10 h-[30vh] lg:h-[60vh]`}>
       <Swiper
         modules={[Pagination, Autoplay]}
         pagination={{

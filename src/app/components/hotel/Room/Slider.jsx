@@ -33,8 +33,8 @@ const RoomCarousel = ({ images = [] }) => {
       const isTablet = window.innerWidth < 1024;
 
       // Set heights
-      const newCarouselHeight = isMobile ? 180 : 220;
-      const newThumbsHeight = isMobile ? 60 : 80;
+      const newCarouselHeight = isMobile ? 180 : 320;
+      const newThumbsHeight = isMobile ? 60 : 90;
       const newThumbsPerView = isMobile ? 3 : isTablet ? 4 : 3;
 
       setCarouselHeight(newCarouselHeight);
@@ -93,7 +93,7 @@ const RoomCarousel = ({ images = [] }) => {
 
   return (
     <>
-      <div className="flex flex-col items-center w-full mx-auto bg-[#EBF0F4] px-4">
+      <div className="flex flex-col items-center w-full mx-auto bg-[#EBF0F4] ">
         {/* Main Carousel */}
         <div className="relative w-full max-w-[1200px]" style={containerStyle}>
           <Swiper
@@ -135,7 +135,7 @@ const RoomCarousel = ({ images = [] }) => {
         </div>
 
         {/* Thumbnail Carousel */}
-        <div className="w-full max-w-[1200px] mt-2">
+        <div className="w-full max-w-[1200px] mt-2 rounded-lg">
           <Swiper
             onSwiper={setThumbsSwiper}
             loop={true}

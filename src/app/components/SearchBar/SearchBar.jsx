@@ -15,9 +15,9 @@ const TravelBookingTabs = () => {
   const [activeTab, setActiveTab] = useState("hotel");
 
   return (
-    <div className=" bg-white  border border-gray-200 shadow-sm rounded-lg text-blue-950">
+    <div className=" md:bg-white   shadow-sm rounded-lg text-blue-950">
       {/* Tabs Navigation - Responsive layout */}
-      <div className="flex lg:w-[35%] border-b">
+      <div className="flex lg:w-[35%] bg-white w-[80%] px-1 rounded-t-lg mx-auto md:mx-0 border-b">
         <TabButton
           icon={<FaHotel />}
           active={activeTab === "hotel"}
@@ -44,7 +44,7 @@ const TravelBookingTabs = () => {
       </div>
 
       {/* Tab Content - Responsive padding */}
-      <div className="p-4 sm:p-6 bg-white">
+      <div className="p-4 sm:p-6 bg-white rounded-lg">
         {activeTab === "hotel" && <HotelSearch />}
         {activeTab === "flight" && <FlightSearch />}
         {activeTab === "tour" && <TourSearch />}
