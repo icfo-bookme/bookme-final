@@ -175,7 +175,7 @@ export default function PropertyList({ id }) {
       </div>
 
       {/* Main Content */}
-      <div className="container w-[85%] mx-auto px-4 pt-16 lg:pt-24"> {/* Added padding to account for overlap */}
+      <div className="container bg-white md:w-[85%] mx-auto px-4 pt-16 lg:pt-24"> {/* Added padding to account for overlap */}
         {/* Mobile Filters (shown only on smaller screens) */}
         <div className="lg:hidden mb-6">
           <PropertyFilters
