@@ -99,7 +99,7 @@ const SearchForm = ({ destinations, hotels, defaultDestination }) => {
 
           <GuestInput
             adults={adults}
-            children={children}
+            child={children}
             rooms={rooms}
             onClick={() => setShowGuestModal(true)}
           />
