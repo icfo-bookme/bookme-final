@@ -1,5 +1,4 @@
-// app/hotel/list/details/[id]/page.jsx
-import HotelDetails from "@/app/components/hotel/hoteldetails";
+
 import HotelHashRoute from "@/app/components/hotel/hotelHashRote";
 import HotelCarousel from "@/app/components/hotel/HotelSlider";
 import getHotelDetails from "@/services/hotel/gethoteldetails";

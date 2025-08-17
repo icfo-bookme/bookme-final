@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
 import getDestination from "@/services/hotel/getDestination";
 import MobileSearchHeader from "./MobileSearchHeader";
 import SearchForm from "./SearchForm";
 import MobileSearchForm from "./MobileSearchForm";
 import DatePickerModal from "../../../../utils/DatePickerModal";
 import GuestModal from "../../../../utils/GuestModal";
+import getAllHotels from "@/services/hotel/getAllHotels";
 
 const SearchBar = ({ initialValues }) => {
   const router = useRouter();
@@ -21,11 +21,14 @@ const SearchBar = ({ initialValues }) => {
   // Guest counts
   const [adults, setAdults] = useState(initialValues?.adults || 2);
   const [children, setChildren] = useState(initialValues?.children || 0);
+  const [childAges, setChildAges] = useState(initialValues?.child_ages?.split(',') || []);
   const [rooms, setRooms] = useState(initialValues?.rooms || 1);
 
-  // Destinations & selection
+  // Data states
   const [destinations, setDestinations] = useState([]);
+  const [hotels, setHotels] = useState([]);
   const [selectedLocationId, setSelectedLocationId] = useState(initialValues?.locationID || "");
+  const [selectedHotelId, setSelectedHotelId] = useState(initialValues?.hotelID || "");
   const [selectedDestination, setSelectedDestination] = useState(null);
 
   // Search input and suggestions
@@ -34,8 +37,6 @@ const SearchBar = ({ initialValues }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
 
-  // Loading and error states
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Date handling
@@ -62,325 +63,261 @@ const SearchBar = ({ initialValues }) => {
     return destination ? `${destination.name}, ${destination.country}` : "Edit Search Information";
   };
 
-  // Load destinations
+  // Load data
   useEffect(() => {
-    const fetchDestinations = async () => {
-      setIsLoading(true);
+    const fetchData = async () => {
       try {
-        const data = await getDestination();
-        setDestinations(data);
+        const [destinationsData, hotelsData] = await Promise.all([
+          getDestination(),
+          getAllHotels()
+        ]);
+        
+        setDestinations(destinationsData);
+        
+        // Transform hotel data
+        const processedHotels = hotelsData.map(hotel => ({
+          id: hotel.hotel_id,
+          name: hotel.hotel_name,
+          city: hotel.city || hotel.street_address?.split(',')[0] || "Unknown City",
+          country: hotel.country || "",
+          destinationId: hotel.destination_id || "",
+          type: 'hotel',
+          starRating: parseInt(hotel.star_rating) || 0,
+          image: hotel.image,
+          price: hotel.lowest_price || hotel.original_price || 0,
+          originalPrice: hotel.original_price,
+          discount: hotel.discount,
+          street_address: hotel.street_address || "Unknown Street",
+        }));
+        
+        setHotels(processedHotels);
 
-        if (initialValues?.locationID) {
-          const selected = data.find((d) => String(d.id) === String(initialValues.locationID));
+        // Set initial values based on URL params
+        if (initialValues?.hotelID) {
+          const selectedHotel = processedHotels.find(h => String(h.id) === String(initialValues.hotelID));
+          if (selectedHotel) {
+            setSelectedHotelId(selectedHotel.id);
+            setSearchQuery(`${selectedHotel.name}, ${selectedHotel.city}, ${selectedHotel.country}`);
+            setSelectedDestination({
+              id: selectedHotel.destinationId,
+              name: selectedHotel.city,
+              country: selectedHotel.country
+            });
+          }
+        } else if (initialValues?.locationID) {
+          const selected = destinationsData.find((d) => String(d.id) === String(initialValues.locationID));
           if (selected) {
-            setSelectedDestination(selected);
-            setSearchQuery(`${selected.name}, ${selected.country}`);
             setSelectedLocationId(selected.id);
+            setSearchQuery(`${selected.name}, ${selected.country}`);
+            setSelectedDestination(selected);
           }
         }
       } catch (error) {
-        console.error("Failed to load destinations:", error);
-        setError("Failed to load destinations");
-      } finally {
-        setIsLoading(false);
+        console.error("Failed to load data:", error);
+        setError("Failed to load search data");
       }
     };
 
-    fetchDestinations();
-  }, [initialValues?.locationID]);
+    fetchData();
+  }, [initialValues]);
 
-  // Enhanced matching algorithm with multiple scoring factors
-  const calculateMatchScore = (destination, query) => {
-    if (!query || !destination?.name || !destination?.country) return 0;
+  // Matching algorithm
+  const calculateMatchScore = (item, query, isHotel = false) => {
+    if (!query || !item?.name) return 0;
     
-    const destName = destination.name.toLowerCase();
-    const destCountry = destination.country.toLowerCase();
-    const destFullText = `${destName}, ${destCountry}`;
+    const itemName = item.name.toLowerCase();
+    const itemLocation = isHotel 
+      ? `${item.city || ''}, ${item.country || ''}`.toLowerCase()
+      : `${item.name || ''}, ${item.country || ''}`.toLowerCase();
     const queryText = query.toLowerCase().trim();
     
-    // Exact match bonus (highest priority)
-    if (destFullText === queryText) return 1000;
-    
-    // Check if query is at the start of any word in the destination
-    const destWords = destFullText.split(/[,\s]+/);
-    const startsWithWord = destWords.some(word => word.startsWith(queryText));
-    if (startsWithWord) return 800;
-    
-    // Check for exact word matches
+    // Exact match bonus
+    if (itemName === queryText) return 1000;
+    if (itemLocation === queryText) return 950;
+
+    // Partial matches
+    if (itemLocation.includes(queryText)) {
+      const matchPos = itemLocation.indexOf(queryText);
+      return 900 + (matchPos === 0 ? 50 : 0);
+    }
+
+    if (itemName.startsWith(queryText)) return 850;
+    if (itemName.includes(queryText)) {
+      const matchPos = itemName.indexOf(queryText);
+      return 800 + (50 - Math.min(matchPos, 50));
+    }
+
+    // Word matching
     const queryWords = queryText.split(/\s+/);
-    const exactWordMatches = queryWords.filter(qw => 
-      destWords.some(dw => dw === qw)
-    ).length;
-    if (exactWordMatches > 0) return 700 + (exactWordMatches * 50);
-    
-    // Find all substring matches (minimum length 2)
-    const substringMatches = [];
-    for (let i = 0; i <= queryText.length - 2; i++) {
-      for (let j = i + 2; j <= queryText.length; j++) {
-        const substring = queryText.substring(i, j);
-        const regex = new RegExp(substring, 'gi');
-        let match;
-        while ((match = regex.exec(destFullText)) !== null) {
-          substringMatches.push({
-            substring,
-            position: match.index,
-            length: substring.length
-          });
-        }
-      }
-    }
-    
-    // Calculate substring score if we have matches
-    if (substringMatches.length > 0) {
-      // Find the longest substring match
-      const longestMatch = substringMatches.reduce((longest, current) => 
-        current.length > longest.length ? current : longest
-      , { length: 0 });
-      
-      // Position bonus - matches at start score higher
-      const positionBonus = longestMatch.position === 0 ? 100 : 
-                          (longestMatch.position < 5 ? 50 : 0);
-      
-      // Length bonus - longer matches score higher (quadratic scaling)
-      const lengthBonus = Math.pow(longestMatch.length, 2) * 5;
-      
-      // Count of matches bonus (diminishing returns)
-      const countBonus = Math.min(substringMatches.length * 15, 100);
-      
-      // Word boundary bonus - matches at word starts score higher
-      const isWordBoundary = destFullText[longestMatch.position - 1] === ' ' || 
-                            longestMatch.position === 0;
-      const boundaryBonus = isWordBoundary ? 50 : 0;
-      
-      // Total substring score
-      return 500 + positionBonus + lengthBonus + countBonus + boundaryBonus;
-    }
-    
-    // Character sequence matching with adjacency bonus
-    let sequenceScore = 0;
-    let queryPos = 0;
-    let consecutiveMatches = 0;
-    let maxConsecutive = 0;
-    
-    for (let i = 0; i < queryText.length; i++) {
-      const queryChar = queryText[i];
-      const foundPos = destFullText.indexOf(queryChar, queryPos);
-      
-      if (foundPos !== -1) {
-        // Bonus for consecutive characters
-        if (foundPos === queryPos) {
-          consecutiveMatches++;
-          maxConsecutive = Math.max(maxConsecutive, consecutiveMatches);
-          sequenceScore += 10; // Adjacent match bonus
-        } else if (foundPos - queryPos <= 2) {
-          sequenceScore += 5; // Nearby match bonus
-          consecutiveMatches = 1;
-        } else {
-          sequenceScore += 2; // Basic match
-          consecutiveMatches = 0;
-        }
-        queryPos = foundPos + 1;
-      } else {
-        consecutiveMatches = 0;
-      }
-    }
-    
-    // Consecutive character bonus
-    const consecutiveBonus = maxConsecutive >= 3 ? maxConsecutive * 5 : 0;
-    
-    // Normalize sequence score with bonuses
-    const normalizedSequenceScore = (sequenceScore / queryText.length) * 100 + consecutiveBonus;
-    
-    // Common prefix matching
-    const commonPrefixLength = () => {
-      let i = 0;
-      while (i < queryText.length && i < destFullText.length && 
-             queryText[i] === destFullText[i]) {
-        i++;
-      }
-      return i;
-    };
-    
-    const prefixLength = commonPrefixLength();
-    const prefixBonus = prefixLength >= 3 ? prefixLength * 10 : 0;
-    
-    // Phonetic similarity (very basic)
-    const phoneticScore = () => {
-      if (queryText.length < 3) return 0;
-      const firstCharMatch = queryText[0] === destFullText[0] ? 20 : 0;
-      const vowelMatch = queryText.match(/[aeiou]/gi)?.length === 
-                        destFullText.match(/[aeiou]/gi)?.length ? 10 : 0;
-      return firstCharMatch + vowelMatch;
-    };
-    
-    // Combine all scores
-    return Math.min(
-      normalizedSequenceScore + prefixBonus + phoneticScore(),
-      900 // Cap at 900 to leave room for higher priority matches
+    const allWordsMatch = queryWords.every(word => 
+      itemName.includes(word) || itemLocation.includes(word)
     );
+    if (allWordsMatch) {
+      const matchedWordsCount = queryWords.filter(word => 
+        itemName.includes(word)
+      ).length;
+      return 700 + (matchedWordsCount * 50);
+    }
+
+    // Partial matching
+    let partialMatchScore = 0;
+    for (let i = 0; i <= queryText.length - 3; i++) {
+      const substring = queryText.substring(i, i + 3);
+      if (itemName.includes(substring)) {
+        const pos = itemName.indexOf(substring);
+        partialMatchScore += 100 + (substring.length * 20) + (pos === 0 ? 50 : (pos < 3 ? 30 : 0));
+      }
+    }
+
+    if (partialMatchScore > 0) return Math.min(partialMatchScore, 699);
+
+    // Character matching
+    let charMatchScore = 0;
+    let queryIndex = 0;
+    for (let i = 0; i < itemName.length && queryIndex < queryText.length; i++) {
+      if (itemName[i] === queryText[queryIndex]) {
+        charMatchScore += 10;
+        queryIndex++;
+      }
+    }
+
+    return Math.min((charMatchScore / queryText.length) * 100, 600);
   };
 
-  // Enhanced highlighting function
+  // Highlight matches
   const highlightMatches = (text, query) => {
     if (!query || !text) return text;
-
     const lowerText = text.toLowerCase();
     const lowerQuery = query.toLowerCase();
     const result = [];
     let lastIndex = 0;
-
-    // Find all possible substring matches (minimum length 2)
-    const matches = [];
-    for (let i = 0; i <= lowerQuery.length - 2; i++) {
-      for (let j = i + 2; j <= lowerQuery.length; j++) {
-        const substring = lowerQuery.substring(i, j);
-        let pos = lowerText.indexOf(substring);
-        while (pos !== -1) {
-          matches.push({ start: pos, end: pos + substring.length });
-          pos = lowerText.indexOf(substring, pos + 1);
-        }
-      }
-    }
-
-    // Sort matches by start position, then by length (longest first)
-    matches.sort((a, b) => {
-      if (a.start !== b.start) return a.start - b.start;
-      return b.end - a.end;
-    });
-
-    // Merge overlapping matches, keeping the longest ones
-    const mergedMatches = [];
-    if (matches.length > 0) {
-      let current = matches[0];
-      for (let i = 1; i < matches.length; i++) {
-        if (matches[i].start <= current.end) {
-          if (matches[i].end > current.end) {
-            current.end = matches[i].end;
-          }
-        } else {
-          mergedMatches.push(current);
-          current = matches[i];
-        }
-      }
-      mergedMatches.push(current);
-    }
-
-    // Build the highlighted text
-    for (const match of mergedMatches) {
-      // Add text before match
-      if (match.start > lastIndex) {
-        result.push(text.substring(lastIndex, match.start));
-      }
-      // Add matched text
+    const matchPos = lowerText.indexOf(lowerQuery);
+    
+    if (matchPos !== -1) {
+      if (matchPos > 0) result.push(text.substring(0, matchPos));
       result.push(
-        <span key={match.start} className="font-bold text-blue-600">
-          {text.substring(match.start, match.end)}
+        <span key={matchPos} className="font-bold text-blue-600">
+          {text.substring(matchPos, matchPos + lowerQuery.length)}
         </span>
       );
-      lastIndex = match.end;
+      lastIndex = matchPos + lowerQuery.length;
     }
-
-    // Add remaining text
-    if (lastIndex < text.length) {
-      result.push(text.substring(lastIndex));
-    }
-
+    if (lastIndex < text.length) result.push(text.substring(lastIndex));
     return result.length > 0 ? result : text;
   };
 
-  // Update suggestions based on query
+  // Update suggestions
   const updateSuggestions = (query) => {
     if (!query) {
-      setSuggestions(destinations);
+      setSuggestions([
+        ...destinations.map(d => ({ ...d, type: 'destination' })),
+        ...hotels.map(h => ({ ...h, type: 'hotel' }))
+      ]);
       return;
     }
 
     const scoredDestinations = destinations.map(dest => ({
       ...dest,
+      type: 'destination',
       score: calculateMatchScore(dest, query),
-      displayName: `${dest.name}, ${dest.country}`
+      displayText: `${dest.name}, ${dest.country}`,
+      displayLocation: dest.country
     }));
 
-    const sorted = scoredDestinations
-      .filter(dest => dest.score > 50)
+    const scoredHotels = hotels.map(hotel => ({
+      ...hotel,
+      type: 'hotel',
+      score: calculateMatchScore(hotel, query, true),
+      displayText: `${hotel.name}, ${hotel.city}, ${hotel.country}`,
+      displayLocation: `${hotel.city}, ${hotel.country}`
+    }));
+
+    const allItems = [...scoredDestinations, ...scoredHotels]
+      .filter(item => item.score > 50)
       .sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;
-        const aPos = a.displayName.toLowerCase().indexOf(query.toLowerCase());
-        const bPos = b.displayName.toLowerCase().indexOf(query.toLowerCase());
-        if (aPos !== bPos) return aPos - bPos;
-        if (a.displayName.length !== b.displayName.length) {
-          return a.displayName.length - b.displayName.length;
-        }
-        return a.displayName.localeCompare(b.displayName);
-      })
-    ;
+        if (a.type === 'destination' && b.type !== 'destination') return -1;
+        if (a.type !== 'destination' && b.type === 'destination') return 1;
+        if (a.name.length !== b.name.length) return a.name.length - b.name.length;
+        return a.displayText.localeCompare(b.displayText);
+      });
 
-    setSuggestions(sorted.length > 0 ? sorted : destinations);
+    setSuggestions(allItems.length > 0 ? allItems : []);
   };
 
-  // Input change handler
+  // Input handlers
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
     updateSuggestions(query);
-
     if (!query) {
       setSelectedLocationId("");
+      setSelectedHotelId("");
       setSelectedDestination(null);
     }
   };
 
-  // On input focus
   const handleSearchFocus = () => {
     if (isFirstInputInteraction) {
       setIsFirstInputInteraction(false);
       setSearchQuery("");
       setSelectedLocationId("");
+      setSelectedHotelId("");
       setSelectedDestination(null);
-      setSuggestions(destinations);
+      updateSuggestions("");
     } else {
       updateSuggestions(searchQuery);
     }
     setShowSuggestions(true);
   };
 
-  // When user picks a suggestion
-  const selectDestination = (destination) => {
-    setSearchQuery(`${destination.name}, ${destination.country}`);
-    setSelectedLocationId(destination.id);
-    setSelectedDestination(destination);
+  const selectDestination = (item) => {
+    if (item.type === 'hotel') {
+      setSearchQuery(`${item.name}, ${item.city}, ${item.country}`);
+      setSelectedHotelId(item.id);
+      setSelectedLocationId(item.destinationId || "");
+      setSelectedDestination({
+        id: item.destinationId || "",
+        name: item.city,
+        country: item.country
+      });
+    } else {
+      setSearchQuery(`${item.name}, ${item.country}`);
+      setSelectedLocationId(item.id);
+      setSelectedHotelId("");
+      setSelectedDestination(item);
+    }
     setShowSuggestions(false);
   };
 
-  // Submit handler
   const handleSearch = (e) => {
     e.preventDefault();
-
-    if (!selectedLocationId) {
-      alert("Please select a valid destination");
+    
+    if (!selectedDestination && !selectedHotelId) {
+      alert("Please select a valid destination or hotel");
       return;
     }
 
     const queryParams = new URLSearchParams({
       checkin: checkinDate.toISOString().split("T")[0],
       checkout: checkoutDate.toISOString().split("T")[0],
-      locationID: String(selectedLocationId),
       rooms: String(rooms),
       adult: String(adults),
-      children: String(children),
+      ...(children > 0 && { children: String(children) }),
+      ...(childAges.length > 0 && { child_ages: childAges.join(',') }),
+      ...(selectedHotelId && { hotelID: String(selectedHotelId) }),
+      ...(!selectedHotelId && selectedLocationId && { locationID: String(selectedLocationId) })
     }).toString();
 
     router.push(`/hotel/list?${queryParams}`);
   };
 
-  // Date change from modal
   const handleDateChange = (update) => {
     setDateRange(update);
     if (update[0]) setCheckinDate(update[0]);
     if (update[1]) setCheckoutDate(update[1]);
   };
 
-  // Format date for display
   const formatDate = (date) =>
     date?.toLocaleDateString("en-US", {
       weekday: "short",
@@ -388,19 +325,6 @@ const SearchBar = ({ initialValues }) => {
       day: "numeric",
     }).replace(",", "") || "";
 
-  // Loading UI
-  if (isLoading) {
-    return (
-      <div className="bg-white rounded-xl max-w-7xl mx-auto p-4 text-center">
-        <div className="animate-pulse flex justify-center items-center">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <span className="ml-2 text-blue-950">Loading destinations...</span>
-        </div>
-      </div>
-    );
-  }
-
-  // Error UI
   if (error) {
     return (
       <div className="bg-white rounded-xl max-w-7xl mx-auto p-4 text-center">
@@ -428,14 +352,37 @@ const SearchBar = ({ initialValues }) => {
       {!showMobileSearch && (
         <MobileSearchHeader
           selectedLocationId={selectedLocationId}
+          selectedHotelId={selectedHotelId}
           checkinDate={checkinDate}
           checkoutDate={checkoutDate}
           guestText={guestText}
           getDestinationNameById={getDestinationNameById}
+           setSearchQuery={setSearchQuery}
           setShowMobileSearch={setShowMobileSearch}
+          destinations={destinations}
+          hotels={hotels}
+          searchQuery={searchQuery}
         />
       )}
-
+  {showMobileSearch && (
+        <MobileSearchForm
+           searchQuery={searchQuery}
+        handleSearchChange={handleSearchChange}
+        handleSearchFocus={handleSearchFocus}
+        showSuggestions={showSuggestions}
+        suggestions={suggestions}
+        selectDestination={selectDestination}
+        checkinDate={checkinDate}
+        checkoutDate={checkoutDate}
+        setShowDatePicker={setShowDatePicker}
+        guestText={guestText}
+        setShowGuestModal={setShowGuestModal}
+        handleSearch={handleSearch}
+        setShowSuggestions={setShowSuggestions}
+        highlightMatches={highlightMatches}
+        formatDate={formatDate}
+        />
+      )}
       <SearchForm
         searchQuery={searchQuery}
         handleSearchChange={handleSearchChange}
@@ -454,25 +401,7 @@ const SearchBar = ({ initialValues }) => {
         formatDate={formatDate}
       />
 
-      {showMobileSearch && (
-        <MobileSearchForm
-          searchQuery={searchQuery}
-          handleSearchChange={handleSearchChange}
-          handleSearchFocus={handleSearchFocus}
-          showSuggestions={showSuggestions}
-          suggestions={suggestions}
-          selectDestination={selectDestination}
-          checkinDate={checkinDate}
-          checkoutDate={checkoutDate}
-          setShowDatePicker={setShowDatePicker}
-          guestText={guestText}
-          setShowGuestModal={setShowGuestModal}
-          handleSearch={handleSearch}
-          setShowMobileSearch={setShowMobileSearch}
-          highlightMatches={highlightMatches}
-          formatDate={formatDate}
-        />
-      )}
+    
 
       {showDatePicker && (
         <DatePickerModal
@@ -488,6 +417,8 @@ const SearchBar = ({ initialValues }) => {
           setAdults={setAdults}
           childrenNumber={children}
           setChildren={setChildren}
+          childAges={childAges}
+          setChildAges={setChildAges}
           rooms={rooms}
           setRooms={setRooms}
           setShowGuestModal={setShowGuestModal}

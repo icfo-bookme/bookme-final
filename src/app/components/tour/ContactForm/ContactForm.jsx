@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import postPackageInfo from "@/services/tour/postPacageInfo";
 
-const ContactForm = ({ propertyDetails,category,headline }) => {
+const ContactForm = ({ propertyDetails, category, headline }) => {
   const {
     register,
     handleSubmit,
@@ -28,7 +28,7 @@ const ContactForm = ({ propertyDetails,category,headline }) => {
       address: data.address,
       additional_info: data.additionalInfo,
       property_name: propertyDetails,
-      category:category
+      category: category
     };
 
     try {
@@ -52,8 +52,8 @@ const ContactForm = ({ propertyDetails,category,headline }) => {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white ">
-<h1 className="text-2xl font-semibold text-[#3d5afc]">{headline}</h1>
+    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg ">
+      <h1 className="text-lg mb-2 font-semibold text-blue-800">{headline}</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 gap-4">
           {/* First Name */}
@@ -81,7 +81,7 @@ const ContactForm = ({ propertyDetails,category,headline }) => {
               htmlFor="lastName"
               className="block text-sm font-medium text-black"
             >
-              Last Name 
+              Last Name
             </label>
             <input
               type="text"
@@ -89,7 +89,7 @@ const ContactForm = ({ propertyDetails,category,headline }) => {
               {...register("lastName")}
               className="mt-2 p-2 border border-gray-300 rounded-md w-full text-black"
             />
-           
+
           </div>
 
           {/* Phone Number */}
@@ -101,18 +101,18 @@ const ContactForm = ({ propertyDetails,category,headline }) => {
               Phone Number <span className="text-red-700 text-xl">*</span>
             </label>
             <input
-  type="tel"
-  id="phoneNumber"
-  placeholder="01xxxxxxxxx"
-  {...register("phoneNumber", {
-    required: "Phone number is required",
-    pattern: {
-      value: /^[0-9]{11,}$/, // At least 11 digits
-      message: "Phone number must be at least 11 digits and contain only numbers",
-    },
-  })}
-  className="mt-2 p-2 border border-gray-300 rounded-md w-full text-black"
-/>
+              type="tel"
+              id="phoneNumber"
+              placeholder="01xxxxxxxxx"
+              {...register("phoneNumber", {
+                required: "Phone number is required",
+                pattern: {
+                  value: /^[0-9]{11,}$/, // At least 11 digits
+                  message: "Phone number must be at least 11 digits and contain only numbers",
+                },
+              })}
+              className="mt-2 p-2 border border-gray-300 rounded-md w-full text-black"
+            />
             {errors.phoneNumber && (
               <span className="text-red-500">{errors.phoneNumber.message}</span>
             )}
@@ -132,7 +132,7 @@ const ContactForm = ({ propertyDetails,category,headline }) => {
               {...register("email")}
               className="mt-2 p-2 border border-gray-300 rounded-md w-full text-black"
             />
-            
+
           </div>
 
           {/* Address */}
@@ -149,7 +149,7 @@ const ContactForm = ({ propertyDetails,category,headline }) => {
               {...register("address")}
               className="mt-2 p-2 border border-gray-300 rounded-md w-full text-black"
             />
-            
+
           </div>
 
           {/* Additional Info */}
@@ -158,7 +158,7 @@ const ContactForm = ({ propertyDetails,category,headline }) => {
               htmlFor="additionalInfo"
               className="block text-sm font-medium text-black"
             >
-              Additional Info 
+              Additional Info
             </label>
             <textarea
               id="additionalInfo"

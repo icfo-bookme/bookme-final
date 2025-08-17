@@ -6,6 +6,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Navigation, Pagination } from "swiper";
+import LoadingSpinner from '@/utils/LoadingSpinner';
 
 const PackageCarousel = ({
   propertyPackages,
@@ -13,7 +14,7 @@ const PackageCarousel = ({
   contactNumber,
 }) => {
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner></LoadingSpinner>;
   }
 
   if (!propertyPackages || propertyPackages.length === 0) {

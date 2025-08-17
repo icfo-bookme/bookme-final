@@ -6,7 +6,7 @@ import getTourDestination from "@/services/getTourDestination";
 import { useRouter } from "next/navigation";
 import { LuMapPin } from "react-icons/lu";
 
-const TourSearch = () => {
+const ShipsSearch = () => {
   const router = useRouter();
   const [destinations, setDestinations] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,7 +58,19 @@ const TourSearch = () => {
       alert("Please select a valid destination");
       return;
     }
-    router.push(`/tour/${selectedLocationId}`);
+
+    // Find the selected destination from the destinations array
+    const selectedDestination = destinations.find(dest => dest.id === selectedLocationId);
+
+    if (selectedDestination) {
+      // Create the slug from the destination name
+      const destinationSlug = slugify(selectedDestination.name);
+      // Construct the URL with both slug and ID
+      router.push(`/tour/${destinationSlug}/${selectedLocationId}`);
+    } else {
+      // Fallback to just the ID if destination not found (shouldn't happen normally)
+      router.push(`/tour/${selectedLocationId}`);
+    }
   };
 
   // Levenshtein Distance
@@ -172,6 +184,15 @@ const TourSearch = () => {
     setShowSuggestions(false);
   };
 
+  const slugify = (str) =>
+    str
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')                      // Replace spaces with dashes
+      .replace(/[^\w\u0980-\u09FF\-]+/g, '')     // Allow Bangla + word chars + hyphen
+      .replace(/\-\-+/g, '-');                   // Replace multiple dashes with one
+
+
   if (error) {
     return (
       <div className="bg-white max-w-5xl mx-auto pb-6 text-center">
@@ -191,7 +212,7 @@ const TourSearch = () => {
       <form onSubmit={handleSearch}>
         <div className="grid grid-cols-1 gap-4 relative" ref={searchRef}>
           <div className="space-y-1 relative">
-            <label className="block text-sm text-blue-950">Location/Tour</label>
+            <label className="block text-sm text-blue-950 font-medium">LOCATION/TOUR</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <LuMapPin className="h-5 w-5 text-blue-600" />
@@ -230,11 +251,11 @@ const TourSearch = () => {
         </div>
 
         <div className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2 -translate-x-1/2 flex justify-end">
-          <SearchButton type="submit">Search Tours</SearchButton>
+          <SearchButton type="submit">Search Ships</SearchButton>
         </div>
       </form>
     </div>
   );
 };
 
-export default TourSearch;
+export default ShipsSearch;

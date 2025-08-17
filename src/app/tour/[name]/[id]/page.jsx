@@ -16,7 +16,7 @@ export default  function Home({ params }) {
     <main className={`${roboto.className}`}>
       
       
-      <div className=" ">
+      <div className=" mb-12">
         <div className=" ">
           {/* Main Content */}
           <div className=" overflow-hidden">

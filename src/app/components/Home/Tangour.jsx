@@ -92,8 +92,18 @@ export default function Tangour() {
         }
     };
 
+  const slugify = (str) =>
+  str
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')                      // Replace spaces with dashes
+    .replace(/[^\w\u0980-\u09FF\-]+/g, '')     // Allow Bangla + word chars + hyphen
+    .replace(/\-\-+/g, '-');                   // Replace multiple dashes with one
+
+    
+
     return (
-        <div className={`${roboto.className} bg-white w-full mx-auto  max-w-7xl`}>
+        <div className={`${roboto.className} bg-blue-50 w-full mx-auto  max-w-7xl`}>
             <div className="w-full text-center mb-5">
                 <h2 className="text-xl md:text-2xl font-bold text-[#00026E] mb-2">
                     Popular Tangour Haor Boats 
@@ -190,7 +200,7 @@ export default function Tangour() {
                     >
                         {data.slice(0, 12).map((property) => (
                             <SwiperSlide key={property.property_id} className=" h-auto">
-                                <div className="relative rounded-xl overflow-hidden shadow-lg h-full group flex flex-col">
+                                <div className="flex flex-col   rounded-lg bg-white h-full transition-all duration-300 hover:shadow-lg hover:translate-y-[-4px]">
                                     <div className="relative h-48 sm:h-56 md:h-64 lg:h-72 w-full">
                                         <Image
                                             src={`${process.env.NEXT_PUBLIC_BASE_URL}/storage/${property.main_img}`}
@@ -202,8 +212,8 @@ export default function Tangour() {
                                         />
                                     </div>
                                     <div className="p-4 sm:p-5 md:p-6 flex-grow flex flex-col">
-                                        <Link href={`/Property/${property.property_id}`} className="cursor-pointer">
-                                            <h3 className="text-lg md:text-xl font-bold h-12 text-[#00026E] mb-2 hover:text-blue-700 transition-colors line-clamp-2">
+                                        <Link href={`/Property/${slugify(property.property_name)}/${property.property_id}`} className="cursor-pointer">
+                                            <h3 className="text-lg md:text-xl font-bold h-[52px] text-[#00026E] mb-2 hover:text-blue-700 transition-colors line-clamp-2">
                                                 {property.property_name}
                                             </h3>
                                         </Link>
@@ -227,7 +237,7 @@ export default function Tangour() {
                                                     </span>
                                                 </div>
                                                 <Link
-                                                    href={`/Property/${property.property_id}`}
+                                                    href={`/Property/${slugify(property.property_name)}/${property.property_id}`}
                                                     style={{
                                                         background: "linear-gradient(90deg, #313881, #0678B4)",
                                                     }}

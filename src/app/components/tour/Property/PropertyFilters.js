@@ -27,7 +27,7 @@ export default function PropertyFilters({
   };
 
   return (
-    <div className={`mb-8 rounded-lg shadow md:w-[90%] mx-auto bg-gray-50 p-5  ${isSearchFocused ? 'lg:hidden  absolute inset-0 h-[20rem] pt-20 px-4 pb-4 z-20' : ''}`}>
+    <div className={`mb-8 rounded-lg shadow md:w-[90%] border border-gray-300 mx-auto bg-gray-50 p-5  ${isSearchFocused ? 'lg:hidden  absolute inset-0 h-[20rem] pt-20 px-4 pb-4 z-20' : ''}`}>
       <div className="flex flex-col md:flex-row bg-white gap-6 mb-6">
         <PropertySearch 
           searchTerm={searchTerm}

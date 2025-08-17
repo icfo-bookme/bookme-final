@@ -29,6 +29,14 @@ export default async function Home() {
     console.error("Failed to fetch data:", error);
     loading = false;
   }
+  const slugify = (str) =>
+  str
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')        // Replace spaces with dashes
+    .replace(/[^\w\-]+/g, '')    // Remove non-word chars
+    .replace(/\-\-+/g, '-');     // Replace multiple dashes with one
+  
   if (loading) {
     return (
       <div className="min-h-screen font-sans">
@@ -101,9 +109,10 @@ export default async function Home() {
         <div className="flex justify-center items-center ">
           <div className='grid xs:grid-cols-2 grid-cols-2 gap-5 md:grid-cols-4'>
             {visaData.map((country, ind) => (
+              
               <Link
                 key={ind}
-                href={`/visa/${country?.id}`}
+                href={`/visa/${slugify(country.name)}/${country?.id}`}
                 className="group block "
               >
                 <div className="relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md border border-gray-100 h-full flex flex-col">

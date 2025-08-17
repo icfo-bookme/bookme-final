@@ -91,9 +91,9 @@ const MobileSearchForm = ({
               ref={suggestionsRef}
               className="absolute z-50 mt-1 w-full border bg-white border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
             >
-              {suggestions.map((destination) => (
+              {suggestions.map((destination,i) => (
                 <button
-                  key={destination.id}
+                  key={i}
                   type="button"
                   className="w-full text-left p-3 hover:bg-blue-50 active:bg-blue-100"
                   onClick={(e) => handleSuggestionSelect(destination, e)}

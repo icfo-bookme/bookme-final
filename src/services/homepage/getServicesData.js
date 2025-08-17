@@ -10,7 +10,7 @@ async function getServicesData() {
     }
     
     const data = await res.json();
-    return data.data || []; // Return empty array if data.data is undefined
+    return data.data || []; 
   } catch (error) {
     console.error('Error fetching services:', error);
     return [];

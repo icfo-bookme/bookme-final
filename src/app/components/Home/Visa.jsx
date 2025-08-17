@@ -61,7 +61,7 @@ export default function Visa() {
         if (isMobile) {
             // Clear any existing timeout
             clearTimeout(touchTimeoutRef.current);
-            
+
             // Set new timeout to restart autoplay after 3 seconds of inactivity
             touchTimeoutRef.current = setTimeout(() => {
                 isInteractingRef.current = false;
@@ -71,9 +71,16 @@ export default function Visa() {
             }, 3000);
         }
     };
+    const slugify = (str) =>
+        str
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')        // Replace spaces with dashes
+            .replace(/[^\w\-]+/g, '')    // Remove non-word chars
+            .replace(/\-\-+/g, '-');     // Replace multiple dashes with one
 
     return (
-        <div className="bg-white w-full mx-auto pt-6  max-w-7xl">
+        <div className="bg-blue-50 w-full mx-auto pt-6  max-w-7xl">
             <div className="w-full text-center mb-5">
                 <h2 className="text-xl md:text-2xl font-bold text-[#00026E] mb-2">
                     Popular Visa Destinations
@@ -87,7 +94,7 @@ export default function Visa() {
                 </div>
             ) : visaData && visaData.length > 0 ? (
                 <div className="relative">
-                     <Swiper
+                    <Swiper
                         ref={swiperRef}
                         modules={[Navigation, Pagination, Autoplay, FreeMode]}
                         spaceBetween={16}
@@ -164,9 +171,9 @@ export default function Visa() {
                         }}
                         className="w-full md:w-[90%] lg:w-[89%] mx-auto"
                     >
-                        {visaData.slice(0,12).map((country) => (
+                        {visaData.slice(0, 12).map((country) => (
                             <SwiperSlide key={country.id} className=" h-auto">
-                                <div className="shadow-custom flex flex-col gap-4 rounded-lg bg-white h-full transition-all duration-300 hover:shadow-lg hover:translate-y-[-4px]">
+                                <div className=" flex flex-col gap-4  rounded-lg bg-white h-full transition-all duration-300 hover:shadow-lg hover:translate-y-[-4px]">
                                     <div className="w-full h-[180px] sm:h-[200px] md:h-[220px] lg:h-[240px] relative rounded-t-lg overflow-hidden">
                                         <Image
                                             src={`${process.env.NEXT_PUBLIC_BASE_URL}/storage/${country.image}`}
@@ -181,7 +188,7 @@ export default function Visa() {
 
                                     <div className="flex flex-col w-full flex-grow pl-2 pb-5">
                                         <Link
-                                            href={`/visa/${country.id}`}
+                                            href={`/visa/${slugify(country.name)}/${country.id}`}
                                             className="cursor-pointer"
                                         >
                                             <h1 className="font-semibold text-lg sm:text-xl lg:text-[22px] text-[#00026E] mt-2 mb-3 hover:text-blue-700 transition-colors line-clamp-2">
@@ -197,11 +204,11 @@ export default function Visa() {
                                                 </p>
                                             </div>
                                             <Link
-                                                href={`/visa/${country.id}`}
+                                               href={`/visa/${slugify(country.name)}/${country.id}`}
                                                 style={{
                                                     background: "linear-gradient(90deg, #313881, #0678B4)",
                                                 }}
-                                                 className="text-sm px-4 py-2 mr-3 text-white font-medium rounded-md hover:opacity-90 transition-opacity flex items-center"
+                                                className="text-sm px-4 py-2 mr-3 text-white font-medium rounded-md hover:opacity-90 transition-opacity flex items-center"
                                             >
                                                 Details
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 ml-1 lg:w-4 lg:h-4">
@@ -242,7 +249,7 @@ export default function Visa() {
                             href="/visa"
                             className="px-3 py-1 md:px-8 md:py-3.5 text-white font-medium rounded-md hover:bg-[#056699] transition-colors duration-200 inline-flex items-center"
                         >
-                            See More 
+                            See More
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 ml-2">
                                 <path fillRule="evenodd" d="M5 10a.75.75 0 01.75-.75h6.638L10.23 7.29a.75.75 0 111.04-1.08l3.5 3.25a.75.75 0 010 1.08l-3.5 3.25a.75.75 0 11-1.04-1.08l2.158-1.96H5.75A.75.75 0 015 10z" clipRule="evenodd" />
                             </svg>
@@ -259,3 +266,21 @@ export default function Visa() {
         </div>
     );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

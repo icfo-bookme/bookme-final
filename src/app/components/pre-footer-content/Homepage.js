@@ -23,7 +23,7 @@ const HpmepageBlog = () => {
   const handleToggle = () => setExpanded(prev => !prev);
 
   return (
-    <article className="max-w-6xl mx-auto px-4 py-8 bg-white rounded-lg shadow-sm">
+    <article className="max-w-6xl mx-auto px-4 py-8 bg-blue-50 rounded-lg shadow-sm">
       <h1 className="text-2xl text-center font-bold text-blue-900 mb-4 leading-tight">
         {post.title}
       </h1>

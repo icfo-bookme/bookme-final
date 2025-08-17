@@ -6,6 +6,25 @@ import PropertyAmenities from "./PropertyAmenities";
 import PropertyContactButtons from "./PropertyContactButtons";
 
 export default function PropertyCard({ property, index, onCardClick }) {
+ const slugify = (str) =>
+  str
+    .trim()
+    .replace(/\s+/g, '-')        // Replace spaces with dashes
+    .replace(/[^\w\u0980-\u09FF\-\(\)]+/g, '')  // Allow Bangla chars, (), -, and word chars
+    .replace(/\-\-+/g, '-')      // Replace multiple dashes with one;
+
+const containsBangla = (text) => /[\u0980-\u09FF]/.test(text);
+
+const propertyName = property.property_name;
+
+const propertySlug = containsBangla(propertyName)
+  ? slugify(propertyName)
+  : slugify(propertyName);
+
+console.log(`y/${propertySlug}/402`);
+
+
+
   return (
     <div key={property.property_id} data-index={index} className="mb-5">
       <div className="shadow-custom flex flex-col lg:flex-row gap-5 pt-5 pl-5 pr-5 pb-0 rounded bg-white relative">
@@ -59,7 +78,7 @@ export default function PropertyCard({ property, index, onCardClick }) {
                 <div className="flex">
                   <div className="mr-[6px]">
                     <Link
-                      href={`/Property/${property.property_id}`}
+                      href={`/Property/${propertySlug}/${property.property_id}`}
                       style={{
                         background: "linear-gradient(90deg, #313881, #0678B4)",
                       }}
@@ -72,7 +91,7 @@ export default function PropertyCard({ property, index, onCardClick }) {
 
                   <div>
                     <Link
-                      href={`/Property/${property.property_id}`}
+                      href={`/Property/${propertySlug}/${property.property_id}`}
                       style={{
                         background: "linear-gradient(90deg, #313881, #0678B4)",
                       }}

@@ -188,11 +188,10 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails, checkin, 
                     key={item.id}
                     href={`#${item.id}`}
                     onClick={(e) => handleNavClick(item.id, e)}
-                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
-                      activeSection === item.id
-                        ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-inner'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-                    }`}
+                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-md whitespace-nowrap text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${activeSection === item.id
+                      ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-inner'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
+                      }`}
                   >
                     <i className={`fa-solid ${item.icon} text-xs`}></i>
                     {item.label}
@@ -214,6 +213,20 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails, checkin, 
         </div>
       </div>
 
+      <section>
+        <div className="p-2 md:p-4 mt-5 rounded-lg mx-auto grid grid-cols-1 bg-white md:grid-cols-10 gap-4">
+          <div className="col-span-1 md:col-span-7">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
+              <i className="fa-solid fa-info-circle text-blue-600"></i>
+              Hotel Summary
+            </h2>
+            <HotelCarousel images={hotelDetails?.images || []} />
+          </div>
+          <div className="col-span-1 pt-8 md:col-span-3">
+            <HotelDetails hotel={hotelDetails} />
+          </div>
+        </div>
+      </section>
       {/* Rooms Section */}
       <section
         ref={(el) => (sectionsRef.current['rooms'] = el)}
@@ -248,18 +261,7 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails, checkin, 
         id="Summary"
         className="scroll-mt-24"
       >
-        <div className="p-2 md:p-4 mt-5 rounded-lg mx-auto grid grid-cols-1 bg-white md:grid-cols-10 gap-4">
-          <div className="col-span-1 md:col-span-7">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">
-              <i className="fa-solid fa-info-circle text-blue-600"></i>
-              Hotel Summary
-            </h2>
-            <HotelCarousel images={hotelDetails?.images || []} />
-          </div>
-          <div className="col-span-1 pt-8 md:col-span-3">
-            <HotelDetails hotel={hotelDetails} />
-          </div>
-        </div>
+
 
         {/* Hotel Description Section */}
         <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm mt-4">

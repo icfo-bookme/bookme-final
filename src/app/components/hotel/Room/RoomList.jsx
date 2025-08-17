@@ -2,7 +2,7 @@ import RoomItem from './RoomItem';
 
 const RoomList = ({ rooms, cart, isLargeScreen, onShowCart, onViewDetails, onAddToCart }) => {
     return (
-        <div className='md:col-span-6'>
+        <div className='md:col-span-6 '>
            
             <div className="">
                 {rooms.map((room, index) => (

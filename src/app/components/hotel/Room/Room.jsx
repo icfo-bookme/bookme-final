@@ -121,7 +121,7 @@ const RoomComponent = ({ hotel_id, checkin, checkout }) => {
                 onAddToCart={addToCart}
             />
 
-         
+
             {(showCart && cart.length > 0) && (
                 <Cart
                     cart={cart}
@@ -129,7 +129,7 @@ const RoomComponent = ({ hotel_id, checkin, checkout }) => {
                     onClose={() => setShowCart(false)}
                     onRemoveItem={removeFromCart}
                     checkin={checkin}
-        checkout={checkout}
+                    checkout={checkout}
                 />
             )}
         </div>

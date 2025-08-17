@@ -8,27 +8,27 @@ import "swiper/css/autoplay";
 import Image from "next/image";
 import { Roboto } from "next/font/google";
 import { Raleway } from "next/font/google";
-import Header from "../../shared/Header/Header";
+import { getHeroBanners } from "@/services/tour/getHeroBanners";
+
 
 const raleway = Raleway({ subsets: ["latin"] });
 const roboto = Roboto({ subsets: ["latin"], weight: ["400"] });
 
-export default function Banner({id}) {
+export default function Banner({ id }) {
   const [terms, setTerms] = useState([]);
-  
+
   useEffect(() => {
     const fetchTerms = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/carousel-slider/destination/${id}`);
-        const data = await response.json();
+        const data = await getHeroBanners(id);
         setTerms(data);
       } catch (error) {
         console.error('Error fetching Carousel Image:', error);
       }
     };
-    
+
     fetchTerms();
-  }, []);
+  }, [id]);
 
   return (
     <section className={`${raleway.className} relative z-10 h-[30vh] lg:h-[60vh]`}>
@@ -50,10 +50,10 @@ export default function Banner({id}) {
                 fill
                 className="object-cover"
                 priority={index === 0}
-                style={{width:"100%", height:"100%"}}
+                style={{ width: "100%", height: "100%" }}
               />
             </div>
-            
+
             {/* Content Overlay - now inside SwiperSlide */}
             <div className="absolute inset-0 bg-black bg-opacity-30 z-10 pointer-events-none"></div>
 
@@ -66,9 +66,9 @@ export default function Banner({id}) {
                 <p className="text-[12px] sm:text-[16px]">
                   {image?.subtitle || "Travel is a transformative and enriching experience that allows individuals to explore new destinations, cultures, and landscapes."}
                 </p>
-               
+
               </div>
-              
+
             </div>
           </SwiperSlide>
         ))}

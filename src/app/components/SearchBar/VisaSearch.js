@@ -42,6 +42,19 @@ const VisaSearch = () => {
     return () => document.removeEventListener("mousedown", handle);
   }, []);
 
+  // Slugify function to create URL-friendly strings
+  const slugify = (str) => {
+    if (!str) return '';
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')                      // Replace spaces with dashes
+      .replace(/[^\w\-]+/g, '')                  // Remove non-word chars except hyphen
+      .replace(/\-\-+/g, '-')                    // Replace multiple dashes with one
+      .replace(/^-+/, '')                        // Trim dashes from start
+      .replace(/-+$/, '');                       // Trim dashes from end
+  };
+
   const coachLeven = (a, b) => {
     const m = a.length, n = b.length;
     const dp = Array(m + 1).fill().map(() => Array(n + 1).fill(0));
@@ -138,18 +151,28 @@ const VisaSearch = () => {
     if (!selectedLocationId) {
       alert("Please select a valid destination");
     } else {
-      router.push(`/visa/${selectedLocationId}`);
+      // Find the selected destination
+      const selectedDestination = destinations.find(dest => dest.id === selectedLocationId);
+      if (selectedDestination) {
+        // Create the URL with slugified country name and ID
+        const countrySlug = slugify(selectedDestination.name);
+        router.push(`/visa/${countrySlug}/${selectedLocationId}`);
+      } else {
+        // Fallback to just the ID if destination not found
+        router.push(`/visa/${selectedLocationId}`);
+      }
     }
   };
 
   if (error) return <div className="text-red-500 p-4">{error}</div>;
 
   return (
-    <div className="max-w-5xl mx-auto pb-6  relative" ref={ref}>
+    <div className="max-w-5xl mx-auto pb-6 relative" ref={ref}>
       <form onSubmit={onSubmit}>
         <div className="space-y-1">
-          <label className="block text-sm text-blue-950">Destination Country</label>
-           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <label className="block text-sm text-blue-950 font-medium">DESTINATION COUNTRY</label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <LuMapPin className="h-5 w-5 text-blue-600" />
             </div>
             <input
@@ -162,6 +185,7 @@ const VisaSearch = () => {
               aria-autocomplete="list"
               aria-controls="visa-suggestions"
             />
+          </div>
           {showSuggestions && suggestions.length > 0 && (
             <div
               id="visa-suggestions"
@@ -183,10 +207,10 @@ const VisaSearch = () => {
               ))}
             </div>
           )}
-          </div>
-          <div className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2 -translate-x-1/2 flex justify-end">
-            <SearchButton type="submit">Search Visa</SearchButton>
-          </div>
+        </div>
+        <div className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2 -translate-x-1/2 flex justify-end">
+          <SearchButton type="submit">Search Visa</SearchButton>
+        </div>
       </form>
     </div>
   );

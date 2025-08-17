@@ -24,6 +24,7 @@ const BookMeHeader = () => {
   const { currentPage, handlePageChange } = usePagination();
   const router = useRouter();
   const packageTourRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   const handleClick = () => {
     handlePageChange(1);
@@ -31,9 +32,13 @@ const BookMeHeader = () => {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+    if (isMobileMenuOpen) {
+      setIsPackageTourOpen(false);
+    }
   };
 
-  const togglePackageTour = () => {
+  const togglePackageTour = (e) => {
+    e.stopPropagation();
     setIsPackageTourOpen(!isPackageTourOpen);
   };
 
@@ -65,6 +70,10 @@ const BookMeHeader = () => {
       if (packageTourRef.current && !packageTourRef.current.contains(event.target)) {
         setIsPackageTourOpen(false);
       }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setIsMobileMenuOpen(false);
+        setIsPackageTourOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -77,9 +86,187 @@ const BookMeHeader = () => {
     setSearchTerm(data.property);
   };
 
-  const closeMobileMenu = () => {
+  const closeAllMenus = () => {
     setIsMobileMenuOpen(false);
     setIsPackageTourOpen(false);
+  };
+const slugify = (str) =>
+  str
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')                      // Replace spaces with dashes
+    .replace(/[^\w\u0980-\u09FF\-]+/g, '')     // Allow Bangla + word chars + hyphen
+    .replace(/\-\-+/g, '-');                   // Replace multiple dashes with one
+
+
+  // Mobile menu component to separate the logic
+  const MobileMenu = () => {
+    const [localPackageTourOpen, setLocalPackageTourOpen] = useState(false);
+
+    return (
+      <div className="h-full flex flex-col overflow-hidden">
+        {/* Menu Header */}
+        <div className="flex justify-between p-4 border-b border-gray-200">
+          <Link href="/" onClick={() => { handleClick(); closeAllMenus(); }}>
+            <Image
+              src="/assets/images/logo.png"
+              alt="logo"
+              width={150}
+              height={5}
+              className="changeLogo"
+            />
+          </Link>
+          <button
+            onClick={closeAllMenus}
+            className="text-gray-950 p-2 focus:outline-none hover:bg-white/10 rounded-full"
+          >
+            <FaTimes className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Menu Items */}
+        <nav className="flex-1 overflow-y-auto py-4">
+          <ul className="space-y-1 px-2">
+            <li>
+              <Link
+                href="/hotel"
+                className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
+                onClick={closeAllMenus}
+              >
+                <span className="font-medium">Hotels</span>
+                <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </li>
+
+            {/* Ship Tickets Dropdown - Mobile */}
+            <li>
+              <div className="flex flex-col">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setLocalPackageTourOpen(!localPackageTourOpen);
+                  }}
+                  className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group w-full text-left"
+                >
+                  <span className="font-medium">Ship Tickets</span>
+                  <FaChevronRight className={`text-blue-400 transition-transform duration-200 ${localPackageTourOpen ? 'rotate-90' : ''}`} />
+                </button>
+
+                {localPackageTourOpen && (
+                  <div className="pl-4">
+                    {destinations.filter((destination) => destination.id !== 4).map((destination) => {
+                      const slug = slugify(destination.name); // ✅ Use slugified name here
+
+                      return (
+                        <Link
+                          key={destination.id}
+                          href={`/tour/${slug}/${destination.id}`} // ✅ Use slug, not destination.name
+                          className="flex items-center justify-between py-2 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
+                          onClick={closeAllMenus}
+                        >
+                          <span className="font-medium">{destination.name}</span>
+                          <FaChevronRight className="text-blue-400 opacity-70" />
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+
+
+              </div>
+            </li>
+
+            <li>
+              <Link
+                href="/contact"
+                className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
+                onClick={closeAllMenus}
+              >
+                <span className="font-medium">Flights</span>
+                <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/visa"
+                className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
+                onClick={closeAllMenus}
+              >
+                <span className="font-medium">Visa</span>
+                <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/contact"
+                className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
+                onClick={closeAllMenus}
+              >
+                <span className="font-medium">Tour Packages</span>
+                <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/contact"
+                className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
+                onClick={closeAllMenus}
+              >
+                <span className="font-medium">Activities</span>
+                <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/contact"
+                className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
+                onClick={closeAllMenus}
+              >
+                <span className="font-medium">Car Rental</span>
+                <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
+        {/* Contact Footer */}
+        <div className="p-4 border-t border-gray-200 bg-gray-50">
+          <h3 className="text-lg font-semibold text-[#00026E] mb-3">Contact Us</h3>
+          <div className="flex items-center space-x-4 mb-4">
+            <a
+              target="_blank"
+              href={`tel:${contactNumber?.Phone}`}
+              className="flex items-center justify-center w-12 h-12 bg-[#00026E] rounded-full text-white hover:bg-[#00026E]/90 transition-colors"
+            >
+              <FaPhone className="text-xl" />
+            </a>
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              href={`https://wa.me/${contactNumber?.Phone}`}
+              className="flex items-center justify-center w-12 h-12 bg-green-500 rounded-full text-white hover:bg-green-600 transition-colors relative"
+            >
+              <span className="absolute animate-ping opacity-75 inline-flex h-full w-full rounded-full bg-green-400"></span>
+              <FaWhatsapp className="text-xl z-10" />
+            </Link>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Call Anytime</p>
+            <a
+              href={`tel:${contactNumber?.Phone}`}
+              className="text-lg font-semibold text-[#00026E] hover:underline"
+            >
+              {contactNumber?.Phone}
+            </a>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -108,7 +295,7 @@ const BookMeHeader = () => {
                 >
                   HOTELS
                 </Link>
-                
+
                 {/* Ship Tickets Dropdown */}
                 <div className="relative group" ref={packageTourRef}>
                   <button
@@ -122,52 +309,57 @@ const BookMeHeader = () => {
                   {isPackageTourOpen && (
                     <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-30">
                       {destinations
-                        .filter((destination) => destination.id !== 4) // Exclude destination with id 4
-                        .map((destination) => (
-                          <Link
-                            key={destination.id}
-                            href={`/tour/${destination.id}`}
-                            className="block px-4 py-2 text-sm text-[#00026E] hover:bg-blue-50"
-                            onClick={() => {
-                              handleClick();
-                              setIsPackageTourOpen(false);
-                            }}
-                          >
-                            {destination.name}
-                          </Link>
-                        ))}
+                        .filter((destination) => destination.id !== 4)
+                        .map((destination) => {
+                          const slug = slugify(destination.name); // ✅ Slugify the name
+
+                          return (
+                            <Link
+                              key={destination.id}
+                              href={`/tour/${slug}/${destination.id}`} // ✅ Use slug in the URL
+                              className="block px-4 py-2 text-sm text-[#00026E] hover:bg-blue-50"
+                              onClick={() => {
+                                handleClick();
+                                setIsPackageTourOpen(false);
+                              }}
+                            >
+                              {destination.name}
+                            </Link>
+                          );
+                        })}
                     </div>
                   )}
+
                 </div>
-                
+
                 <Link
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
                   FLIGHTS
                 </Link>
-                
+
                 <Link
                   href="/visa"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
                   VISA
                 </Link>
-                
+
                 <Link
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
                   TOUR PACKAGES
                 </Link>
-                
+
                 <Link
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                 >
                   ACTIVITIES
                 </Link>
-                
+
                 <Link
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
@@ -245,171 +437,23 @@ const BookMeHeader = () => {
         </div>
 
         {/* Enhanced Mobile Menu */}
-        <div className={`lg:hidden fixed inset-0 z-20 transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-          {/* Backdrop */}
-          <div
-            className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}
-            onClick={closeMobileMenu}
-          ></div>
+        {isMobileMenuOpen && (
+          <div className="lg:hidden fixed inset-0 z-20">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/50"
+              onClick={closeAllMenus}
+            ></div>
 
-          {/* Menu Content */}
-          <div
-            className={`absolute top-0 right-0 h-full w-4/5 max-w-xs bg-white shadow-xl transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
-          >
-            <div className="h-full flex flex-col overflow-hidden">
-              {/* Menu Header */}
-              <div className="flex justify-between p-4 border-b border-gray-200">
-                <Link href="/" onClick={() => { handleClick(); closeMobileMenu(); }}>
-                  <Image
-                    src="/assets/images/logo.png"
-                    alt="logo"
-                    width={150}
-                    height={5}
-                    className="changeLogo"
-                  />
-                </Link>
-                <button
-                  onClick={closeMobileMenu}
-                  className="text-gray-950 p-2 focus:outline-none hover:bg-white/10 rounded-full"
-                >
-                  <FaTimes className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Menu Items */}
-              <nav className="flex-1 overflow-y-auto py-4">
-                <ul className="space-y-1 px-2">
-                  <li>
-                    <Link
-                      href="/hotel"
-                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
-                      onClick={closeMobileMenu}
-                    >
-                      <span className="font-medium">Hotels</span>
-                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </li>
-                  
-                  {/* Ship Tickets Dropdown */}
-                  <li>
-                    <div className="flex flex-col">
-                      <button
-                        onClick={togglePackageTour}
-                        className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
-                      >
-                        <span className="font-medium">Ship Tickets</span>
-                        <FaChevronRight className={`text-blue-400 transition-transform duration-200 ${isPackageTourOpen ? 'rotate-90' : ''}`} />
-                      </button>
-
-                      {isPackageTourOpen && (
-                        <div className="pl-4">
-                          {destinations.filter((destination) => destination.id !== 4).map((destination) => (
-                            <Link
-                              key={destination.id}
-                              href={`/tour/${destination.id}`}
-                              className="flex items-center justify-between py-2 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
-                              onClick={closeMobileMenu}
-                            >
-                              <span className="font-medium">{destination.name}</span>
-                              <FaChevronRight className="text-blue-400 opacity-70" />
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </li>
-                  
-                  <li>
-                    <Link
-                      href="/contact"
-                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
-                      onClick={closeMobileMenu}
-                    >
-                      <span className="font-medium">Flights</span>
-                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </li>
-                  
-                  <li>
-                    <Link
-                      href="/visa"
-                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
-                      onClick={closeMobileMenu}
-                    >
-                      <span className="font-medium">Visa</span>
-                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </li>
-                  
-                  <li>
-                    <Link
-                      href="/contact"
-                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
-                      onClick={closeMobileMenu}
-                    >
-                      <span className="font-medium">Tour Packages</span>
-                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </li>
-                  
-                  <li>
-                    <Link
-                      href="/contact"
-                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
-                      onClick={closeMobileMenu}
-                    >
-                      <span className="font-medium">Activities</span>
-                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </li>
-                  
-                  <li>
-                    <Link
-                      href="/contact"
-                      className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
-                      onClick={closeMobileMenu}
-                    >
-                      <span className="font-medium">Car Rental</span>
-                      <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </li>
-                </ul>
-              </nav>
-
-              {/* Contact Footer */}
-              <div className="p-4 border-t border-gray-200 bg-gray-50">
-                <h3 className="text-lg font-semibold text-[#00026E] mb-3">Contact Us</h3>
-                <div className="flex items-center space-x-4 mb-4">
-                  <a
-                    target="_blank"
-                    href={`tel:${contactNumber?.Phone}`}
-                    className="flex items-center justify-center w-12 h-12 bg-[#00026E] rounded-full text-white hover:bg-[#00026E]/90 transition-colors"
-                  >
-                    <FaPhone className="text-xl" />
-                  </a>
-                  <Link
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={`https://wa.me/${contactNumber?.Phone}`}
-                    className="flex items-center justify-center w-12 h-12 bg-green-500 rounded-full text-white hover:bg-green-600 transition-colors relative"
-                  >
-                    <span className="absolute animate-ping opacity-75 inline-flex h-full w-full rounded-full bg-green-400"></span>
-                    <FaWhatsapp className="text-xl z-10" />
-                  </Link>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Call Anytime</p>
-                  <a
-                    href={`tel:${contactNumber?.Phone}`}
-                    className="text-lg font-semibold text-[#00026E] hover:underline"
-                  >
-                    {contactNumber?.Phone}
-                  </a>
-                </div>
-              </div>
+            {/* Menu Content */}
+            <div
+              ref={mobileMenuRef}
+              className="absolute top-0 right-0 h-full w-4/5 max-w-xs bg-white shadow-xl transform transition-transform duration-300 ease-in-out"
+            >
+              <MobileMenu />
             </div>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );

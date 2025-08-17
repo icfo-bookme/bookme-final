@@ -47,6 +47,8 @@ export default function PropertyList({ id }) {
     fetchData();
   }, [id]);
 
+
+  
   // Fetch popular property data when sort option changes to "Most Popular"
   useEffect(() => {
     async function fetchPopularData() {
@@ -158,8 +160,8 @@ export default function PropertyList({ id }) {
         <Banner id={id} />
         
         {/* Filters Overlay - LG devices only */}
-        <div className="hidden lg:block absolute bottom-0 left-0 right-0 transform translate-y-1/2 z-10">
-          <div className="container mx-auto px-4">
+        <div className="hidden w-[80%] mx-auto  lg:block absolute bottom-0 left-0 right-0 transform translate-y-1/2 z-10">
+          <div className="container mx-auto px-4 ">
             <PropertyFilters
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}

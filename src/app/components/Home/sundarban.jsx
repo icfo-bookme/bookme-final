@@ -91,9 +91,16 @@ export default function SundarbanShips() {
             }, 3000);
         }
     };
+const slugify = (str) =>
+  str
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')                      // Replace spaces with dashes
+    .replace(/[^\w\u0980-\u09FF\-]+/g, '')     // Allow Bangla + word chars + hyphen
+    .replace(/\-\-+/g, '-');                   // Replace multiple dashes with one
 
     return (
-        <div className={`${roboto.className} bg-white w-full mx-auto  max-w-7xl`}>
+        <div className={`${roboto.className} bg-blue-50 w-full mx-auto  max-w-7xl`}>
             <div className="w-full text-center mb-5">
                 <h2 className="text-xl md:text-2xl font-bold text-[#00026E] mb-2">
                     Popular Sundarban Ships
@@ -190,7 +197,7 @@ export default function SundarbanShips() {
                     >
                         {data.slice(0, 12).map((property) => (
                             <SwiperSlide key={property.property_id} className=" h-auto">
-                                <div className="relative rounded-xl overflow-hidden shadow-lg h-full group flex flex-col">
+                                <div className="flex flex-col   rounded-lg bg-white h-full transition-all duration-300 hover:shadow-lg hover:translate-y-[-4px]">
                                     <div className="relative h-48 sm:h-56 md:h-64 lg:h-72 w-full">
                                         <Image
                                             src={`${process.env.NEXT_PUBLIC_BASE_URL}/storage/${property.main_img}`}
@@ -202,7 +209,7 @@ export default function SundarbanShips() {
                                         />
                                     </div>
                                     <div className="p-4 sm:p-5 md:p-6 flex-grow flex flex-col">
-                                        <Link href={`/Property/${property.property_id}`} className="cursor-pointer">
+                                        <Link href={`/Property/${slugify(property.property_name)}/${property.property_id}`} className="cursor-pointer">
                                             <h3 className="text-lg md:text-xl font-bold text-[#00026E] mb-2 hover:text-blue-700 transition-colors line-clamp-2">
                                                 {property.property_name}
                                             </h3>
@@ -227,7 +234,7 @@ export default function SundarbanShips() {
                                                     </span>
                                                 </div>
                                                 <Link
-                                                    href={`/Property/${property.property_id}`}
+                                                    href={`/Property/${slugify(property.property_name)}/${property.property_id}`}
                                                     style={{
                                                         background: "linear-gradient(90deg, #313881, #0678B4)",
                                                     }}
@@ -267,7 +274,7 @@ export default function SundarbanShips() {
                             }}
                             className="px-3 py-1 md:px-8 md:py-3.5 text-white font-medium rounded-md hover:opacity-90 transition-opacity inline-flex items-center"
                         >
-                            Details
+                            See More
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 ml-2">
                                 <path fillRule="evenodd" d="M5 10a.75.75 0 01.75-.75h6.638L10.23 7.29a.75.75 0 111.04-1.08l3.5 3.25a.75.75 0 010 1.08l-3.5 3.25a.75.75 0 11-1.04-1.08l2.158-1.96H5.75A.75.75 0 015 10z" clipRule="evenodd" />
                             </svg>

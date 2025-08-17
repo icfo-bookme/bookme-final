@@ -2,9 +2,6 @@ import getAllHotels from '@/services/hotel/getAllHotels';
 import HotelLoadingSkeleton from '../components/hotel/Hotel/HotelLoadingSkeleton';
 import HotelHeroSection from '../components/hotel/Hotel/HotelHeroSection';
 import HotelCTA from '../components/hotel/Hotel/HotelCTA';
-import Link from 'next/link';
-import { FaMapMarkerAlt, FaStar } from 'react-icons/fa';
-import Image from 'next/image';
 import HotelCard from '../components/hotel/Hotel/HotelCard';
 import DestinationSlider from '../components/hotel/Hotel/DestinationSlider';
 
@@ -35,9 +32,9 @@ export default async function HotelHome() {
     <div className="min-h-screen">
       <HotelHeroSection />
 
-      <DestinationSlider />
+      {/* <DestinationSlider /> */}
       <main className="container mx-auto ">
-        <section className=" ">
+        <section className="mt-12 ">
           <h2 className="text-xl sm:text-2xl md:text-2xl font-bold text-center mb-2 text-blue-950">
             Best Hotels for Your Next Trip
           </h2>
