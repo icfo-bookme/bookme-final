@@ -9,6 +9,7 @@ import MobileSearchForm from "./MobileSearchForm";
 import DatePickerModal from "../../../../utils/DatePickerModal";
 import GuestModal from "../../../../utils/GuestModal";
 import getAllHotels from "@/services/hotel/getAllHotels";
+import HotelSearch from "../../SearchBar/HotelSearch";
 
 const SearchBar = ({ initialValues }) => {
   const router = useRouter();
@@ -53,9 +54,8 @@ const SearchBar = ({ initialValues }) => {
   const [dateRange, setDateRange] = useState([checkinDate, checkoutDate]);
 
   // Guest summary text
-  const guestText = `${rooms} Room${rooms > 1 ? "s" : ""}, ${adults} Adult${adults > 1 ? "s" : ""}${
-    children > 0 ? `, ${children} Child${children > 1 ? "ren" : ""}` : ""
-  }`;
+  const guestText = `${rooms} Room${rooms > 1 ? "s" : ""}, ${adults} Adult${adults > 1 ? "s" : ""}${children > 0 ? `, ${children} Child${children > 1 ? "ren" : ""}` : ""
+    }`;
 
   // Get destination display name by id
   const getDestinationNameById = (locationID) => {
@@ -71,9 +71,9 @@ const SearchBar = ({ initialValues }) => {
           getDestination(),
           getAllHotels()
         ]);
-        
+
         setDestinations(destinationsData);
-        
+
         // Transform hotel data
         const processedHotels = hotelsData.map(hotel => ({
           id: hotel.hotel_id,
@@ -89,7 +89,7 @@ const SearchBar = ({ initialValues }) => {
           discount: hotel.discount,
           street_address: hotel.street_address || "Unknown Street",
         }));
-        
+
         setHotels(processedHotels);
 
         // Set initial values based on URL params
@@ -124,13 +124,13 @@ const SearchBar = ({ initialValues }) => {
   // Matching algorithm
   const calculateMatchScore = (item, query, isHotel = false) => {
     if (!query || !item?.name) return 0;
-    
+
     const itemName = item.name.toLowerCase();
-    const itemLocation = isHotel 
+    const itemLocation = isHotel
       ? `${item.city || ''}, ${item.country || ''}`.toLowerCase()
       : `${item.name || ''}, ${item.country || ''}`.toLowerCase();
     const queryText = query.toLowerCase().trim();
-    
+
     // Exact match bonus
     if (itemName === queryText) return 1000;
     if (itemLocation === queryText) return 950;
@@ -149,11 +149,11 @@ const SearchBar = ({ initialValues }) => {
 
     // Word matching
     const queryWords = queryText.split(/\s+/);
-    const allWordsMatch = queryWords.every(word => 
+    const allWordsMatch = queryWords.every(word =>
       itemName.includes(word) || itemLocation.includes(word)
     );
     if (allWordsMatch) {
-      const matchedWordsCount = queryWords.filter(word => 
+      const matchedWordsCount = queryWords.filter(word =>
         itemName.includes(word)
       ).length;
       return 700 + (matchedWordsCount * 50);
@@ -192,7 +192,7 @@ const SearchBar = ({ initialValues }) => {
     const result = [];
     let lastIndex = 0;
     const matchPos = lowerText.indexOf(lowerQuery);
-    
+
     if (matchPos !== -1) {
       if (matchPos > 0) result.push(text.substring(0, matchPos));
       result.push(
@@ -292,7 +292,7 @@ const SearchBar = ({ initialValues }) => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    
+
     if (!selectedDestination && !selectedHotelId) {
       alert("Please select a valid destination or hotel");
       return;
@@ -357,32 +357,22 @@ const SearchBar = ({ initialValues }) => {
           checkoutDate={checkoutDate}
           guestText={guestText}
           getDestinationNameById={getDestinationNameById}
-           setSearchQuery={setSearchQuery}
+          setSearchQuery={setSearchQuery}
           setShowMobileSearch={setShowMobileSearch}
           destinations={destinations}
           hotels={hotels}
           searchQuery={searchQuery}
         />
       )}
-  {showMobileSearch && (
-        <MobileSearchForm
-           searchQuery={searchQuery}
-        handleSearchChange={handleSearchChange}
-        handleSearchFocus={handleSearchFocus}
-        showSuggestions={showSuggestions}
-        suggestions={suggestions}
-        selectDestination={selectDestination}
-        checkinDate={checkinDate}
-        checkoutDate={checkoutDate}
-        setShowDatePicker={setShowDatePicker}
-        guestText={guestText}
-        setShowGuestModal={setShowGuestModal}
-        handleSearch={handleSearch}
-        setShowSuggestions={setShowSuggestions}
-        highlightMatches={highlightMatches}
-        formatDate={formatDate}
-        />
+
+
+      {showMobileSearch && (
+        <HotelSearch type="details_page" setShowMobileSearch={setShowMobileSearch} />
       )}
+
+
+
+
       <SearchForm
         searchQuery={searchQuery}
         handleSearchChange={handleSearchChange}
@@ -401,7 +391,7 @@ const SearchBar = ({ initialValues }) => {
         formatDate={formatDate}
       />
 
-    
+
 
       {showDatePicker && (
         <DatePickerModal

@@ -9,6 +9,7 @@ import getAllHotels from "@/services/hotel/getAllHotels";
 import ErrorDisplay from "./Hotels/ErrorDisplay";
 import SearchForm from "./Hotels/SearchForm";
 import LoadingSpinner from "./Hotels/LoadingSpinner";
+import { set } from "date-fns";
 
 
 const DEFAULT_DESTINATIONS = [
@@ -29,7 +30,8 @@ const DEFAULT_DESTINATIONS = [
   },
 ];
 
-const HotelSearch = () => {
+const HotelSearch = ({ type = "default_value", setShowMobileSearch }) => {
+  
   const [destinations, setDestinations] = useState([]);
   const [hotels, setHotels] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
