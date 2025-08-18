@@ -30,7 +30,7 @@ const DEFAULT_DESTINATIONS = [
   },
 ];
 
-const HotelSearch = ({ type = "default_value", setShowMobileSearch }) => {
+const HotelSearch = () => {
   
   const [destinations, setDestinations] = useState([]);
   const [hotels, setHotels] = useState([]);

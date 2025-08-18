@@ -1,16 +1,18 @@
-import HotelSearch from "@/components/HotelSearch";
-import getDestination from "@/services/hotel/getDestination";
 
-export default async function Home() {
-  // Fetch destinations on the server side
+import getAllHotels from "@/services/hotel/getAllHotels";
+import getDestination from "@/services/hotel/getDestination";
+import HotelSearch from "./HotelSearch";
+
+export default async function Hotel() {
+  // Server Side এ data fetch
   const destinations = await getDestination();
-  const initialSelectedLocationId = destinations.length > 0 ? destinations[0].id : "";
+  const hotelsData = await getAllHotels();
 
   return (
     <main>
-      <HotelSearch 
-        serverDestinations={destinations} 
-        initialSelectedLocationId={initialSelectedLocationId} 
+      <HotelSearch
+        destinationsData={destinations}
+        hotelsData={hotelsData}
       />
     </main>
   );

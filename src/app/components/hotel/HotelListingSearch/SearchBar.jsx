@@ -9,7 +9,6 @@ import MobileSearchForm from "./MobileSearchForm";
 import DatePickerModal from "../../../../utils/DatePickerModal";
 import GuestModal from "../../../../utils/GuestModal";
 import getAllHotels from "@/services/hotel/getAllHotels";
-import HotelSearch from "../../SearchBar/HotelSearch";
 
 const SearchBar = ({ initialValues }) => {
   const router = useRouter();
@@ -365,12 +364,32 @@ const SearchBar = ({ initialValues }) => {
         />
       )}
 
-
       {showMobileSearch && (
-        <HotelSearch type="details_page" setShowMobileSearch={setShowMobileSearch} />
-      )}
-
-
+  <MobileSearchForm
+    searchQuery={searchQuery}
+    handleSearchChange={handleSearchChange}
+    handleSearchFocus={handleSearchFocus}
+    showSuggestions={showSuggestions}
+    setShowSuggestions={setShowSuggestions}
+    suggestions={suggestions}
+    selectDestination={selectDestination}
+    checkinDate={checkinDate}
+    checkoutDate={checkoutDate}
+    setShowDatePicker={setShowDatePicker}
+    guestText={guestText}
+    setShowGuestModal={setShowGuestModal}
+    handleSearch={handleSearch}
+    highlightMatches={highlightMatches}
+    formatDate={formatDate}
+    setShowMobileSearch={setShowMobileSearch}
+    // ✅ Fix: pass down setters
+    setSearchQuery={setSearchQuery}
+    setSelectedLocationId={setSelectedLocationId}
+    setSelectedHotelId={setSelectedHotelId}
+    setSelectedDestination={setSelectedDestination}
+    updateSuggestions={updateSuggestions}
+  />
+)}
 
 
       <SearchForm
@@ -390,8 +409,6 @@ const SearchBar = ({ initialValues }) => {
         highlightMatches={highlightMatches}
         formatDate={formatDate}
       />
-
-
 
       {showDatePicker && (
         <DatePickerModal
