@@ -47,7 +47,7 @@ export default function HotelDetails({ hotel }) {
                                     key={amenity.id}
                                     className="flex items-center text-xs md:text-xs text-blue-950 bg-gray-100 px-2 md:px-3 py-0.5 md:py-1 rounded-full"
                                 >
-                                   
+
                                     {amenity.icon_class ? (
                                         <i
                                             className={`${amenity.icon_class} text-blue-500 text-sm w-4 flex justify-center mr-1`}
@@ -55,12 +55,12 @@ export default function HotelDetails({ hotel }) {
                                     ) : (
                                         <FaCheck className="text-blue-500 text-sm mr-1" />
                                     )}
-                                  
+
                                     {amenity.name}
                                 </span>
                             ))}
 
-                          
+
                             {hotel.summary.length > 6 && (
                                 <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
                                     +{hotel.summary.length - 6} more

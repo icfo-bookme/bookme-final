@@ -3,7 +3,7 @@ import HotelLoadingSkeleton from '../components/hotel/Hotel/HotelLoadingSkeleton
 import HotelHeroSection from '../components/hotel/Hotel/HotelHeroSection';
 import HotelCTA from '../components/hotel/Hotel/HotelCTA';
 import HotelCard from '../components/hotel/Hotel/HotelCard';
-import DestinationSlider from '../components/hotel/Hotel/DestinationSlider';
+
 
 // Helper function to calculate discounted price
 function calculateDiscountedPrice(originalPrice, discount) {
@@ -32,7 +32,7 @@ export default async function HotelHome() {
     <div className="min-h-screen">
       <HotelHeroSection />
 
-      {/* <DestinationSlider /> */}
+     
       <main className="container mx-auto ">
         <section className="mt-12 ">
           <h2 className="text-xl sm:text-2xl md:text-2xl font-bold text-center mb-2 text-blue-950">

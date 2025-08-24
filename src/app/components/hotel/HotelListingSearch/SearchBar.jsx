@@ -77,7 +77,7 @@ const SearchBar = ({ initialValues }) => {
         const processedHotels = hotelsData.map(hotel => ({
           id: hotel.hotel_id,
           name: hotel.hotel_name,
-          city: hotel.city || hotel.street_address?.split(',')[0] || "Unknown City",
+          city: hotel.street_address || "Unknown City",
           country: hotel.country || "",
           destinationId: hotel.destination_id || "",
           type: 'hotel',
@@ -272,7 +272,7 @@ const SearchBar = ({ initialValues }) => {
 
   const selectDestination = (item) => {
     if (item.type === 'hotel') {
-      setSearchQuery(`${item.name}, ${item.city}, ${item.country}`);
+      setSearchQuery(`${item.name}`);
       setSelectedHotelId(item.id);
       setSelectedLocationId(item.destinationId || "");
       setSelectedDestination({
@@ -298,8 +298,8 @@ const SearchBar = ({ initialValues }) => {
     }
 
     const queryParams = new URLSearchParams({
-      checkin: checkinDate.toISOString().split("T")[0],
-      checkout: checkoutDate.toISOString().split("T")[0],
+      checkin: formatDateForURL(checkinDate),
+      checkout: formatDateForURL(checkoutDate),
       rooms: String(rooms),
       adult: String(adults),
       ...(children > 0 && { children: String(children) }),
@@ -323,7 +323,15 @@ const SearchBar = ({ initialValues }) => {
       month: "short",
       day: "numeric",
     }).replace(",", "") || "";
+  const formatDateForURL = (date) => {
+    if (!date) return '';
 
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  };
   if (error) {
     return (
       <div className="bg-white rounded-xl max-w-7xl mx-auto p-4 text-center">
@@ -365,31 +373,30 @@ const SearchBar = ({ initialValues }) => {
       )}
 
       {showMobileSearch && (
-  <MobileSearchForm
-    searchQuery={searchQuery}
-    handleSearchChange={handleSearchChange}
-    handleSearchFocus={handleSearchFocus}
-    showSuggestions={showSuggestions}
-    setShowSuggestions={setShowSuggestions}
-    suggestions={suggestions}
-    selectDestination={selectDestination}
-    checkinDate={checkinDate}
-    checkoutDate={checkoutDate}
-    setShowDatePicker={setShowDatePicker}
-    guestText={guestText}
-    setShowGuestModal={setShowGuestModal}
-    handleSearch={handleSearch}
-    highlightMatches={highlightMatches}
-    formatDate={formatDate}
-    setShowMobileSearch={setShowMobileSearch}
-    // ✅ Fix: pass down setters
-    setSearchQuery={setSearchQuery}
-    setSelectedLocationId={setSelectedLocationId}
-    setSelectedHotelId={setSelectedHotelId}
-    setSelectedDestination={setSelectedDestination}
-    updateSuggestions={updateSuggestions}
-  />
-)}
+        <MobileSearchForm
+          searchQuery={searchQuery}
+          handleSearchChange={handleSearchChange}
+          handleSearchFocus={handleSearchFocus}
+          showSuggestions={showSuggestions}
+          setShowSuggestions={setShowSuggestions}
+          suggestions={suggestions}
+          selectDestination={selectDestination}
+          checkinDate={checkinDate}
+          checkoutDate={checkoutDate}
+          setShowDatePicker={setShowDatePicker}
+          guestText={guestText}
+          setShowGuestModal={setShowGuestModal}
+          handleSearch={handleSearch}
+          highlightMatches={highlightMatches}
+          formatDate={formatDate}
+          setShowMobileSearch={setShowMobileSearch}
+          setSearchQuery={setSearchQuery}
+          setSelectedLocationId={setSelectedLocationId}
+          setSelectedHotelId={setSelectedHotelId}
+          setSelectedDestination={setSelectedDestination}
+          updateSuggestions={updateSuggestions}
+        />
+      )}
 
 
       <SearchForm

@@ -3,13 +3,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-const HotelCard = ({ 
-  hotel, 
-  amenities, 
-  checkin, 
-  checkout, 
-  rooms, 
-  adult 
+const HotelCard = ({
+  hotel,
+  amenities,
+  checkin,
+  checkout,
+  rooms,
+  adult,
+  isHighlighted,
 }) => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-BD', {
@@ -18,20 +19,22 @@ const HotelCard = ({
       maximumFractionDigits: 0
     }).format(price).replace('BDT', 'BDT ');
   };
-const slugify = (str) =>
-  str
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')        // Replace spaces with dashes
-    .replace(/[^\w\-]+/g, '')    // Remove non-word chars
-    .replace(/\-\-+/g, '-');     // Replace multiple dashes with one
-
+  const slugify = (str) =>
+    str
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')        
+      .replace(/[^\w\-]+/g, '')    
+      .replace(/\-\-+/g, '-');     
+ 
   return (
     <Link
       href={`/hotel/list/details/${slugify(hotel.name)}/${hotel.id}?checkin=${checkin}&checkout=${checkout}&rooms=${rooms}&adult=${adult}`}
       className="block"
     >
-      <div className="group relative flex flex-col md:flex-row gap-5 p-5 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 bg-white hover:border-blue-100">
+      <div className={`group relative flex flex-col md:flex-row gap-5 p-5 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 ${isHighlighted ? 'bg-yellow-100' : 'bg-white'
+        } hover:border-blue-100`}
+      >
         {/* Hotel Image */}
         <div className="relative w-full md:w-2/5 h-52 rounded-lg overflow-hidden">
           <Image
@@ -45,11 +48,11 @@ const slugify = (str) =>
           {hotel.discount && hotel.discount > 0 && (
             <div className="absolute top-3 left-0 bg-[#FD7E14] text-white font-bold text-xs px-3 py-1 shadow-md z-10">
               <span className="relative z-10">{hotel.discount}% OFF</span>
-             
+
             </div>
           )}
           {hotel.label && (
-            <div className="absolute top-12 rounded-r-lg bg-white text-blur-950 font-bold text-sm px-2 py-1 shadow-md z-10">
+            <div className="absolute top-10 rounded-r-lg bg-white text-blur-950 font-bold text-sm px-2 py-1 shadow-md z-10">
               <i className="fa-solid fa-fire"></i> <span className="relative z-10">{hotel.label}</span>
             </div>
           )}

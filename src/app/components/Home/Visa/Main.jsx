@@ -1,8 +1,8 @@
-import Hotel from "../Hotel"
+import Hotel from "../Hotel/Hotel"
 import getAllVisa from "@/services/visa/getAllVisa"
-import Visa from "../Visa"
+import Visa from "./Visa"
 
-export default async function HotelMain() {
+export default async function VisaMain() {
     const data = (await getAllVisa()).slice(0, 21)
 
     return (

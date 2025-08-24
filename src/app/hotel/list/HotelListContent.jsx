@@ -277,6 +277,7 @@ const HotelListContent = ({
             {sortedHotels.length > 0 ? (
               <div className="space-y-5">
                 {sortedHotels.map((hotel) => (
+                  console.log('isHighlighted', hotelID == hotel.id),
                   <HotelCard
                     key={hotel.id}
                     hotel={hotel}
@@ -285,6 +286,8 @@ const HotelListContent = ({
                     checkout={checkout}
                     rooms={rooms}
                     adult={adult}
+                    isHighlighted={hotelID == hotel.id}
+                   
                   />
                 ))}
               </div>

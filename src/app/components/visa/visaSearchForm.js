@@ -16,6 +16,16 @@ export default function VisaSearchForm({ countryData }) {
   const inputRef = useRef(null);
   const router = useRouter();
 
+
+  const slugify = (str) =>
+  str
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')        // Replace spaces with dashes
+    .replace(/[^\w\-]+/g, '')    // Remove non-word chars
+    .replace(/\-\-+/g, '-'); 
+
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -90,7 +100,7 @@ export default function VisaSearchForm({ countryData }) {
     e.preventDefault();
     const selectedCountry = countryData.find(country => country?.name === departure);
     if (!selectedCountry) return;
-    router.push(`/visa/${selectedCountry?.id}`);
+    router.push(`/visa/${slugify(selectedCountry?.name)}/${selectedCountry?.id}`);
   };
 
   const currentCountryCode = countryData.find(country => country.name === departure)?.code || '';

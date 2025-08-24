@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import PrimaryButton from '@/utils/PrimaryButton';
 import RoomCarousel from './Slider';
-import { Button } from 'flowbite-react';
+import { Button, Modal } from 'flowbite-react';
 
 const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
+    const [openModal, setOpenModal] = useState(false);
+
     const getFormattedDate = () => {
         const today = new Date();
         today.setDate(today.getDate() + 2);
@@ -15,11 +18,13 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
     const taxesAndFees = Math.round(discountedPrice * 0.265);
 
     return (
-        <div className="py-3 ">
-            <span className='bg-gray-200 text-gray-800  rounded-md p-2  font-semibold'>
+        <div className="py-3">
+            <span style={{
+                background: "linear-gradient(90deg, #313881, #0678B4)",
+            }} className=' text-gray-50 rounded-md p-2 font-semibold'>
                 Option {index + 1}
             </span>
-            <div className=" rounded-lg bg-gray-100 border border-gray-300 mb-4">
+            <div className="rounded-lg bg-gray-100 border border-gray-300 mb-4">
 
                 {/* Mobile View (sm) */}
                 <div className="md:hidden">
@@ -70,8 +75,12 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
 
                         <div className="grid grid-cols-2 gap-4 mt-4">
                             <div>
-
-                                <p className='font-bold mt-2 text-lg'>Refundable <i className="fa fa-info-circle" aria-hidden="true"></i></p>
+                                <button
+                                    onClick={() => setOpenModal(true)}
+                                    className='font-bold mt-2 text-lg hover:text-blue-700 text-gray-800'
+                                >
+                                    Refundable <i className="fa fa-info-circle text-gray-500" aria-hidden="true"></i>
+                                </button>
 
                                 <p className="text-gray-600 mt-2 text-sm flex items-center gap-2">
                                     <i className="fa-solid fa-utensils"></i>
@@ -116,7 +125,7 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                 </div>
 
                 {/* Desktop View (lg) */}
-                <div className="hidden md:grid md:grid-cols-8  gap-6">
+                <div className="hidden md:grid md:grid-cols-8 gap-6">
                     {/* Left side - Carousel */}
                     <div className='col-span-3 border-r border-gray-300'>
                         <RoomCarousel images={room.images} key={room.id} />
@@ -127,7 +136,6 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                         {/* Room header section */}
 
                         <div className="flex justify-between items-start mb-4">
-
                             <div>
                                 <h2 className="text-xl font-bold text-gray-800 mt-1 mb-1">{room.room_name}</h2>
                                 <p className="text-gray-600 text-sm">
@@ -149,15 +157,15 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                         {/* Room details grid */}
                         <div className='grid grid-cols-2 gap-6 mb-4'>
                             <div>
-                                <div className="flex items-center gap-3 mb-3">
-
-                                    <span className='font-bold text-blue-950'>
-                                        Refundable <i className="fa fa-info-circle text-gray-500" aria-hidden="true"></i>
-                                    </span>
+                                <div className="flex items-center gap-3 mb-3 font-bold text-blue-600 hover:text-blue-950">
+                                    <button
+                                        onClick={() => setOpenModal(true)}
+                                    >
+                                        <i className="fa fa-eye text-blue-500" aria-hidden="true"></i>   Refundable
+                                    </button>
                                 </div>
 
                                 <div className="space-y-3">
-
                                     <p className="text-gray-600 text-sm flex items-center gap-2">
                                         <i className="fa-solid fa-utensils text-gray-500"></i>
                                         Breakfast {room.breakfast_status === 'included' ? 'Included' : 'Not Included'}
@@ -173,7 +181,7 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                             </div>
 
                             {/* Pricing section */}
-                            <div className=' p-4 rounded-lg'>
+                            <div className='p-4 rounded-lg'>
                                 <div className="flex flex-col h-full justify-between">
                                     <div className="text-right">
                                         <p className='text-gray-500 text-xs'>Starts From</p>
@@ -202,7 +210,7 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                                     {room.feature_summary.slice(0, 6).map((amenity) => (
                                         <span
                                             key={amenity.id}
-                                            className="flex items-center  border border-gray-300 text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-700"
+                                            className="flex items-center border border-gray-300 text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-700"
                                         >
                                             {amenity.icon_class ? (
                                                 <i className={`${amenity.icon_class} mr-1 text-blue-600`}></i>
@@ -227,17 +235,56 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                         {/* Action buttons */}
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-6">
                             <button
-                                className="text-blue-950 hover:text-blue-800 font-medium text-sm flex items-center gap-1"
+                                className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1"
                                 onClick={() => onViewDetails(room)}
                             >
-                                <i className="fas fa-eye"></i> View Room Details
+                                <i className="fas fa-eye"></i> <span className='underline'>View Room Details</span>
                             </button>
 
                             <PrimaryButton onClick={() => onAddToCart(room)}>Add Room</PrimaryButton>
                         </div>
                     </div>
                 </div>
-            </div></div>
+            </div>
+
+            {/* Refund Policy Modal */}
+            <Modal
+                show={openModal}
+                onClose={() => setOpenModal(false)}
+                dismissible
+                className=" [&>div]:text-gray-800 bg-slate-200  mt-20"
+            >
+                <Modal.Header className="border-b border-gray-200">
+                    <span className="text-xl font-semibold">Refund Policy</span>
+                </Modal.Header>
+                <Modal.Body className="py-4">
+                    <div className="space-y-4">
+                        <p className="text-gray-700">
+                            This room is fully refundable if cancelled before 00:01 on {getFormattedDate()}.
+                        </p>
+                        <p className="text-gray-700">
+                            After this date, the following cancellation policy applies:
+                        </p>
+                        <ul className="list-disc pl-5 text-gray-700 space-y-2">
+                            <li>Cancellations made within 48 hours of check-in will incur a fee equal to one nights stay</li>
+                            <li>No-shows will be charged the full amount of the reservation</li>
+                            <li>Early departures are subject to the full reservation amount</li>
+                        </ul>
+                        <p className="text-gray-700">
+                            For any changes or cancellations, please contact our customer service team.
+                        </p>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer className="border-t border-gray-200 flex justify-end">
+                    <Button
+                        onClick={() => setOpenModal(false)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                        I Understand
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </div>
     );
 };
 

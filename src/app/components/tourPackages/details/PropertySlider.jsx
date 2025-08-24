@@ -51,10 +51,7 @@ const PropertySlider = ({ images }) => {
   return (
     <div className="flex flex-col w-full">
       {/* Main + Right-side preview */}
-      <h2 className="text-lg sm:text-xl font-bold text-gray-800  sm:mb-3 flex items-center -mt-2  gap-2">
-        <i className="fa-solid fa-info-circle text-blue-600 "></i>
-        Package Summary
-      </h2>
+      
       <div className="flex flex-col lg:flex-row w-full gap-2">
         {/* Main Swiper */}
         <div className="w-full lg:w-2/3">
@@ -83,7 +80,7 @@ const PropertySlider = ({ images }) => {
                     src={`${process.env.NEXT_PUBLIC_BASE_URL}/storage/${image}`}
                     alt={`Property Image ${index + 1}`}
                     fill
-                    className="object-cover"
+                    className="object-cover rounded-lg"
                     priority
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
@@ -112,7 +109,7 @@ const PropertySlider = ({ images }) => {
                   src={`${process.env.NEXT_PUBLIC_BASE_URL}/storage/${image}`}
                   alt={`Preview ${index + 1}`}
                   fill
-                  className="object-cover rounded-sm border border-gray-200 hover:border-blue-500 transition-all"
+                  className="object-cover rounded-lg border border-gray-200 hover:border-blue-500 transition-all"
                   sizes="(max-width: 1024px) 100vw, 33vw"
                 />
               </div>
@@ -151,7 +148,7 @@ const PropertySlider = ({ images }) => {
                   src={`${process.env.NEXT_PUBLIC_BASE_URL}/storage/${image}`}
                   alt={`Thumbnail ${index + 1}`}
                   fill
-                  className="object-cover rounded-sm border border-gray-200 hover:border-blue-500 transition-all"
+                  className="object-cover rounded-lg border border-gray-200 hover:border-blue-500 transition-all"
                   sizes="100px"
                 />
                 {(isMobile && index === 3 && images.length > 4) ||

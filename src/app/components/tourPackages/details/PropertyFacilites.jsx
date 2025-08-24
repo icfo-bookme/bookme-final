@@ -173,7 +173,7 @@ export default function PropertyFacilities({ data }) {
                   key="itineraries"
                   id="itineraries"
                   ref={(el) => (sectionRefs.current["itineraries"] = el)}
-                  className="scroll-mt-36"
+                  className="scroll-mt-[130px]"
                 >
                   <Itineraries itineraries={data.itineraries} />
                 </section>
@@ -185,7 +185,7 @@ export default function PropertyFacilities({ data }) {
                   key={category}
                   id={category}
                   ref={(el) => (sectionRefs.current[category] = el)}
-                  className="scroll-mt-36"
+                  className="scroll-mt-[130px]"
                 >
                   <div className="space-y-4">
                     <div className="grid gap-4">

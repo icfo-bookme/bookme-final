@@ -1,37 +1,38 @@
 import { Roboto } from "next/font/google";
+import { Suspense } from "react";
+
 import Banner from "./components/Home/Banner";
-import Visa from "./components/Home/Visa";
-import Tangour from "./components/Home/Tangour";
-import Sundarban from "./components/Home/sundarban";
-import SaintMartin from "./components/Home/SaintMartin";
+import Tangour from "./components/Home/Tangour/Tangour";
+import Sundarban from "./components/Home/sundarban/sundarban";
+import SaintMartin from "./components/Home/Saintmartin/SaintMartin";
 import PromotionsPage from "./components/Home/PromotionsPage";
 import getServicesData from "@/services/homepage/getServicesData";
 import HpmepageBlog from "./components/pre-footer-content/Homepage";
 
-import Hotel from "./components/Home/Hotel";
 import HotelMain from "./components/Home/Hotel/Main";
 import TravelBookingTabs from "./components/SearchBar/SearchBar";
+import VisaMain from "./components/Home/Visa/Main";
+import TangourMain from "./components/Home/Tangour/Main";
+import LoadingSpinner from "./components/SearchBar/Hotels/LoadingSpinner";
 
 export const dynamic = "force-dynamic";
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400"] });
 
-// Component mapping for main categories
 const mainComponentMap = {
-  "Visa": Visa,
-  "Hotel":  HotelMain,
-  "Ships": null, 
-  "Flight": null 
+  Visa: VisaMain,
+  Hotel: HotelMain,
+  Ships: null,
+  Flight: null,
 };
 
-// Sub-categories of Ships with their components
 const ShipsSubComponents = {
-  "Tanguar Haor": Tangour,
-  "Sundarban": Sundarban,
-  "Saint Martin Ships": SaintMartin
+  "Tanguar Haor": TangourMain,
+  Sundarban: Sundarban,
+  "Saint Martin Ships": SaintMartin,
 };
 
-export default async function Home({searchParams}) {
+export default async function Home({ searchParams }) {
   let servicesData = [];
 
   try {
@@ -40,15 +41,15 @@ export default async function Home({searchParams}) {
     console.error("Error fetching services data:", error);
   }
 
-  // Sort servicesData by serialno
   const sortedServices = [...servicesData].sort((a, b) => {
     const aSerial = a.serialno ? parseInt(a.serialno) : Infinity;
     const bSerial = b.serialno ? parseInt(b.serialno) : Infinity;
     return aSerial - bSerial;
   });
 
-  // Filter and get only the services that should be shown
-  const visibleServices = sortedServices.filter(service => service.isShow === "yes");
+  const visibleServices = sortedServices.filter(
+    (service) => service.isShow === "yes"
+  );
 
   return (
     <main className={`${roboto.className} bg-blue-50`}>
@@ -56,13 +57,21 @@ export default async function Home({searchParams}) {
       <section className="relative w-full min-h-[60vh] md:min-h-[60vh]">
         {/* Banner Background */}
         <div className="absolute inset-0 z-0">
-          <Banner />
+          <Suspense fallback={<div className="h-60 bg-gray-200 animate-pulse" />}>
+            <Banner />
+          </Suspense>
         </div>
 
-        {/* Search Widget - Centered Vertically */}
+        {/* Search Widget */}
         <div className="absolute top-28 inset-0 z-10 flex items-center justify-center px-4">
           <div className="w-full max-w-5xl mx-auto">
-            <TravelBookingTabs searchParams={searchParams} />
+            <Suspense
+              fallback={
+                <LoadingSpinner />
+              }
+            >
+              <TravelBookingTabs searchParams={searchParams} />
+            </Suspense>
           </div>
         </div>
       </section>
@@ -72,29 +81,58 @@ export default async function Home({searchParams}) {
         <div className="w-full max-w-screen-xl mx-auto px-4 space-y-10">
           {servicesData.length > 0 ? (
             <>
-              <PromotionsPage servicesData={servicesData} />
+              <Suspense
+                fallback={<div className="h-40 bg-gray-200 animate-pulse" />}
+              >
+                <PromotionsPage servicesData={servicesData} />
+              </Suspense>
 
               {visibleServices.map((service) => {
                 if (service.category_name === "Ships") {
                   const ShipsSubCategories = sortedServices
-                    .filter(s => 
-                      Object.keys(ShipsSubComponents).includes(s.category_name) && 
-                      s.isShow === "yes"
+                    .filter(
+                      (s) =>
+                        Object.keys(ShipsSubComponents).includes(
+                          s.category_name
+                        ) && s.isShow === "yes"
                     )
                     .sort((a, b) => {
-                      const aSerial = a.serialno ? parseInt(a.serialno) : Infinity;
-                      const bSerial = b.serialno ? parseInt(b.serialno) : Infinity;
+                      const aSerial = a.serialno
+                        ? parseInt(a.serialno)
+                        : Infinity;
+                      const bSerial = b.serialno
+                        ? parseInt(b.serialno)
+                        : Infinity;
                       return aSerial - bSerial;
                     });
 
-                  return ShipsSubCategories.map(subCategory => {
-                    const SubComponent = ShipsSubComponents[subCategory.category_name];
-                    return SubComponent ? <SubComponent key={subCategory.category_name} /> : null;
+                  return ShipsSubCategories.map((subCategory) => {
+                    const SubComponent =
+                      ShipsSubComponents[subCategory.category_name];
+                    return SubComponent ? (
+                      <Suspense
+                        key={subCategory.category_name}
+                        fallback={
+                          <div className="h-40 bg-gray-200 animate-pulse rounded-lg" />
+                        }
+                      >
+                        <SubComponent />
+                      </Suspense>
+                    ) : null;
                   });
                 }
 
                 const Component = mainComponentMap[service.category_name];
-                return Component ? <Component key={service.category_name} /> : null;
+                return Component ? (
+                  <Suspense
+                    key={service.category_name}
+                    fallback={
+                      <div className="h-40 bg-gray-200 animate-pulse rounded-lg" />
+                    }
+                  >
+                    <Component />
+                  </Suspense>
+                ) : null;
               })}
             </>
           ) : (
@@ -108,8 +146,15 @@ export default async function Home({searchParams}) {
       {/* Blog Section */}
       <section className="bg-blue-50 py-10">
         <div className="w-full max-w-screen-xl mx-auto px-4">
-          <HpmepageBlog />
+          <Suspense
+            fallback={
+              <div className="h-60 bg-gray-200 animate-pulse rounded-lg" />
+            }
+          >
+            <HpmepageBlog />
+          </Suspense>
         </div>
       </section>
     </main>
-  );}
+  );
+}

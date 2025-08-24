@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Roboto } from "next/font/google";
@@ -26,21 +26,17 @@ const BookMeHeader = () => {
   const packageTourRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
-  const handleClick = () => {
-    handlePageChange(1);
-  };
-
-  const toggleMobileMenu = () => {
+  const toggleMobileMenu = useCallback(() => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
     if (isMobileMenuOpen) {
       setIsPackageTourOpen(false);
     }
-  };
+  }, [isMobileMenuOpen]);
 
-  const togglePackageTour = (e) => {
+  const togglePackageTour = useCallback((e) => {
     e.stopPropagation();
     setIsPackageTourOpen(!isPackageTourOpen);
-  };
+  }, [isPackageTourOpen]);
 
   const {
     register,
@@ -86,18 +82,18 @@ const BookMeHeader = () => {
     setSearchTerm(data.property);
   };
 
-  const closeAllMenus = () => {
+  const closeAllMenus = useCallback(() => {
     setIsMobileMenuOpen(false);
     setIsPackageTourOpen(false);
-  };
-const slugify = (str) =>
-  str
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')                      // Replace spaces with dashes
-    .replace(/[^\w\u0980-\u09FF\-]+/g, '')     // Allow Bangla + word chars + hyphen
-    .replace(/\-\-+/g, '-');                   // Replace multiple dashes with one
+  }, []);
 
+  const slugify = (str) =>
+    str
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\u0980-\u09FF\-]+/g, '')
+      .replace(/\-\-+/g, '-');
 
   // Mobile menu component to separate the logic
   const MobileMenu = () => {
@@ -107,21 +103,17 @@ const slugify = (str) =>
       <div className="h-full flex flex-col overflow-hidden">
         {/* Menu Header */}
         <div className="flex justify-between p-4 border-b border-gray-200">
-          <Link href="/" onClick={() => { handleClick(); closeAllMenus(); }}>
+          <Link href="/" prefetch onClick={closeAllMenus}>
             <Image
               src="/assets/images/logo.png"
               alt="logo"
               width={150}
-              height={5}
+              height={50}
               className="changeLogo"
+              priority
             />
           </Link>
-          <button
-            onClick={closeAllMenus}
-            className="text-gray-950 p-2 focus:outline-none hover:bg-white/10 rounded-full"
-          >
-            <FaTimes className="w-5 h-5" />
-          </button>
+          
         </div>
 
         {/* Menu Items */}
@@ -132,6 +124,7 @@ const slugify = (str) =>
                 href="/hotel"
                 className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                 onClick={closeAllMenus}
+                prefetch
               >
                 <span className="font-medium">Hotels</span>
                 <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
@@ -156,14 +149,15 @@ const slugify = (str) =>
                 {localPackageTourOpen && (
                   <div className="pl-4">
                     {destinations.filter((destination) => destination.id !== 4).map((destination) => {
-                      const slug = slugify(destination.name); // ✅ Use slugified name here
+                      const slug = slugify(destination.name);
 
                       return (
                         <Link
                           key={destination.id}
-                          href={`/tour/${slug}/${destination.id}`} // ✅ Use slug, not destination.name
+                          href={`/tour/${slug}/${destination.id}`}
                           className="flex items-center justify-between py-2 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                           onClick={closeAllMenus}
+                          prefetch
                         >
                           <span className="font-medium">{destination.name}</span>
                           <FaChevronRight className="text-blue-400 opacity-70" />
@@ -172,8 +166,6 @@ const slugify = (str) =>
                     })}
                   </div>
                 )}
-
-
               </div>
             </li>
 
@@ -182,6 +174,7 @@ const slugify = (str) =>
                 href="/contact"
                 className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                 onClick={closeAllMenus}
+                prefetch
               >
                 <span className="font-medium">Flights</span>
                 <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
@@ -193,6 +186,7 @@ const slugify = (str) =>
                 href="/visa"
                 className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                 onClick={closeAllMenus}
+                prefetch
               >
                 <span className="font-medium">Visa</span>
                 <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
@@ -201,9 +195,10 @@ const slugify = (str) =>
 
             <li>
               <Link
-                href="/contact"
+                href="/tour/packages"
                 className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                 onClick={closeAllMenus}
+                prefetch
               >
                 <span className="font-medium">Tour Packages</span>
                 <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
@@ -215,6 +210,7 @@ const slugify = (str) =>
                 href="/contact"
                 className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                 onClick={closeAllMenus}
+                prefetch
               >
                 <span className="font-medium">Activities</span>
                 <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
@@ -226,6 +222,7 @@ const slugify = (str) =>
                 href="/contact"
                 className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                 onClick={closeAllMenus}
+                prefetch
               >
                 <span className="font-medium">Car Rental</span>
                 <FaChevronRight className="text-blue-400 group-hover:translate-x-1 transition-transform" />
@@ -276,13 +273,14 @@ const slugify = (str) =>
           <div className="container w-[95%] lg:w-[84%] mx-auto">
             <div className="flex justify-between items-center py-2">
               <div className="logo">
-                <Link href={"/"} onClick={handleClick} className="cursor-pointer">
+                <Link href={"/"} prefetch className="cursor-pointer">
                   <Image
                     src="/assets/images/logo.png"
                     alt="logo"
                     width={130}
-                    height={10}
+                    height={50}
                     className="changeLogo"
+                    priority
                   />
                 </Link>
               </div>
@@ -292,6 +290,7 @@ const slugify = (str) =>
                 <Link
                   href="/hotel"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
+                  prefetch
                 >
                   HOTELS
                 </Link>
@@ -311,17 +310,17 @@ const slugify = (str) =>
                       {destinations
                         .filter((destination) => destination.id !== 4)
                         .map((destination) => {
-                          const slug = slugify(destination.name); // ✅ Slugify the name
+                          const slug = slugify(destination.name);
 
                           return (
                             <Link
                               key={destination.id}
-                              href={`/tour/${slug}/${destination.id}`} // ✅ Use slug in the URL
+                              href={`/tour/${slug}/${destination.id}`}
                               className="block px-4 py-2 text-sm text-[#00026E] hover:bg-blue-50"
                               onClick={() => {
-                                handleClick();
                                 setIsPackageTourOpen(false);
                               }}
+                              prefetch
                             >
                               {destination.name}
                             </Link>
@@ -329,12 +328,12 @@ const slugify = (str) =>
                         })}
                     </div>
                   )}
-
                 </div>
 
                 <Link
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
+                  prefetch
                 >
                   FLIGHTS
                 </Link>
@@ -342,13 +341,15 @@ const slugify = (str) =>
                 <Link
                   href="/visa"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
+                  prefetch
                 >
                   VISA
                 </Link>
 
                 <Link
-                  href="/contact"
+                  href="/tour/packages"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
+                  prefetch
                 >
                   TOUR PACKAGES
                 </Link>
@@ -356,6 +357,7 @@ const slugify = (str) =>
                 <Link
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
+                  prefetch
                 >
                   ACTIVITIES
                 </Link>
@@ -363,6 +365,7 @@ const slugify = (str) =>
                 <Link
                   href="/contact"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
+                  prefetch
                 >
                   CAR RENTAL
                 </Link>

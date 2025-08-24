@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 
 const MobileSearchForm = ({
   searchQuery,
@@ -25,41 +25,73 @@ const MobileSearchForm = ({
     date?.toLocaleDateString("en-US", { month: "short", day: "numeric" }) || ""
 }) => {
   const suggestionsRef = useRef(null);
+  const inputRef = useRef(null);
+  const isSelectingRef = useRef(false);
+  const [inputClicked, setInputClicked] = useState(false);
+
+  // Handle input focus - always show suggestions
+  const handleInputFocus = (e) => {
+    setInputClicked(true);
+    if (handleSearchFocus) {
+      handleSearchFocus(e);
+    }
+    setShowSuggestions(true);
+  };
 
   // Handle suggestion selection
   const handleSuggestionSelect = (destination, e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    selectDestination(destination);
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    // Set flag to prevent immediate closure
+    isSelectingRef.current = true;
+    
+    if (selectDestination) {
+      selectDestination(destination);
+    }
 
     // Update local state to ensure consistency
     if (destination.type === 'hotel') {
-      setSelectedHotelId(destination.id);
-      setSelectedLocationId(destination.destinationId || "");
-      setSelectedDestination({
+      if (setSelectedHotelId) setSelectedHotelId(destination.id);
+      if (setSelectedLocationId) setSelectedLocationId(destination.destinationId || "");
+      if (setSelectedDestination) setSelectedDestination({
         id: destination.destinationId || "",
         name: destination.city,
         country: destination.country
       });
-      setSearchQuery(`${destination.name}, ${destination.city}, ${destination.country}`);
+      if (setSearchQuery) setSearchQuery(`${destination.name}, ${destination.city}, ${destination.country}`);
     } else {
-      setSelectedLocationId(destination.id);
-      setSelectedHotelId("");
-      setSelectedDestination(destination);
-      setSearchQuery(`${destination.name}, ${destination.country}`);
+      if (setSelectedLocationId) setSelectedLocationId(destination.id);
+      if (setSelectedHotelId) setSelectedHotelId("");
+      if (setSelectedDestination) setSelectedDestination(destination);
+      if (setSearchQuery) setSearchQuery(`${destination.name}, ${destination.country}`);
     }
 
-    setShowSuggestions(false);
+    if (setShowSuggestions) setShowSuggestions(false);
+    setInputClicked(false);
+    
+    // Reset flag after a short delay
+    setTimeout(() => {
+      isSelectingRef.current = false;
+    }, 100);
   };
 
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
+      // Don't close if we're in the process of selecting a suggestion
+      if (isSelectingRef.current) return;
+      
       if (
         suggestionsRef.current &&
-        !suggestionsRef.current.contains(e.target)
+        !suggestionsRef.current.contains(e.target) &&
+        inputRef.current &&
+        !inputRef.current.contains(e.target)
       ) {
-        setShowSuggestions(false);
+        if (setShowSuggestions) setShowSuggestions(false);
+        setInputClicked(false);
       }
     };
 
@@ -72,14 +104,21 @@ const MobileSearchForm = ({
     };
   }, [setShowSuggestions]);
 
+  // Always show suggestions when input is focused and has content
+  useEffect(() => {
+    if (inputClicked && searchQuery && setShowSuggestions) {
+      setShowSuggestions(true);
+    }
+  }, [inputClicked, searchQuery, setShowSuggestions]);
+
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        handleSearch(e);
-        setShowMobileSearch(false);
+        if (handleSearch) handleSearch(e);
+        if (setShowMobileSearch) setShowMobileSearch(false);
       }}
-      className="md:hidden mx-auto p-4 w-[95%] border border-gray-200 rounded-lg"
+      className="md:hidden mx-auto p-4 w-[95%] border border-gray-200 rounded-lg bg-white shadow-lg"
     >
       <div className="flex flex-col gap-4">
         {/* Header */}
@@ -87,8 +126,8 @@ const MobileSearchForm = ({
           <h2 className="text-lg font-semibold text-blue-950">Edit Search</h2>
           <button
             type="button"
-            onClick={() => setShowMobileSearch(false)}
-            className="text-gray-500 hover:text-gray-700"
+            onClick={() => setShowMobileSearch && setShowMobileSearch(false)}
+            className="text-gray-500 hover:text-gray-700 text-xl"
             aria-label="Close search"
           >
             ✕
@@ -104,15 +143,17 @@ const MobileSearchForm = ({
             CITY/HOTEL/RESORT/AREA
           </label>
           <input
+            ref={inputRef}
             id="mobile-destination-input"
             type="text"
-            value={searchQuery}
+            value={searchQuery || ""}
             onChange={handleSearchChange}
-            onFocus={handleSearchFocus}
+            onFocus={handleInputFocus}
+            onClick={handleInputFocus}
             placeholder="Search destinations..."
-            className="p-3 h-8 border border-gray-300 rounded-lg focus:border-blue-900 focus:ring-0 bg-white w-full text-blue-950"
+            className="p-3 h-10 border border-gray-300 rounded-lg focus:border-blue-900 focus:ring-1 focus:ring-blue-900 bg-white w-full text-blue-950"
           />
-          {showSuggestions && suggestions.length > 0 && (
+          {(showSuggestions || inputClicked) && suggestions && suggestions.length > 0 && (
             <div
               ref={suggestionsRef}
               className="absolute z-50 mt-1 w-full border bg-white border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
@@ -121,17 +162,17 @@ const MobileSearchForm = ({
                 <button
                   key={`${destination.type}-${destination.id}`}
                   type="button"
-                  className="w-full text-left p-3 hover:bg-blue-50 active:bg-blue-100 text-gray-800"
+                  className="w-full text-left p-3 hover:bg-blue-50 active:bg-blue-100 text-gray-800 border-b border-gray-100 last:border-b-0"
                   onClick={(e) => handleSuggestionSelect(destination, e)}
                   onTouchEnd={(e) => handleSuggestionSelect(destination, e)}
                 >
                   <div className="font-medium">
-                    {highlightMatches(destination.name, searchQuery)}
+                    {highlightMatches ? highlightMatches(destination.name, searchQuery) : destination.name}
                   </div>
                   <div className="text-sm text-gray-600">
                     {destination.type === 'hotel'
-                      ? highlightMatches(`${destination.city}, ${destination.country}`, searchQuery)
-                      : highlightMatches(destination.country, searchQuery)}
+                      ? (highlightMatches ? highlightMatches(`${destination.city}, ${destination.country}`, searchQuery) : `${destination.city}, ${destination.country}`)
+                      : (highlightMatches ? highlightMatches(destination.country, searchQuery) : destination.country)}
                   </div>
                 </button>
               ))}
@@ -147,10 +188,11 @@ const MobileSearchForm = ({
             </label>
             <button
               type="button"
-              onClick={() => setShowDatePicker(true)}
-              className="w-full p-3 h-8 border border-gray-300 rounded-lg flex items-center text-blue-950 bg-white"
+              onClick={() => setShowDatePicker && setShowDatePicker(true)}
+              className="w-full p-3 h-10 border border-gray-300 rounded-lg flex items-center justify-between text-blue-950 bg-white"
             >
-              {formatDate(checkinDate)}
+              <span>{formatDate(checkinDate) || "Select date"}</span>
+              <span className="text-gray-400">📅</span>
             </button>
           </div>
           <div>
@@ -159,10 +201,11 @@ const MobileSearchForm = ({
             </label>
             <button
               type="button"
-              onClick={() => setShowDatePicker(true)}
-              className="w-full p-3 h-8 border border-gray-300 rounded-lg flex items-center text-blue-950 bg-white"
+              onClick={() => setShowDatePicker && setShowDatePicker(true)}
+              className="w-full p-3 h-10 border border-gray-300 rounded-lg flex items-center justify-between text-blue-950 bg-white"
             >
-              {formatDate(checkoutDate)}
+              <span>{formatDate(checkoutDate) || "Select date"}</span>
+              <span className="text-gray-400">📅</span>
             </button>
           </div>
         </div>
@@ -174,10 +217,11 @@ const MobileSearchForm = ({
           </label>
           <button
             type="button"
-            onClick={() => setShowGuestModal(true)}
-            className="w-full p-3 h-8 border border-gray-300 rounded-lg flex items-center text-blue-950 bg-white"
+            onClick={() => setShowGuestModal && setShowGuestModal(true)}
+            className="w-full p-3 h-10 border border-gray-300 rounded-lg flex items-center justify-between text-blue-950 bg-white"
           >
-            {guestText}
+            <span>{guestText || "Select guests"}</span>
+            <span className="text-gray-400">👥</span>
           </button>
         </div>
 
@@ -185,14 +229,14 @@ const MobileSearchForm = ({
         <div className="flex gap-3 mt-4">
           <button
             type="button"
-            onClick={() => setShowMobileSearch(false)}
-            className="flex-1 h-8 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+            onClick={() => setShowMobileSearch && setShowMobileSearch(false)}
+            className="flex-1 h-10 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="flex-1 h-8 px-4 bg-blue-900 text-white rounded-lg hover:bg-blue-800"
+            className="flex-1 h-10 px-4 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-colors font-medium"
           >
             Search
           </button>

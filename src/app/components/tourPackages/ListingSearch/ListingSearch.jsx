@@ -5,7 +5,11 @@ import { useRouter, useParams } from "next/navigation";
 import { LuMapPin } from "react-icons/lu";
 import SearchButton from "@/utils/SearchButton";
 
-const ListingSearchBar = ({ data }) => {
+const ListingSearchBar = ({
+    label = "TOUR DESTINATIONS", 
+    query = "/tour/packages/",  
+    data = []
+}) => {
     const router = useRouter();
     const params = useParams();
     const [searchQuery, setSearchQuery] = useState("");
@@ -75,11 +79,12 @@ const ListingSearchBar = ({ data }) => {
         }
     };
 
+
     const selectDestination = (destination) => {
         setSearchQuery(`${destination.name}, ${destination.country}`);
         setSelectedDestination(destination);
         setShowSuggestions(false);
-        inputRef.current?.focus();
+
     };
 
     const handleSearch = (e) => {
@@ -94,7 +99,7 @@ const ListingSearchBar = ({ data }) => {
             alert("Please select a destination from the list");
             return;
         }
-        router.push(`/tour/packages/${selectedDestination.id}`);
+        router.push(`${query}/${selectedDestination.id}`);
     };
 
     return (
@@ -107,7 +112,7 @@ const ListingSearchBar = ({ data }) => {
                             htmlFor="destination-search"
                             className="block text-xs sm:text-sm font-medium text-gray-700 mb-1"
                         >
-                            TOUR DESTINATION
+                            {label}
                         </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

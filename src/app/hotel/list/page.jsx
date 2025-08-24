@@ -1,4 +1,4 @@
-// app/hotel/listing/page.jsx
+
 import HotelListContent from './HotelListContent';
 
 const fetchHotelsByLocation = async (locationID) => {

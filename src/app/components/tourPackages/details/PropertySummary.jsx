@@ -5,6 +5,7 @@ import * as FaIcons from "react-icons/fa";
 import * as PiIcons from "react-icons/pi";
 import * as GoIcons from "react-icons/go";
 import { FaLocationDot } from 'react-icons/fa6';
+import Link from 'next/link';
 
 export default function PropertySummary({ data }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,8 +41,8 @@ export default function PropertySummary({ data }) {
             null
         );
     };
-// Process requirements HTML to ensure proper formatting
-    const processedRequirements = data.requirements 
+    // Process requirements HTML to ensure proper formatting
+    const processedRequirements = data.requirements
         ? data.requirements
             .replace(/&nbsp;/g, ' ')
             .replace(/<ul>/g, '<ul class="list-disc pl-8">')
@@ -50,7 +51,7 @@ export default function PropertySummary({ data }) {
         <div className="p-5">
             {/* Title & Address */}
             <h2 className="text-xl font-bold text-blue-950 lg:mt-2 mb-1">{data.property_name}</h2>
-            <div className='flex items-center gap-1 text-sm'>
+            <div className='flex items-center text-gray-700 gap-1 text-sm'>
                 <FaLocationDot />
                 {data.address}
             </div>
@@ -75,7 +76,7 @@ export default function PropertySummary({ data }) {
                     );
                 })}
             </div>
-
+           
             {/* Requirements clickable text */}
             {data.requirements && (
                 <div className="mt-4">
@@ -83,16 +84,48 @@ export default function PropertySummary({ data }) {
                         onClick={() => setIsModalOpen(true)}
                         className="text-blue-500  hover:text-blue-700"
                     >
-                       <i className="fa-solid fa-eye text-blue-700"></i> View Requirements
+                        <i className="fa-solid fa-eye text-blue-700"></i> View Requirements
                     </button>
-                    
+
                 </div>
             )}
-
+             <div className="md:block hidden">
+                <div className="flex justify-start md:justify-start">
+                    <div className="flex items-center">
+                        <span className="text-black md:text-[16px] text-[14px] font-bold">
+                            For instant service:{" "}
+                        </span>
+                        <div className="mr-[5px] mt-[10px]">
+                            <a
+                                href={`tel:8801967776777`}
+                                className="mx-[10px]"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <div className="phone-call md:w-[50px] md:h-[50px] w-[36px] h-[36px] ml-[15px]">
+                                    <FaIcons.FaPhone className="i md:ml-[17px] md:mt-[17px] mt-[8px] ml-[11px]" />
+                                </div>
+                            </a>
+                        </div>
+                        <div>
+                            <Link
+                                href={`https://wa.me/8801967776777`}
+                                className="mx-[10px]"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <span className="btn-whatsapp-pulse btn-whatsapp-pulse-border md:w-[50px] md:h-[50px] w-[36px] h-[36px] md:mt-[0px] mt-[-5px]">
+                                    <FaIcons.FaWhatsapp className="w-[25px] h-[25px] text-white" />
+                                </span>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div 
+                    <div
                         ref={modalRef}
                         className="bg-white rounded-lg shadow-lg w-11/12 md:w-2/3 lg:w-1/2 max-h-[80vh] overflow-y-auto p-6 relative"
                     >
@@ -103,8 +136,8 @@ export default function PropertySummary({ data }) {
                             ✖
                         </button>
                         <h3 className="text-lg font-semibold mb-4">Requirements</h3>
-                        <div 
-                            className="prose prose-sm max-w-none"
+                        <div
+                            className="prose prose-sm text-gray-700 max-w-none"
                             dangerouslySetInnerHTML={{ __html: processedRequirements }}
                         />
                     </div>

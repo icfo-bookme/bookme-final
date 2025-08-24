@@ -150,7 +150,7 @@ export default function VisaDetailsPage({ params }) {
               </div>
             ))}
           </div>
-<div className="block md:hidden">
+          <div className="block md:hidden">
             {/* Unit Cards */}
             {visaDetails?.property_uinit?.map((unit, index) => (
               <div key={unit?.id || index}>

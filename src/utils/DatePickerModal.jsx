@@ -5,7 +5,8 @@ import "react-datepicker/dist/react-datepicker.css";
 const DatePickerModal = ({
   dateRange,
   handleDateChange,
-  setShowDatePicker
+  setShowDatePicker,
+  onApply = () => { }
 }) => {
   // Close modal when clicking on backdrop
   const handleBackdropClick = (e) => {
@@ -20,23 +21,21 @@ const DatePickerModal = ({
   };
 
   return (
-    <div 
-      className="fixed inset-0   flex items-center justify-center z-20  p-2"
+    <div
+      className="fixed  inset-0 flex items-center justify-center z-20 p-2"
       onClick={handleBackdropClick}
     >
-      <div 
-        className="bg-white rounded-lg p-2 shadow-lg max-w-[22rem] sm:max-w-[36rem] "
+      <div
+        className="bg-white rounded-lg p-2 shadow-lg  md:w-[30%] "
         onClick={handleModalClick}
       >
         <style jsx global>{`
           .react-datepicker {
             font-size: 1rem;
             border: none;
-             
           }
           .react-datepicker__month-container {
             padding: 0.2rem;
-            
           }
           .react-datepicker__header {
             padding: 0.2rem;
@@ -84,14 +83,14 @@ const DatePickerModal = ({
           /* Mobile devices */
           @media (max-width: 639px) {
             .react-datepicker {
-              width: 50%;
+              width: 100%;
             }
             .react-datepicker__month-container {
               width: 100%;
             }
             .react-datepicker__day-name,
             .react-datepicker__day {
-              width: 2rem;
+              width: 3rem;
               line-height: 2rem;
             }
           }
@@ -120,11 +119,17 @@ const DatePickerModal = ({
           </button>
           <button
             type="button"
-            onClick={() => setShowDatePicker(false)}
+            onClick={() => {
+              if (typeof onApply === 'function') {
+                onApply();
+              }
+              setShowDatePicker(false);
+            }}
             className="px-3 py-1.5 text-sm bg-blue-900 text-white rounded hover:bg-blue-800 transition-colors"
           >
             Apply
           </button>
+
         </div>
       </div>
     </div>
