@@ -3,8 +3,8 @@ import React from "react";
 import getDestination from "@/services/hotel/getDestination";
 import getAllHotels from "@/services/hotel/getAllHotels";
 
-import ErrorDisplay from "./Hotels/ErrorDisplay";
-import SearchForm from "./Hotels/SearchForm";
+import ErrorDisplay from "./ErrorDisplay";
+import SearchForm from "./SearchForm";
 
 const DEFAULT_DESTINATIONS = [
   {

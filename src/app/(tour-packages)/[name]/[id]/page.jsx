@@ -8,7 +8,7 @@ export default async function Page({ params }) {
   const data = await getPropertyDetails({ id: params.id });
   
   return (
-    <div className="bg-blue-100 pt-20">
+    <div className="bg-blue-100 pt-10 md:pt-20">
         <PropertyDetails data={data} />
     </div>
   )

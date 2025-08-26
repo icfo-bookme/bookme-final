@@ -1,4 +1,4 @@
-import HotelSearch from "../../SearchBar/HotelSearch";
+import HotelSearch from "../../SearchBar/Hotels/HotelSearch";
 
 
 const HotelHeroSection = () => {

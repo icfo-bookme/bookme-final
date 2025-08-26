@@ -12,7 +12,7 @@ const inter = Inter({
 });
 // This is the main layout of the website with all
 export default function DashboardLayout({ children }) {
-  
+
 
   return (
     <html lang="en" data-theme="white">
@@ -31,24 +31,21 @@ export default function DashboardLayout({ children }) {
       <body className={inter.className}>
         {/*global search provider*/}
         <PaginationProvider>
-        <SearchProvider>
-          {" "}
-          {/* Wrap children inside provider */}
-          <div>
-            <div className="bg-white">
-              <main>
-                <div className="">
-
-            <HeaderWrapper/>
+          <SearchProvider>
+            {" "}
+            {/* Wrap children inside provider */}
+            <div>
+              <div className="bg-white">
+                <main>
+                  <div className="">
+                    <HeaderWrapper />
+                  </div>
+                  <div className="min-h-[100vh] py-[12px]">{children}</div>
+                  <Footer />
+                </main>
+              </div>
             </div>
-                <div className="min-h-[100vh] py-[2
-                0px]">{children}</div>
-
-                <Footer />
-              </main>
-            </div>
-          </div>
-        </SearchProvider>
+          </SearchProvider>
         </PaginationProvider>
 
       </body>

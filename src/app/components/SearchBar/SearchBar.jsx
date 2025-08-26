@@ -8,7 +8,7 @@ import {
   FaHiking, // added for activities
 } from "react-icons/fa";
 
-import HotelSearch from "./HotelSearch";
+import HotelSearch from "./Hotels/HotelSearch";
 // import FlightSearch from "./FlightSearch";
 import VisaSearch from "./VisaSearch";
 import ShipsSearch from "./ShipsSearch";

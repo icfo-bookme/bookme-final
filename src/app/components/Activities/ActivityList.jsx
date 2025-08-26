@@ -47,7 +47,7 @@ const ActivityList = ({ activities }) => {
     } else if (sortOption === 'price-high-low') {
       result = [...result].sort((a, b) => b.price - a.price);
     }
-    
+
     return result;
   }, [activities, filters, sortOption, priceRanges]);
 

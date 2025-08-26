@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { LuMapPin } from "react-icons/lu";
-import SearchButton from "../../../utils/SearchButton";
+import SearchButton from "../../../../utils/SearchButton";
 
 const TourSearchBar = ({ data }) => {
   const router = useRouter();
@@ -11,6 +11,7 @@ const TourSearchBar = ({ data }) => {
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredDestinations, setFilteredDestinations] = useState([]);
+  const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -33,27 +34,117 @@ const TourSearchBar = ({ data }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSearchChange = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
+  const calculateMatchScore = (item, query) => {
+    if (!query) return 0;
 
-    if (query.trim() === "") {
+    const itemName = item?.name?.toLowerCase();
+    const itemCountry = item?.country?.toLowerCase();
+    const itemFullText = `${itemName}, ${itemCountry}`.toLowerCase();
+    const queryText = query.toLowerCase().trim();
+
+    // Exact match bonus (highest priority)
+    if (itemName === queryText) return 1000;
+    if (itemFullText === queryText) return 950;
+
+    // Exact match with country
+    if (itemFullText.includes(queryText)) {
+      const matchPos = itemFullText.indexOf(queryText);
+      return 900 + (matchPos === 0 ? 50 : 0);
+    }
+
+    if (itemName.startsWith(queryText)) return 850;
+
+    if (itemName.includes(queryText)) {
+      const matchPos = itemName.indexOf(queryText);
+      return 800 + (50 - Math.min(matchPos, 50));
+    }
+
+    const queryWords = queryText.split(/\s+/);
+    const allWordsMatch = queryWords.every(word =>
+      (itemName || '').includes(word) || (itemCountry || '').includes(word)
+    );
+    if (allWordsMatch) {
+      const matchedWordsCount = queryWords.filter(word =>
+        itemName.includes(word)
+      ).length;
+      return 700 + (matchedWordsCount * 50);
+    }
+
+    let partialMatchScore = 0;
+    for (let i = 0; i <= queryText.length - 3; i++) {
+      const substring = queryText.substring(i, i + 3);
+      if (itemName.includes(substring)) {
+        const pos = itemName.indexOf(substring);
+        partialMatchScore += 100 +
+          (substring.length * 20) +
+          (pos === 0 ? 50 : (pos < 3 ? 30 : 0));
+      }
+    }
+
+    if (partialMatchScore > 0) return Math.min(partialMatchScore, 699);
+
+    let charMatchScore = 0;
+    let queryIndex = 0;
+    for (let i = 0; i < itemName.length && queryIndex < queryText.length; i++) {
+      if (itemName[i] === queryText[queryIndex]) {
+        charMatchScore += 10;
+        queryIndex++;
+      }
+    }
+
+    return Math.min((charMatchScore / queryText.length) * 100, 600);
+  };
+
+  const updateSuggestions = (query) => {
+    if (!query) {
       setFilteredDestinations(data);
-      setSelectedDestination(null);
       return;
     }
 
-    const filtered = data.filter(dest => {
-      const destString = `${dest.name}, ${dest.country}`.toLowerCase();
-      return destString.includes(query.toLowerCase());
-    });
+    const scoredItems = data.map(dest => ({
+      ...dest,
+      score: calculateMatchScore(dest, query),
+    }));
 
-    setFilteredDestinations(filtered);
+    const sorted = scoredItems
+      .filter(item => item.score > 50)
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        const aNameMatch = a.name.toLowerCase().includes(query.toLowerCase());
+        const bNameMatch = b.name.toLowerCase().includes(query.toLowerCase());
+
+        if (aNameMatch && !bNameMatch) return -1;
+        if (!aNameMatch && bNameMatch) return 1;
+
+        const aNameLength = a.name.length;
+        const bNameLength = b.name.length;
+        if (aNameLength !== bNameLength) return aNameLength - bNameLength;
+
+        return `${a.name}, ${a.country}`.localeCompare(`${b.name}, ${b.country}`);
+      });
+
+    setFilteredDestinations(sorted);
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    updateSuggestions(query);
+    if (!query) {
+      setSelectedDestination(null);
+    }
   };
 
   const handleSearchFocus = () => {
+    if (isFirstInputInteraction) {
+      setIsFirstInputInteraction(false);
+      setSearchQuery("");
+      setSelectedDestination(null);
+      setFilteredDestinations(data);
+    } else {
+      updateSuggestions(searchQuery);
+    }
     setShowSuggestions(true);
-    setFilteredDestinations(data);
   };
 
   const selectDestination = (destination) => {

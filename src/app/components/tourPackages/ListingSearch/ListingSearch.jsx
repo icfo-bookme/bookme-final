@@ -103,7 +103,7 @@ const ListingSearchBar = ({
     };
 
     return (
-        <div className="bg-white mx-auto md:py-4 pb-3  rounded-xl">
+        <div className="bg-white mx-auto md:pb-4 pb-3  rounded-xl">
             <form onSubmit={handleSearch}>
                 <div className="flex flex-nowrap gap-3 items-end w-full">
                     {/* Search Input */}

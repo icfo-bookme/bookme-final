@@ -1,8 +1,6 @@
 
 
 import { Roboto } from "next/font/google";
-// import Banner from "./components/tour/Banner/Banner";
-// import Property from "../components/tour/Property/Property";
 import Banner from "@/app/components/tour/Banner/Banner";
 import PropertyList from "@/app/components/tour/Property/Property";
 

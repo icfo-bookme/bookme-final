@@ -14,11 +14,10 @@ import LoadingSpinner from "@/utils/LoadingSpinner";
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400"] });
 
-// Helper function for fetch with timeout
 const fetchWithTimeout = async (url, options = {}, timeout = 8000) => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
+
   try {
     const response = await fetch(url, {
       ...options,
@@ -44,10 +43,10 @@ export default function PromotionsPage() {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640);
     };
-    
+
     handleResize();
     window.addEventListener('resize', handleResize);
-    
+
     return () => {
       window.removeEventListener('resize', handleResize);
       if (touchTimeoutRef.current) clearTimeout(touchTimeoutRef.current);
@@ -64,7 +63,7 @@ export default function PromotionsPage() {
     async function fetchPromotions() {
       try {
         if (isMounted) setLoading(true);
-        
+
         // Check cache first
         const cachedData = localStorage.getItem(cacheKey);
         if (cachedData) {
@@ -88,11 +87,11 @@ export default function PromotionsPage() {
         }
 
         const { data } = await response.json();
-        
+
         if (isMounted) {
           setPromotions(data);
           setError(null);
-          
+
           // Update cache
           localStorage.setItem(cacheKey, JSON.stringify({
             data,
@@ -153,7 +152,6 @@ export default function PromotionsPage() {
   const handleRetry = () => {
     setError(null);
     setLoading(true);
-    // Trigger a new fetch by changing a dummy state
     setPromotions([]);
   };
 

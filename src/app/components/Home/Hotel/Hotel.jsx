@@ -21,7 +21,7 @@ export default function Hotel({ data = [] }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-   
+
     if (data && data.length > 0) {
       setLoading(false);
     }
@@ -69,12 +69,12 @@ export default function Hotel({ data = [] }) {
   };
 
   const slugify = (str) =>
-  str
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')        // Replace spaces with dashes
-    .replace(/[^\w\-]+/g, '')    // Remove non-word chars
-    .replace(/\-\-+/g, '-');     // Replace multiple dashes with one
+    str
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')        // Replace spaces with dashes
+      .replace(/[^\w\-]+/g, '')    // Remove non-word chars
+      .replace(/\-\-+/g, '-');     // Replace multiple dashes with one
 
   return (
     <div className={`${roboto.className} bg-blue-50 w-full mx-auto max-w-7xl`}>

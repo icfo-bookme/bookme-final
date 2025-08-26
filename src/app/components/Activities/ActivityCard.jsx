@@ -28,7 +28,7 @@ const ActivityCard = ({ activity }) => {
 
   // Function to render the appropriate icon based on icon_name
   const renderIcon = (iconName) => {
-    switch(iconName) {
+    switch (iconName) {
       case 'IoLocationOutline':
         return <IoLocationOutline className="text-blue-500 text-xs" />;
       case 'FaRegClock':
@@ -75,10 +75,6 @@ const ActivityCard = ({ activity }) => {
           <div>
             <div className="flex justify-between items-start">
               <h3 className="font-bold text-xl text-blue-900 mb-1">{activity.property_name}</h3>
-              {/* <div className="flex items-center bg-blue-50 px-2 py-1 rounded-md">
-                <i className="fa-solid fa-star text-yellow-400 text-sm mr-1"></i>
-                <span className="text-sm font-medium">Package</span>
-              </div> */}
             </div>
 
             <div className="flex items-center text-sm text-gray-900 mb-3">
@@ -103,12 +99,12 @@ const ActivityCard = ({ activity }) => {
           </div>
 
           {/* Price and CTA - Updated layout with price on right */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between pt-1 border-t border-gray-100">
+          <div className="flex  md:flex-row md:items-center justify-between pt-1 border-t border-gray-100">
             <button
               style={{
                 background: "linear-gradient(90deg, #313881, #0678B4)",
               }}
-              className="mt-3 md:mt-0 inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white rounded-lg hover:from-blue-800 hover:to-blue-700 transition-all shadow-sm hover:shadow-md"
+              className="mt-3  md:mt-0 inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white rounded-lg hover:from-blue-800 hover:to-blue-700 transition-all shadow-sm hover:shadow-md"
             >
               View Details
               <i className="fa-solid fa-arrow-right ml-2 text-xs"></i>

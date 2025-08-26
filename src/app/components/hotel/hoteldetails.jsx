@@ -4,7 +4,7 @@ import { FaCheck } from "react-icons/fa";
 
 export default function HotelDetails({ hotel }) {
 
-    console.log("Hotel Details:", hotel);
+   
     const nearbyLocations = hotel.near_by
         ? hotel.near_by.split('|').map(loc => loc.trim()).filter(loc => loc)
         : [];

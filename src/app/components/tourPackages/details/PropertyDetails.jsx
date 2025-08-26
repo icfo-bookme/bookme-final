@@ -9,7 +9,7 @@ export default function PropertyDetails({ data }) {
     }
 
     return (
-        <div className="container w-[93%] mx-auto">
+        <div className="container md:w-[93%] w-[98%] mx-auto">
             {data?.category_id == 5 ? (
                 <>
                     <div className="p-5 bg-white rounded-lg grid grid-cols-1 md:grid-cols-10 gap-4">
@@ -30,9 +30,9 @@ export default function PropertyDetails({ data }) {
                     </div>
                 </>
             ) : (
-                <div className="px-5  bg-gray-100 rounded-lg">
+                <div className="md:px-5 px-1  bg-gray-100 rounded-lg">
                     <div className="py-2">
-                        <div>
+                        <div className="px-2">
                             <div className="flex items-center">
                                 <h2 className="text-2xl font-bold text-blue-900 ">{data.property_name}</h2>
                             </div>

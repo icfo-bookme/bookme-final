@@ -22,7 +22,7 @@ const roboto = Roboto({ subsets: ["latin"], weight: ["400"] });
 
 export default function Page({ params }) {
   const { id } = use(params);
-console.log(id);
+  console.log(id);
   const [propertyImages, setPropertyImages] = useState([]);
   const [propertyDetails, setPropertyDetails] = useState([]);
   const [propertyFacilities, setPropertyFacilities] = useState([]);
@@ -145,8 +145,8 @@ console.log(id);
               Packages:
             </h1>
             <PackageCarousel
-              propertyPackages={propertyPackages} 
-              loading={loading} 
+              propertyPackages={propertyPackages}
+              loading={loading}
               contactNumber={contactNumber}
             />
           </div>
@@ -182,7 +182,7 @@ console.log(id);
         </div>
         {/* Toast container*/}
         <ToastContainer />
-        
+
       </div>
     </div>
   );

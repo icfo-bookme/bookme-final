@@ -252,7 +252,7 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails, checkin, 
           <i className="fa-solid fa-wifi text-blue-600"></i>
           Hotel Facilities
         </h2>
-        <FacilitiesByCategory categories={hotelDetails.category_wise_features || {}} />
+        <FacilitiesByCategory categories={hotelDetails?.category_wise_features || {}} />
       </section>
 
       {/* Main Layout - Responsive grid */}
@@ -287,7 +287,7 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails, checkin, 
             )}
           </div>
 
-          {hotelDetails.description && (
+          {hotelDetails?.description && (
             <div className="mb-4 sm:mb-6">
               <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                 {showFullDescription ? hotelDetails.description : truncatedDescription}

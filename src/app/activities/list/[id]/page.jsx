@@ -15,7 +15,7 @@ export default async function PackagesPage({ params }) {
   }
 
   return (
-    <div className="  md:px-4 py-8">
+    <div className="  md:px-4 md:py-8">
       <div className='md:container max-w-7xl md:w-[90%] mx-auto'>
         <div className='pt-12 px-4 md:px-0'>
           <ActivityListingSearch />

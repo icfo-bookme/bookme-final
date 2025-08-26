@@ -87,7 +87,7 @@ export default async function Home({ searchParams }) {
                 <PromotionsPage servicesData={servicesData} />
               </Suspense>
 
-              {visibleServices.map((service) => {
+              {visibleServices?.map((service) => {
                 if (service.category_name === "Ships") {
                   const ShipsSubCategories = sortedServices
                     .filter(

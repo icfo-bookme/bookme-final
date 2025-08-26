@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from "react";
 import getTourDestinations from "@/services/packages/getTourDestinations";
-import TourSearchBar from "../Tour";
+import TourSearchBar from "./Tour";
 
 export default function TourSearch() {
   const [data, setData] = useState(null);
