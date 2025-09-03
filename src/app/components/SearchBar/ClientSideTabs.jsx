@@ -6,10 +6,11 @@ import {
   FaMapMarkedAlt,
   FaPassport,
   FaShip,
-  FaHiking, // ✅ new icon for Activities
+  FaHiking,
+  FaCar, // ✅ new icon for Car Rental
 } from "react-icons/fa";
 
-const ClientSideTabs = ({ initialTab, components }) => {
+const ClientSideTabs = ({ initialTab, components, icons }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
 
   // Update URL query param when activeTab changes without reload
@@ -21,10 +22,10 @@ const ClientSideTabs = ({ initialTab, components }) => {
 
   return (
     <>
-      <div className="flex lg:w-[35%] -mb-1 shadow-xl bg-white w-[80%] px-1 rounded-t-lg mx-auto md:mx-0 border-b">
+      <div className="flex w-[95%] lg:w-[35%] -mb-1 shadow-xl bg-white  px-1 rounded-t-lg mx-auto md:mx-0 border-b">
         <TabButton
           active={activeTab === "hotel"}
-          icon={<FaHotel />}
+          icon={icons.hotel}
           onClick={() => setActiveTab("hotel")}
         >
           Hotels
@@ -32,7 +33,7 @@ const ClientSideTabs = ({ initialTab, components }) => {
 
         {/* <TabButton
           active={activeTab === "flight"}
-          icon={<FaPlaneDeparture />}
+          icon={icons.flight}
           onClick={() => setActiveTab("flight")}
         >
           Flights
@@ -40,7 +41,7 @@ const ClientSideTabs = ({ initialTab, components }) => {
 
         <TabButton
           active={activeTab === "ships"}
-          icon={<FaShip />}
+          icon={icons.ships}
           onClick={() => setActiveTab("ships")}
         >
           Ships
@@ -48,7 +49,7 @@ const ClientSideTabs = ({ initialTab, components }) => {
 
         <TabButton
           active={activeTab === "visa"}
-          icon={<FaPassport />}
+          icon={icons.visa}
           onClick={() => setActiveTab("visa")}
         >
           Visa
@@ -56,19 +57,31 @@ const ClientSideTabs = ({ initialTab, components }) => {
 
         <TabButton
           active={activeTab === "tour"}
-          icon={<FaMapMarkedAlt />}
+          icon={icons.tour}
           onClick={() => setActiveTab("tour")}
         >
           Tours
         </TabButton>
 
-        {/* ✅ New Activities Tab */}
+        {/* ✅ Activities Tab */}
         <TabButton
           active={activeTab === "activities"}
-          icon={<FaHiking />}
+          icon={icons.activities}
           onClick={() => setActiveTab("activities")}
         >
           Activities
+        </TabButton>
+
+        {/* ✅ New Car Rental Tab */}
+        <TabButton
+          active={activeTab === "carRental"}
+          icon={icons.carRental}
+          onClick={() => setActiveTab("carRental")}
+        >
+         <div className="flex   items-center gap-2">
+          <span>Car</span> <span className="hidden md:block">Rental</span>
+         </div>
+         
         </TabButton>
       </div>
 

@@ -1,16 +1,23 @@
+import getRelatedActivities from "@/services/Activities/getRelatedActivities";
 import Activities from "../../Activities/Packages";
 import PropertyFacilities from "./PropertyFacilites";
 import PropertySlider from "./PropertySlider";
 import PropertySummary from "./PropertySummary";
+import RelatedActivities from "../../Activities/RelatedActivities";
+// import { RelatedActivities } from "../../Activities/RelatedActivities";
 
-export default function PropertyDetails({ data }) {
+export default async function PropertyDetails({ data }) {
     if (!data) {
         return <div>No property details available</div>;
     }
+console.log("Property Details Data:", data);
+    const { category_id } = data;
+    
+const relatedPackages = await getRelatedActivities(data.destination_id, data.id);
 
     return (
         <div className="container md:w-[93%] w-[98%] mx-auto">
-            {data?.category_id == 5 ? (
+            {category_id == 5 && (
                 <>
                     <div className="p-5 bg-white rounded-lg grid grid-cols-1 md:grid-cols-10 gap-4">
                         <div className="md:col-span-7">
@@ -29,8 +36,11 @@ export default function PropertyDetails({ data }) {
                         <PropertyFacilities data={data} />
                     </div>
                 </>
-            ) : (
-                <div className="md:px-5 px-1  bg-gray-100 rounded-lg">
+            )}
+
+            {category_id == 6 && (
+                <>
+                    <div className="md:px-5 px-1  bg-gray-100 rounded-lg">
                     <div className="py-2">
                         <div className="px-2">
                             <div className="flex items-center">
@@ -49,8 +59,35 @@ export default function PropertyDetails({ data }) {
                     <div className="mt-4">
                         <PropertyFacilities data={data} />
                     </div>
+                    <div>
+                        <RelatedActivities packages={relatedPackages} />
+                    </div>
                 </div>
+                </>
             )}
+
+            {category_id == 7 && (
+                 <>
+                    <div className="p-5 bg-white rounded-lg grid grid-cols-1 md:grid-cols-10 gap-4">
+                        <div className="md:col-span-7">
+                            <h2 className="text-lg sm:text-xl font-bold text-gray-800  sm:mb-3 flex items-center -mt-2  gap-2">
+                                <i className="fa-solid fa-info-circle text-blue-600 "></i>
+                                Package Summary
+                            </h2>
+                            <PropertySlider images={data.images} />
+                        </div>
+                        <div className="md:col-span-3">
+                            <PropertySummary data={data} />
+                        </div>
+                    </div>
+
+                    <div>
+                        <PropertyFacilities data={data} />
+                    </div>
+                </>
+            )}
+
+           
         </div>
     );
 }

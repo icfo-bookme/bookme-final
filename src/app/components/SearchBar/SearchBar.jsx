@@ -5,7 +5,8 @@ import {
   FaMapMarkedAlt,
   FaPassport,
   FaShip,
-  FaHiking, // added for activities
+  FaHiking,
+  FaCar, // added for car rental
 } from "react-icons/fa";
 
 import HotelSearch from "./Hotels/HotelSearch";
@@ -13,9 +14,9 @@ import HotelSearch from "./Hotels/HotelSearch";
 import VisaSearch from "./VisaSearch";
 import ShipsSearch from "./ShipsSearch";
 import TourSearch from "./Tour/TourSearch";
-
 import ClientSideTabs from "./ClientSideTabs";
 import ActivitiesSearch from "./ActivitiesSearchBar/ActivitiesSearch";
+import CarRentalSearch from "./CarRental/CarRentalSearch"; // import the car rental component
 
 const TravelBookingTabs = ({ searchParams }) => {
   // Pass initial tab value to client component
@@ -31,7 +32,8 @@ const TravelBookingTabs = ({ searchParams }) => {
           ships: <ShipsSearch />,
           tour: <TourSearch />,
           visa: <VisaSearch />,
-          activities: <ActivitiesSearch/>, // ✅ added new tab
+          activities: <ActivitiesSearch />,
+          carRental: <CarRentalSearch />, 
         }}
         icons={{
           hotel: <FaHotel />,
@@ -39,7 +41,8 @@ const TravelBookingTabs = ({ searchParams }) => {
           ships: <FaShip />,
           tour: <FaMapMarkedAlt />,
           visa: <FaPassport />,
-          activities: <FaHiking />, // ✅ added icon for activities
+          activities: <FaHiking />,
+          carRental: <FaCar />, 
         }}
       />
     </div>

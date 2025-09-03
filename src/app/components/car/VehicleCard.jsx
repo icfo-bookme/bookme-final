@@ -9,15 +9,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const VehicleCard = ({ vehicle }) => {
-  const formatPrice = (price) => {
-    if (!price) return 'N/A';
-    
-    return new Intl.NumberFormat('en-BD', {
-      style: 'currency',
-      currency: 'BDT',
-      maximumFractionDigits: 0
-    }).format(price).replace('BDT', 'BDT ');
-  };
 
   const slugify = (str) =>
     str
@@ -43,8 +34,7 @@ const VehicleCard = ({ vehicle }) => {
     }
   };
 
-  const basePrice = parseFloat(vehicle.price_upto_4_hours) || 0;
-  const kilometerPrice = parseFloat(vehicle.kilometer_price) || 0;
+  const basePrice = parseFloat(vehicle.price_upto_4_hours) * 4 + parseFloat(vehicle.kilometer_price) * 40 || 0;
 
   return (
     <Link
@@ -109,7 +99,7 @@ const VehicleCard = ({ vehicle }) => {
               <div className="flex items-end justify-end gap-2">
                 {basePrice ? (
                   <p className="text-xl font-bold text-blue-800">
-                    {formatPrice(basePrice)}
+                    {basePrice}
                   </p>
                 ) : (
                   <p className="text-sm text-gray-500">Price on request</p>
@@ -117,9 +107,9 @@ const VehicleCard = ({ vehicle }) => {
               </div>
               {basePrice ? (
                 <>
-                  <p className="text-xs text-gray-500 mt-1">for 4 hours</p>
-                  {kilometerPrice > 0 && (
-                    <p className="text-xs text-gray-500">+ {formatPrice(kilometerPrice)} per km</p>
+                  <p className="text-xs text-gray-500 mt-1">for 4 hours and 40 km</p>
+                  {vehicle.kilometer_price > 0 && (
+                    <p className="text-xs font-bold text-blue-900">{vehicle.price_upto_4_hours} per Hours, {vehicle.kilometer_price} per km</p>
                   )}
                 </>
               ) : null}

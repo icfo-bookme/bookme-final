@@ -1,13 +1,51 @@
 'use client';
 
+// Import all possible icons from react-icons
 import { IoLocationOutline } from "react-icons/io5";
-import { FaRegClock } from "react-icons/fa";
+import { FaRegClock, FaUsers, FaCommentDots } from "react-icons/fa";
 import { PiUsersThreeBold } from "react-icons/pi";
 import { GoCommentDiscussion } from "react-icons/go";
 import { MdOutlineFreeCancellation } from "react-icons/md";
 import { GiDiamondHard } from "react-icons/gi";
+import { RiUserVoiceLine } from "react-icons/ri";
+import { TbClock, TbUsers } from "react-icons/tb";
+import { BiTime, BiUserVoice } from "react-icons/bi";
+import { AiOutlineUser, AiOutlineClockCircle } from "react-icons/ai";
 import Image from 'next/image';
 import Link from 'next/link';
+
+// Centralized icon mapping - add new icons here as needed
+const iconMapping = {
+  // Location icons
+  IoLocationOutline: IoLocationOutline,
+  
+  // Clock/time icons
+  FaRegClock: FaRegClock,
+  TbClock: TbClock,
+  BiTime: BiTime,
+  AiOutlineClockCircle: AiOutlineClockCircle,
+  
+  // User/people icons
+  PiUsersThreeBold: PiUsersThreeBold,
+  PiUsersThree: PiUsersThreeBold, 
+  FaUsers: FaUsers,
+  TbUsers: TbUsers,
+  AiOutlineUser: AiOutlineUser,
+  
+  // Comment/discussion icons
+  GoCommentDiscussion: GoCommentDiscussion,
+  FaCommentDots: FaCommentDots,
+  RiUserVoiceLine: RiUserVoiceLine,
+  BiUserVoice: BiUserVoice,
+  
+  // Cancellation icons
+  MdOutlineFreeCancellation: MdOutlineFreeCancellation,
+  
+  // Premium/quality icons
+  GiDiamondHard: GiDiamondHard,
+  
+  default: FaRegClock
+};
 
 const ActivityCard = ({ activity }) => {
   const formatPrice = (price) => {
@@ -26,24 +64,57 @@ const ActivityCard = ({ activity }) => {
       .replace(/[^\w\-]+/g, '')
       .replace(/\-\-+/g, '-');
 
-  // Function to render the appropriate icon based on icon_name
+  
+  const formatTimeDisplay = (timeString) => {
+    if (!timeString) return '';
+    
+   
+    return timeString
+      .replace(/\b0h\s?/g, '')    
+      .replace(/\s0m\b/g, '')       
+      .replace(/\s+to\s+/, ' to '); 
+  };
+
+ 
   const renderIcon = (iconName) => {
-    switch (iconName) {
-      case 'IoLocationOutline':
-        return <IoLocationOutline className="text-blue-500 text-xs" />;
-      case 'FaRegClock':
-        return <FaRegClock className="text-blue-500 text-xs" />;
-      case 'PiUsersThree':
-        return <PiUsersThreeBold className="text-blue-500 text-xs" />;
-      case 'GoCommentDiscussion':
-        return <GoCommentDiscussion className="text-blue-500 text-xs" />;
-      case 'MdOutlineFreeCancellation':
-        return <MdOutlineFreeCancellation className="text-blue-500 text-xs" />;
-      case 'GiDiamondHard':
-        return <GiDiamondHard className="text-blue-500 text-xs" />;
-      default:
-        return <FaRegClock className="text-blue-500 text-xs" />;
+    
+    const cleanIconName = iconName ? iconName.replace(/['"]/g, '').trim() : '';
+    const IconComponent = iconMapping[cleanIconName] || iconMapping.default;
+    return <IconComponent className="text-blue-500 text-xs" />;
+  };
+
+  // Get the display text for a summary item
+  const getSummaryText = (summary) => {
+    // Find the first non-empty key that's not icon_name or icon_import
+    const validKeys = Object.keys(summary).filter(key => 
+      key !== 'icon_name' && 
+      key !== 'icon_import' && 
+      summary[key] && 
+      summary[key].trim() !== ''
+    );
+    
+    if (validKeys.length > 0) {
+      const text = summary[validKeys[0]];
+      // Format time if this appears to be a time-related summary
+      if (validKeys[0] === 'Duration' || text.includes('h') || text.includes('m')) {
+        return formatTimeDisplay(text);
+      }
+      return text;
     }
+    
+    return '';
+  };
+
+  // Get the key for the summary text (to display the label)
+  const getSummaryKey = (summary) => {
+    const validKeys = Object.keys(summary).filter(key => 
+      key !== 'icon_name' && 
+      key !== 'icon_import' && 
+      summary[key] && 
+      summary[key].trim() !== ''
+    );
+    
+    return validKeys.length > 0 ? validKeys[0] : '';
   };
 
   return (
@@ -53,7 +124,7 @@ const ActivityCard = ({ activity }) => {
     >
       <div className="group relative flex flex-col md:flex-row gap-5 p-5 border border-gray-200 rounded-xl  hover:shadow-sm transition-all duration-200 bg-white hover:border-blue-100">
         {/* activity Image */}
-        <div className="relative w-full md:w-2/5 h-[12rem] rounded-lg overflow-hidden">
+        <div className="relative w-full md:w-2/5 h-[13rem] rounded-lg overflow-hidden">
           <Image
             src={`${process.env.NEXT_PUBLIC_BASE_URL}/storage/${activity.image}`}
             alt={activity.property_name}
@@ -62,9 +133,9 @@ const ActivityCard = ({ activity }) => {
             sizes="(max-width: 768px) 100vw, 40vw"
             priority={false}
           />
-          {activity.discount && activity.discount > 0 && (
+          {activity.discount_percent && parseFloat(activity.discount_percent) > 0 && (
             <div className="absolute top-3 left-0 bg-[#FD7E14] text-white font-bold text-xs px-3 py-1 shadow-md z-10">
-              <span className="relative z-10">{activity.discount}% OFF</span>
+              <span className="relative z-10">{activity.discount_percent}% OFF</span>
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>
@@ -84,17 +155,24 @@ const ActivityCard = ({ activity }) => {
 
             {/* activity Summary */}
             <div className="flex flex-wrap gap-2 mb-4">
-              {activity.summaries && activity.summaries.slice(0, 4).map((summary, i) => (
-                <span
-                  key={i}
-                  className="flex items-center text-xs text-gray-700 bg-gray-50 border border-gray-200 px-3 py-1 rounded-full hover:bg-blue-50 hover:border-blue-200 transition-colors"
-                >
-                  <div className="mr-2">
-                    {renderIcon(summary.icon_name)}
-                  </div>
-                  {summary.value}
-                </span>
-              ))}
+              {activity.summaries && activity.summaries.slice(0, 4).map((summary, i) => {
+                const summaryText = getSummaryText(summary);
+                const summaryKey = getSummaryKey(summary);
+                if (!summaryText) return null;
+                
+                return (
+                  <span
+                    key={i}
+                    className="flex items-center text-xs text-gray-700 bg-gray-50 border border-gray-200 px-3 py-1 rounded-full hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                    title={summaryKey} // Show the key as tooltip
+                  >
+                    <div className="mr-2">
+                      {renderIcon(summary.icon_name)}
+                    </div>
+                    {summaryText}
+                  </span>
+                );
+              })}
             </div>
           </div>
 
@@ -113,13 +191,13 @@ const ActivityCard = ({ activity }) => {
             <div className="text-right mt-3 md:mt-0">
               <span className="text-xs text-gray-500 block">Starting From:</span>
               <div className="flex items-end justify-end gap-2">
-                {activity.original_price && activity.original_price > (activity.price || 0) && (
+                {activity.original_price && parseFloat(activity.original_price) > parseFloat(activity.final_price || activity.price || 0) && (
                   <p className="text-sm text-gray-500 line-through">
                     {formatPrice(activity.original_price)}
                   </p>
                 )}
                 <p className="text-xl font-bold text-blue-800">
-                  {formatPrice(activity.price || 0)}
+                  {formatPrice(activity.final_price || activity.price || 0)}
                 </p>
               </div>
               <p className="text-xs text-gray-500 mt-1">for entire package</p>
