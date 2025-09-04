@@ -2,6 +2,7 @@ import PrimaryButton from "@/utils/PrimaryButton"
 import Image from "next/image"
 import Link from "next/link"
 import { FaMapMarkerAlt, FaPlane, FaPlaneDeparture } from "react-icons/fa"
+import { RiWhatsappFill } from "react-icons/ri"
 
 
 export const Card = ({ flightRoutes }) => {
@@ -91,15 +92,18 @@ export const Card = ({ flightRoutes }) => {
                                 </div>
 
                                 <div className="flex flex-col sm:flex-row items-center gap-3">
-
-                                    <Link href={`/contact`} >
-                                        
-                                    
-                                    <PrimaryButton className="flex items-center whitespace-nowrap text-sm py-2.5 px-5 shadow-md hover:shadow-lg">
-                                        <FaPlane size={14} className="mr-2" />
-                                        Book Now
-                                    </PrimaryButton></Link>
+                                    <a
+                                        href="https://wa.me/8801967776777"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <PrimaryButton className="flex items-center whitespace-nowrap text-sm py-2.5 px-5 shadow-md hover:shadow-lg">
+                                            Book Now
+                                            <RiWhatsappFill size={24} className="ml-2 text-green-500" />
+                                        </PrimaryButton>
+                                    </a>
                                 </div>
+
                             </div>
                         </div>
                     </div>

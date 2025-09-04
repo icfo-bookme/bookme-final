@@ -1,7 +1,7 @@
 import ActivitiesCarousel from './ActivitiesCarousel';
 
-export default function Activities({ packages }) {
-  console.log("Packages data:", packages);
+export default function Activities({ packages,property_id }) {
+
   
 
   const contactNumber = {
@@ -12,6 +12,7 @@ export default function Activities({ packages }) {
     <div>
       <ActivitiesCarousel 
         packages={packages} 
+        property_id={property_id}
         loading={false} 
         contactNumber={contactNumber} 
       />

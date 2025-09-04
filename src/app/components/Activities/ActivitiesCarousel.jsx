@@ -14,7 +14,8 @@ import { Roboto } from "next/font/google";
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400"] });
 
-export default function ActivitiesCarousel({ packages = [] }) {
+export default function ActivitiesCarousel({ packages = [], property_id }) {
+
   const [isMobile, setIsMobile] = useState(false);
   const swiperRef = useRef(null);
   const touchTimeoutRef = useRef(null);
@@ -23,6 +24,8 @@ export default function ActivitiesCarousel({ packages = [] }) {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [pickupLocations, setPickupLocations] = useState([]);
+  const [fetchingPickup, setFetchingPickup] = useState(false);
   const [bookingDetails, setBookingDetails] = useState({
     packageId: null,
     adults: 1,
@@ -31,15 +34,6 @@ export default function ActivitiesCarousel({ packages = [] }) {
     time: "",
     pickupLocation: ""
   });
-
-  // Sample pickup locations
-  const pickupLocations = [
-    "Dhaka City Center",
-    "Airport Terminal",
-    "Gulshan Circle 1",
-    "Uttara Sector 7",
-    "Dhanmondi 27"
-  ];
 
   // Generate time slots from 8:00 AM to 4:00 PM with 30-minute intervals
   const generateTimeSlots = () => {
@@ -62,6 +56,59 @@ export default function ActivitiesCarousel({ packages = [] }) {
   };
 
   const timeSlots = generateTimeSlots();
+
+  // Fetch pickup destinations from API
+  useEffect(() => {
+    const fetchPickupDestinations = async () => {
+      if (!property_id) return;
+      
+      setFetchingPickup(true);
+      try {
+        const response = await fetch(
+          `https://bookme.com.bd/admin/api/pickup/destinations/${property_id}`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Extract destination names from API response
+          const destinations = data.map(item => item.destination);
+          setPickupLocations(destinations);
+          
+          // Set default pickup location if destinations exist
+          if (destinations.length > 0) {
+            setBookingDetails(prev => ({
+              ...prev,
+              pickupLocation: destinations[0]
+            }));
+          }
+        } else {
+          console.error("Failed to fetch pickup destinations");
+          // Fallback locations if API fails
+          setPickupLocations([
+            "Dhaka City Center",
+            "Airport Terminal",
+            "Gulshan Circle 1",
+            "Uttara Sector 7",
+            "Dhanmondi 27"
+          ]);
+        }
+      } catch (error) {
+        console.error("Error fetching pickup destinations:", error);
+        // Fallback locations on error
+        setPickupLocations([
+          "Dhaka City Center",
+          "Airport Terminal",
+          "Gulshan Circle 1",
+          "Uttara Sector 7",
+          "Dhanmondi 27"
+        ]);
+      } finally {
+        setFetchingPickup(false);
+      }
+    };
+
+    fetchPickupDestinations();
+  }, [property_id]);
 
   // Refs for detecting outside clicks
   const guestModalRef = useRef(null);
@@ -480,16 +527,22 @@ export default function ActivitiesCarousel({ packages = [] }) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Pickup Location */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Pickup Location</label>
-                        <select 
-                          value={bookingDetails.pickupLocation}
-                          onChange={(e) => setBookingDetails({...bookingDetails, pickupLocation: e.target.value})}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          {pickupLocations.map(location => (
-                            <option key={location} value={location}>{location}</option>
-                          ))}
-                        </select>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Starting Point/Pickup Location</label>
+                        {fetchingPickup ? (
+                          <div className="w-full p-3 border border-gray-300 rounded-lg flex items-center justify-center">
+                            <TailSpin height="20" width="20" color="#0678B4" />
+                          </div>
+                        ) : (
+                          <select 
+                            value={bookingDetails.pickupLocation}
+                            onChange={(e) => setBookingDetails({...bookingDetails, pickupLocation: e.target.value})}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            {pickupLocations.map((location, index) => (
+                              <option key={index} value={location}>{location}</option>
+                            ))}
+                          </select>
+                        )}
                       </div>
                       
                       {/* Guest Selector */}
@@ -550,8 +603,11 @@ export default function ActivitiesCarousel({ packages = [] }) {
                   <div className="mt-8 pt-5 border-t">
                     <button
                       onClick={handleBookingSubmit}
-                      disabled={!bookingDetails.date || !bookingDetails.time}
-                      className="w-full py-3 px-4 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                      disabled={!bookingDetails.date || !bookingDetails.time || !bookingDetails.pickupLocation}
+                      style={{
+                        background: "linear-gradient(90deg, #313881, #0678B4)"
+                      }}
+                      className="w-full py-3 px-4 text-white font-medium rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
                     >
                       Confirm Booking - 
                       <span className="ml-1 font-semibold">
@@ -648,7 +704,10 @@ export default function ActivitiesCarousel({ packages = [] }) {
                 <div className="p-6 border-t">
                   <button
                     onClick={() => setShowGuestModal(false)}
-                    className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    style={{
+                      background: "linear-gradient(90deg, #313881, #0678B4)"
+                    }}
+                    className="w-full py-3 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     Confirm Guests
                   </button>

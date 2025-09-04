@@ -171,7 +171,7 @@ const BookMeHeader = () => {
 
             <li>
               <Link
-                href="/contact"
+                href="/flight"
                 className="flex items-center justify-between py-3 px-4 text-sm text-[#00026E] hover:bg-blue-50 rounded-lg transition-colors duration-200 group"
                 onClick={closeAllMenus}
                 prefetch
@@ -331,7 +331,7 @@ const BookMeHeader = () => {
                 </div>
 
                 <Link
-                  href="/contact"
+                  href="/flight"
                   className="text-sm text-[#00026E] hover:text-blue-600 font-medium transition-colors duration-200"
                   prefetch
                 >
