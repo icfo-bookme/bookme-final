@@ -46,7 +46,7 @@ console.log(`y/${propertySlug}/402`);
 
         <div className="flex flex-col w-full pr-4 pb-4">
           <Link
-            href={`/Property/${property.property_id}`}
+            href={`/Property/${propertySlug}/${property.property_id}`}
             className="cursor-pointer"
             onClick={() => onCardClick(index)}
           >

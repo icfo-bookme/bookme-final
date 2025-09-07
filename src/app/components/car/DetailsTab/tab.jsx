@@ -1,48 +1,52 @@
-"use client"
-import { useState } from "react";
+"use client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useMemo } from "react";
 
-// Example: Define fallback content if no component is provided
-function DefaultComponent({ model }) {
-  return (
-    <div className="p-4 text-gray-600">
-      <h2 className="text-lg font-semibold">Model: {model.model_name}</h2>
-      <p>No component specified for this model.</p>
-    </div>
-  );
-}
+// Slugify utility
+const slugify = (str) =>
+  str
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\u0980-\u09FF\-\(\)]+/g, "")
+    .replace(/\-\-+/g, "-");
 
 export default function Tab({ models }) {
-  const [activeTab, setActiveTab] = useState(models[0]?.id || null);
+  const pathname = usePathname();
 
-  const handleTabClick = (id) => {
-    setActiveTab(id);
-  };
+  const currentPropertyId = useMemo(() => {
+    return pathname?.split("/").pop();
+  }, [pathname]);
 
-  const activeModel = models.find((model) => model.id === activeTab);
-  const RenderComponent = activeModel?.Component || DefaultComponent;
+  const links = useMemo(() => {
+    return models?.map((model) => {
+      const slug = slugify(model.property_name);
+      return {
+        ...model,
+        slug,
+        href: `/${slug}/${model.property_id}`,
+        isActive: model.property_id.toString() === currentPropertyId,
+      };
+    });
+  }, [models, currentPropertyId]);
 
   return (
     <div className="w-full px-4 py-5 bg-white rounded-lg shadow">
-      {/* Tab Buttons */}
-      <div className="flex space-x-4 border-b">
-        {models.map((model) => (
-          <button
-            key={model.id}
-            onClick={() => handleTabClick(model.id)}
-            className={`px-4 py-2 text-sm font-medium transition-all ${
-              activeTab === model.id
+      <div className="flex space-x-4 border-b overflow-x-auto">
+        {links.map(({ id, href, model_name, isActive }) => (
+          <Link
+            key={id}
+            href={href}
+            prefetch
+            className={`px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${
+              isActive
                 ? "text-blue-600 border-b-2 border-blue-500"
                 : "text-gray-700 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600"
             }`}
           >
-            {model.model_name}
-          </button>
+            {model_name}
+          </Link>
         ))}
-      </div>
-
-      {/* Active Tab Content */}
-      <div className="mt-4">
-        <RenderComponent model={activeModel} />
       </div>
     </div>
   );

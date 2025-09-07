@@ -12,11 +12,11 @@ const VehicleCard = ({ vehicle }) => {
 
   const slugify = (str) =>
     str
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w\-]+/g, '')
-      .replace(/\-\-+/g, '-');
+      ?.toLowerCase()
+      ?.trim()
+      ?.replace(/\s+/g, '-')
+      ?.replace(/[^\w\-]+/g, '')
+      ?.replace(/\-\-+/g, '-') || '';
 
   // Function to render the appropriate icon based on icon_name
   const renderIcon = (iconName) => {
@@ -34,7 +34,82 @@ const VehicleCard = ({ vehicle }) => {
     }
   };
 
-  const basePrice = parseFloat(vehicle.price_upto_4_hours) * 4 + parseFloat(vehicle.kilometer_price) * 40 || 0;
+  // Format price with commas and decimals
+  const formatPrice = (price) => {
+    if (!price) return '0';
+    return parseFloat(price).toLocaleString('en-IN', {
+      maximumFractionDigits: 0
+    });
+  };
+
+  // Calculate base price for 4 hours and 40 km
+  const basePrice = vehicle.price_upto_4_hours && vehicle.kilometer_price 
+    ? parseFloat(vehicle.price_upto_4_hours) * 4 + parseFloat(vehicle.kilometer_price) * 40 
+    : 0;
+
+  // Process summaries to prioritize seating capacity and format values
+  const processSummaries = () => {
+    if (!vehicle.summaries || !Array.isArray(vehicle.summaries) || vehicle.summaries.length === 0) return [];
+    
+    // Create a copy of the summaries array and filter out null/undefined items
+    const summaries = [...vehicle.summaries].filter(s => s && typeof s === 'object');
+    
+    // Find and prioritize seating capacity
+    const seatingIndex = summaries.findIndex(s => 
+      s?.name && (s.name.toLowerCase().includes('seat') || s.name === 'Seating Capacity')
+    );
+    
+    if (seatingIndex > -1) {
+      // Remove seating from current position and add to beginning
+      const seatingSummary = summaries.splice(seatingIndex, 1)[0];
+      summaries.unshift(seatingSummary);
+    }
+    
+    // Format the display for each summary
+    return summaries.map(summary => {
+      // Check if the summary has a value property
+      const valueKey = Object.keys(summary).find(key => 
+        key !== 'name' && key !== 'icon_name' && key !== 'icon_import'
+      );
+      
+      if (valueKey) {
+        const value = summary[valueKey];
+        
+        // For seating capacity, always show the value
+        if (summary.name && (summary.name.toLowerCase().includes('seat') || summary.name === 'Seating Capacity')) {
+          return {
+            ...summary,
+            displayText: value?.toString() || "",
+            showFeature: true
+          };
+        }
+        // For other features, only show if value is "Yes"
+        else if (value === "Yes" || value === true) {
+          return {
+            ...summary,
+            displayText: "",
+            showFeature: true
+          };
+        }
+        // Don't show features with value not "Yes"
+        else {
+          return {
+            ...summary,
+            showFeature: false
+          };
+        }
+      }
+      
+      // Default case if no value key found
+      return {
+        ...summary,
+        displayText: "",
+        showFeature: true
+      };
+    }).filter(summary => summary.showFeature); // Filter out features that shouldn't be shown
+  };
+
+  const processedSummaries = processSummaries();
 
   return (
     <Link
@@ -46,7 +121,7 @@ const VehicleCard = ({ vehicle }) => {
         <div className="relative w-full md:w-2/5 h-[14rem] rounded-lg overflow-hidden">
           <Image
             src={`${process.env.NEXT_PUBLIC_BASE_URL || ''}/storage/${vehicle.image}`}
-            alt={vehicle.property_name}
+            alt={vehicle.property_name || 'Vehicle'}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 40vw"
@@ -59,13 +134,13 @@ const VehicleCard = ({ vehicle }) => {
         <div className="flex flex-col justify-between w-full md:w-3/5">
           <div>
             <div className="flex justify-between items-start">
-              <h3 className="font-bold text-xl text-blue-900 mb-1">{vehicle.property_name}</h3>
+              <h3 className="font-bold text-xl text-blue-900 mb-1">{vehicle.property_name || 'Unnamed Vehicle'}</h3>
             </div>
 
             {/* Vehicle Summary */}
             <div className="flex flex-wrap gap-2 mb-4 mt-3">
-              {vehicle.summaries && vehicle.summaries.length > 0 ? (
-                vehicle.summaries.slice(0, 4).map((summary, i) => (
+              {processedSummaries.length > 0 ? (
+                processedSummaries.slice(0, 4).map((summary, i) => (
                   <span
                     key={i}
                     className="flex items-center text-xs text-gray-700 bg-gray-50 border border-gray-200 px-3 py-1 rounded-full hover:bg-blue-50 hover:border-blue-200 transition-colors"
@@ -73,7 +148,10 @@ const VehicleCard = ({ vehicle }) => {
                     <div className="mr-2">
                       {renderIcon(summary.icon_name)}
                     </div>
-                    {summary.value}
+                    <span className="font-medium">
+                      {summary.name || 'Feature'}
+                      {summary.displayText && `: ${summary.displayText}`}
+                    </span>
                   </span>
                 ))
               ) : (
@@ -97,19 +175,21 @@ const VehicleCard = ({ vehicle }) => {
             <div className="text-right mt-3 md:mt-0">
               <span className="text-xs text-gray-500 block">Starting From:</span>
               <div className="flex items-end justify-end gap-2">
-                {basePrice ? (
+                {basePrice > 0 ? (
                   <p className="text-xl font-bold text-blue-800">
-                    {basePrice}
+                    {formatPrice(basePrice)}
                   </p>
                 ) : (
                   <p className="text-sm text-gray-500">Price on request</p>
                 )}
               </div>
-              {basePrice ? (
+              {basePrice > 0 ? (
                 <>
                   <p className="text-xs text-gray-500 mt-1">for 4 hours and 40 km</p>
                   {vehicle.kilometer_price > 0 && (
-                    <p className="text-xs font-bold text-blue-900">{vehicle.price_upto_4_hours} per Hours, {vehicle.kilometer_price} per km</p>
+                    <p className="text-xs font-bold text-blue-900">
+                      {formatPrice(vehicle.price_upto_4_hours)} per hour, {formatPrice(vehicle.kilometer_price)} per km
+                    </p>
                   )}
                 </>
               ) : null}

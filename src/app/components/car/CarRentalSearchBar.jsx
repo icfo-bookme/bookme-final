@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaExchangeAlt } from "react-icons/fa";
 import SearchButton from "@/utils/SearchButton";
 
-const CarRentalSearchBar = ({ locationsData }) => {
+const CarRentalSearchBar = ({ locationsData, initialParams }) => {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const locations = Array.isArray(locationsData) ? locationsData : [];
 
-    const [searchParams, setSearchParams] = useState({
+    const [searchParamsState, setSearchParamsState] = useState({
         pickupLocation: { id: 0, name: "", country: "" },
         dropoffLocation: { id: 0, name: "", country: "" },
         pickupDate: new Date().toISOString().split("T")[0],
@@ -18,33 +19,38 @@ const CarRentalSearchBar = ({ locationsData }) => {
 
     const [isMobile, setIsMobile] = useState(false);
 
-    // ✅ Detect screen size and update isMobile
+    // Set initial values from URL params
     useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 768); // Tailwind 'md' breakpoint
+        const updateScreenSize = () => {
+            setIsMobile(window.innerWidth < 768);
         };
-        handleResize(); // Set on mount
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
+
+        updateScreenSize();
+        window.addEventListener('resize', updateScreenSize);
+
+        return () => window.removeEventListener('resize', updateScreenSize);
     }, []);
 
-    // ✅ Set default pickup/dropoff once locationsData is loaded
+    // Set initial values from URL params
     useEffect(() => {
-        if (
-            locations.length >= 2 &&
-            searchParams.pickupLocation.id === 0 &&
-            searchParams.dropoffLocation.id === 0
-        ) {
-            setSearchParams((prev) => ({
-                ...prev,
-                pickupLocation: locations[0],
-                dropoffLocation: locations[1],
-            }));
+        if (locations.length > 0 && initialParams) {
+            const pickupId = parseInt(initialParams.pickupId);
+            const dropoffId = parseInt(initialParams.dropoffId);
+
+            const pickupLocation = locations.find(loc => loc.id === pickupId) || locations[0];
+            const dropoffLocation = locations.find(loc => loc.id === dropoffId) || locations[1];
+
+            setSearchParamsState({
+                pickupLocation,
+                dropoffLocation,
+                pickupDate: initialParams.pickupDate || new Date().toISOString().split("T")[0],
+                pickupTime: initialParams.pickupTime || "10:00",
+            });
         }
-    }, [locations]);
+    }, [locations, initialParams]);
 
     const swapLocations = () => {
-        setSearchParams((prev) => ({
+        setSearchParamsState((prev) => ({
             ...prev,
             pickupLocation: prev.dropoffLocation,
             dropoffLocation: prev.pickupLocation,
@@ -54,12 +60,12 @@ const CarRentalSearchBar = ({ locationsData }) => {
     const handleSearch = (e) => {
         e.preventDefault();
 
-        const pickupId = searchParams.pickupLocation.id;
+        const pickupId = searchParamsState.pickupLocation.id;
 
         const params = new URLSearchParams();
-        params.set("dropoff", searchParams.dropoffLocation.id);
-        params.set("date", searchParams.pickupDate);
-        params.set("time", searchParams.pickupTime);
+        params.set("dropoff", searchParamsState.dropoffLocation.id);
+        params.set("date", searchParamsState.pickupDate);
+        params.set("time", searchParamsState.pickupTime);
 
         router.push(`/Car/list/${pickupId}?${params.toString()}`);
     };
@@ -75,7 +81,7 @@ const CarRentalSearchBar = ({ locationsData }) => {
         );
 
         const handleSelect = (location) => {
-            setSearchParams((prev) => ({
+            setSearchParamsState((prev) => ({
                 ...prev,
                 [field]: location,
             }));
@@ -92,9 +98,9 @@ const CarRentalSearchBar = ({ locationsData }) => {
         };
 
         useEffect(() => {
-            const loc = searchParams[field];
+            const loc = searchParamsState[field];
             setQuery(loc.name && loc.country ? `${loc.name}, ${loc.country}` : "");
-        }, [searchParams[field]]);
+        }, [searchParamsState[field]]);
 
         useEffect(() => {
             const handleClickOutside = (e) => {
@@ -169,15 +175,17 @@ const CarRentalSearchBar = ({ locationsData }) => {
     );
 
     return (
-        <div className="bg-white max-w-6xl mx-auto pb-6 text-blue-950 rounded-lg relative">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md mb-6">
             <form onSubmit={handleSearch} className="w-full">
-                <div className="flex flex-col md:flex-row items-end gap-3 md:gap-4">
-                    <div className="w-full md:flex-1">
+                <div className="flex flex-col md:flex-row items-end gap-4">
+                    {/* Pickup Location */}
+                    <div className="w-full md:w-1/4">
                         <SearchableLocationField label="PICKUP LOCATION" field="pickupLocation" />
                     </div>
 
+                    {/* Swap Button for Desktop */}
                     {!isMobile && (
-                        <div className="h-12 flex items-center justify-center md:px-0">
+                        <div className="h-12 flex items-center justify-center px-2 md:mt-6">
                             <button
                                 type="button"
                                 onClick={swapLocations}
@@ -189,44 +197,59 @@ const CarRentalSearchBar = ({ locationsData }) => {
                         </div>
                     )}
 
-                    <div className="w-full md:flex-1">
+                    {/* Dropoff Location */}
+                    <div className="w-full md:w-1/4">
                         <SearchableLocationField label="DROPOFF LOCATION" field="dropoffLocation" />
                     </div>
 
-                    
-                    <div className="w-full grid grid-cols-2 gap-3 md:gap-4 md:flex md:flex-1">
-                        <div className="w-full">
-                            <DateTimeSearchField
-                                label="PICKUP DATE"
-                                type="date"
-                                value={searchParams.pickupDate}
-                                onChange={(e) =>
-                                    setSearchParams((prev) => ({
-                                        ...prev,
-                                        pickupDate: e.target.value,
-                                    }))
-                                }
-                            />
-                        </div>
-                        <div className="w-full">
-                            <DateTimeSearchField
-                                label="PICKUP TIME"
-                                type="time"
-                                value={searchParams.pickupTime}
-                                onChange={(e) =>
-                                    setSearchParams((prev) => ({
-                                        ...prev,
-                                        pickupTime: e.target.value,
-                                    }))
-                                }
-                            />
-                        </div>
+                    {/* Date and Time Fields */}
+                    <div className="w-full md:w-2/5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <DateTimeSearchField
+                            label="PICKUP DATE"
+                            type="date"
+                            value={searchParamsState.pickupDate}
+                            onChange={(e) =>
+                                setSearchParamsState((prev) => ({
+                                    ...prev,
+                                    pickupDate: e.target.value,
+                                }))
+                            }
+                        />
+                        <DateTimeSearchField
+                            label="PICKUP TIME"
+                            type="time"
+                            value={searchParamsState.pickupTime}
+                            onChange={(e) =>
+                                setSearchParamsState((prev) => ({
+                                    ...prev,
+                                    pickupTime: e.target.value,
+                                }))
+                            }
+                        />
+                    </div>
+
+                    {/* Search Button */}
+                    <div className="w-full md:w-1/6 mt-2 md:mt-0">
+                        <SearchButton type="submit" className="w-full h-12 px-4">
+                          Modify  Search
+                        </SearchButton>
                     </div>
                 </div>
 
-                <div className="absolute text-sm md:text-lg mt-3 md:mt-6 left-1/2 -translate-x-1/2 flex justify-end">
-                    <SearchButton type="submit">Search Cars</SearchButton>
-                </div>
+                {/* Swap Button for Mobile */}
+                {isMobile && (
+                    <div className="w-full flex justify-center mt-4">
+                        <button
+                            type="button"
+                            onClick={swapLocations}
+                            className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-colors"
+                            aria-label="Swap pickup and dropoff locations"
+                        >
+                            <FaExchangeAlt className="h-4 w-4" />
+                            <span className="text-sm">Swap Locations</span>
+                        </button>
+                    </div>
+                )}
             </form>
         </div>
     );
