@@ -12,13 +12,13 @@ export default async function FlightRoute() {
     <div className="min-h-screen  bg-gradient-to-br from-sky-50 to-blue-100 py-8 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-7">
-          <h1 className="text-2xl font-bold text-slate-800 mb-3 flex items-center justify-center gap-2">
-            <FaPlane className="text-blue-600" size={36} />
-             Top Flight Deals – Domestic & International
-          </h1>
-          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-            Discover available flight paths with detailed information and exclusive discounts
-          </p>
+          <div className="w-full text-center mb-5">
+        <h2 className="text-xl md:text-2xl font-bold text-[#00026E] mb-2">
+           Top Flight Deals
+        </h2>
+        <div className="w-20 h-1 bg-[#0678B4] mx-auto"></div>
+      </div>
+         
         </div>
 
         <Tab flightRoutes={{ domestic: flightdomesticRoutes, international: flightinternationalRoutes }} />

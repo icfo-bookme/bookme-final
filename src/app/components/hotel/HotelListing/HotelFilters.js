@@ -30,7 +30,7 @@ const HotelFilters = ({
     <div
       ref={searchRef}
       className={`${isMobile
-        ? 'w-full mt-12 max-w-sm bg-white overflow-y-auto animate-slide-in z-40 h-[calc(100vh-48px)] fixed right-0 top-0 shadow-lg'
+        ? 'w-full mt-12 max-w-sm bg-white overflow-y-auto animate-slide-in z-40 h-[calc(100vh-100px)] fixed right-0 top-0 shadow-lg'
         : 'sticky top-16 h-[calc(100vh-64px)] overflow-y-auto w-full bg-white rounded-xl shadow-sm border border-gray-200 p-4 custom-scrollbar'
       }`}
     >

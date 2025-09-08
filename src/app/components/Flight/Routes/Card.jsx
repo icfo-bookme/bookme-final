@@ -35,8 +35,8 @@ export const Card = ({ flightRoutes }) => {
                                 </div>
 
                                 {/* Flight path visualization */}
-                                <div className="relative -top-[52px] mx-auto w-[50%] flex items-center justify-center">
-                                    <span className="font-semibold -mt-5 text-blue-700 text-sm">{route.flight_duration}</span>
+                                <div className="relative -top-[52px] right-2 mx-auto w-[50%] flex items-center justify-center">
+                                    <span className="font-semibold -mt-5 text-blue-700 text-xs">{route.flight_duration}</span>
                                     <div className="h-0.5 bg-blue-200 w-full mx-auto absolute top-1/2 transform -translate-y-1/2"></div>
 
                                     <div className="relative bg-white px-2 z-10">
@@ -44,45 +44,45 @@ export const Card = ({ flightRoutes }) => {
                                             <FaPlaneDeparture className="text-white transform " size={16} />
                                         </div>
                                     </div>
-                                    <span className="font-semibold -mt-5 text-blue-700 text-sm">{route.number_of_stops === "0" ? "Non-" : `${route.number_of_stops}`} stop</span>
+                                    <span className="font-semibold -mt-5 text-blue-700 text-xs">{route.number_of_stops === "0" ? "Non-" : `${route.number_of_stops}`} stop</span>
                                 </div>
                             </div>
 
-                            {/* Additional details and pricing */}
-                            <div className="flex flex-col md:flex-row justify-between items-center  border-t border-slate-100">
-                                <div className="flex items-center mb-4 md:mb-0">
+                           {/* Additional details and pricing */}
+                            <div className="flex flex-col sm:flex-row justify-between items-center pt-1 border-t border-slate-100 mt-0 ">
+                                <div className="flex items-center mb-4 sm:mb-0 w-full sm:w-auto justify-center sm:justify-start">
                                     {route.airline_icon_url ? (
-                                        <div className="relative h-10 w-10 mr-3">
+                                        <div className="relative h-8 w-8 sm:h-10 sm:w-10 mr-3">
                                             <Image
                                                 src={`${process.env.NEXT_PUBLIC_BASE_URL}/storage/${route.airline_icon_url}`}
                                                 alt={`${route.airline_name || 'Airline'} logo`}
                                                 fill
                                                 className="object-contain rounded-lg"
-                                                sizes="40px"
+                                                sizes="(max-width: 640px) 32px, 40px"
                                             />
                                         </div>
                                     ) : (
-                                        <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                            <FaPlane className="text-blue-600" size={18} />
+                                        <div className="h-8 w-8 sm:h-10 sm:w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                            <FaPlane className="text-blue-600" size={14} />
                                         </div>
                                     )}
 
-                                    <div>
+                                    <div className="flex-1 sm:flex-none">
                                         <div className="text-xs text-slate-500 font-medium mb-1">Starting from</div>
                                         <div className="flex items-baseline flex-wrap">
                                             {route.discount_percent > 0 ? (
                                                 <>
-                                                    <span className="text-xl font-bold text-slate-800">
+                                                    <span className="text-lg sm:text-xl font-bold text-slate-800">
                                                         ${(route.base_price * (1 - route.discount_percent / 100)).toFixed(2)}
                                                     </span>
-                                                    <span className="ml-2 text-sm text-slate-500 line-through">${route.base_price}</span>
+                                                    <span className="ml-2 text-xs sm:text-sm text-slate-500 line-through">${route.base_price}</span>
                                                 </>
                                             ) : (
-                                                <span className="text-xl font-bold text-slate-800">${route.base_price}</span>
+                                                <span className="text-lg sm:text-xl font-bold text-slate-800">${route.base_price}</span>
                                             )}
 
                                             {route.discount_percent > 0 && (
-                                                <span className="ml-2 bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full">
+                                                <span className="ml-2 bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 sm:py-1 rounded-full">
                                                     Save {route.discount_percent}%
                                                 </span>
                                             )}
@@ -91,19 +91,19 @@ export const Card = ({ flightRoutes }) => {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row items-center gap-3">
+                                <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-center sm:justify-end mt-4 sm:mt-0">
                                     <a
                                         href="https://wa.me/8801967776777"
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        className="w-full sm:w-auto"
                                     >
-                                        <PrimaryButton className="flex items-center whitespace-nowrap text-sm py-2.5 px-5 shadow-md hover:shadow-lg">
+                                        <PrimaryButton className="flex items-center justify-center whitespace-nowrap text-sm py-2.5 px-5 shadow-md hover:shadow-lg w-full sm:w-auto">
                                             Book Now
-                                            <RiWhatsappFill size={24} className="ml-2 text-green-500" />
+                                            <RiWhatsappFill size={20} className="ml-2 text-green-500" />
                                         </PrimaryButton>
                                     </a>
                                 </div>
-
                             </div>
                         </div>
                     </div>
