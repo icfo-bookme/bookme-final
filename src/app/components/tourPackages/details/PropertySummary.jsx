@@ -48,7 +48,7 @@ export default function PropertySummary({ data }) {
             .replace(/<ul>/g, '<ul class="list-disc pl-8">')
         : '';
     return (
-        <div className="p-5">
+        <div className="py-5 md:px-5">
             {/* Title & Address */}
             <h2 className="text-xl font-bold text-blue-950 lg:mt-2 mb-1">{data.property_name}</h2>
             <div className='flex items-center text-gray-700 gap-1 text-sm'>
@@ -135,7 +135,7 @@ export default function PropertySummary({ data }) {
                         >
                             ✖
                         </button>
-                        <h3 className="text-lg font-semibold mb-4">Requirements</h3>
+                        <h3 className="text-lg text-blue-950 font-semibold mb-4">Requirements</h3>
                         <div
                             className="prose prose-sm text-gray-700 max-w-none"
                             dangerouslySetInnerHTML={{ __html: processedRequirements }}

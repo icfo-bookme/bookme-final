@@ -21,10 +21,10 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
         <div className="py-3">
             <span style={{
                 background: "linear-gradient(90deg, #313881, #0678B4)",
-            }} className=' text-gray-50 rounded-md p-2 font-semibold'>
+            }} className=' text-gray-50 rounded-md p-2 mb-2 font-semibold'>
                 Option {index + 1}
             </span>
-            <div className="rounded-lg bg-gray-100 border border-gray-300 mb-4">
+            <div className="rounded-lg mt-1 bg-gray-100 border border-gray-300 mb-4">
 
                 {/* Mobile View (sm) */}
                 <div className="md:hidden">
@@ -76,11 +76,10 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                         <div className="grid grid-cols-2 gap-4 mt-4">
                             <div>
                                 <button
-                                    onClick={() => setOpenModal(true)}
-                                    className='font-bold mt-2 text-lg hover:text-blue-700 text-gray-800'
-                                >
-                                    Refundable <i className="fa fa-info-circle text-gray-500" aria-hidden="true"></i>
-                                </button>
+                                        onClick={() => setOpenModal(true)}
+                                    >
+                                        <i className="fa fa-eye text-blue-500" aria-hidden="true"></i> <span className="font-bold underline">Refund Policy</span>
+                                    </button>
 
                                 <p className="text-gray-600 mt-2 text-sm flex items-center gap-2">
                                     <i className="fa-solid fa-utensils"></i>
@@ -161,7 +160,7 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                                     <button
                                         onClick={() => setOpenModal(true)}
                                     >
-                                        <i className="fa fa-eye text-blue-500" aria-hidden="true"></i>   Refundable
+                                        <i className="fa fa-eye text-blue-500" aria-hidden="true"></i> <span className="font-bold underline">Refund Policy</span>
                                     </button>
                                 </div>
 
