@@ -9,7 +9,7 @@ export default async function HotelDetailsPage({ params, searchParams }) {
     const { checkin, checkout, rooms, adult } = searchParams;
    
   return (
-    <div className=" pt-20 min-h-screen bg-gray-200">
+    <div className=" pt-16 min-h-screen bg-gray-200">
       
       <div className=" ">
         <HotelHashRoute hotelId={params.id} initialHotelDetails={hotelDetails}  checkin={checkin}
