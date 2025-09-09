@@ -21,8 +21,8 @@ export default function VisaSearchForm({ countryData }) {
   str
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')        // Replace spaces with dashes
-    .replace(/[^\w\-]+/g, '')    // Remove non-word chars
+    .replace(/\s+/g, '-')        
+    .replace(/[^\w\-]+/g, '')    
     .replace(/\-\-+/g, '-'); 
 
 
@@ -55,9 +55,7 @@ export default function VisaSearchForm({ countryData }) {
       .map(country => {
         const name = country.name.toLowerCase();
         
-        // Calculate match score:
-        // 1. Count how many query characters appear in the name (in any order)
-        // 2. Give bonus for consecutive matches
+      
         let score = 0;
         let consecutiveBonus = 0;
         let lastMatchIndex = -2;
@@ -120,7 +118,7 @@ export default function VisaSearchForm({ countryData }) {
     if (!searchQuery) return name;
     
     const query = searchQuery.toLowerCase();
-    const queryChars = [...new Set(query.split(''))]; // Get unique chars
+    const queryChars = [...new Set(query.split(''))]; 
     let result = [];
     let currentText = '';
     

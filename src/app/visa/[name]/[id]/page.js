@@ -90,7 +90,6 @@ export default function VisaDetailsPage({ params }) {
     );
   }
 
-
   return (
     <div className="bg-[#FAFAFA] text-[#333] ">
       {/* Hero Image */}
@@ -100,8 +99,6 @@ export default function VisaDetailsPage({ params }) {
           alt={visaDetails?.property_name}
           fill
           className="object-fill"
-
-
         />
       </div>
 

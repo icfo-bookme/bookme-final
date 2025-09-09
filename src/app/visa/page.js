@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { FaWhatsapp } from 'react-icons/fa';
 import getContactNumber from '@/services/tour/getContactNumber';
 import { TbCurrentLocation } from 'react-icons/tb';
-import { IoTime } from 'react-icons/io5';
 import VisaAgency from '../components/pre-footer-content/VisaAgency';
 
 export default async function Home() {
@@ -33,17 +32,17 @@ export default async function Home() {
   str
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')        // Replace spaces with dashes
-    .replace(/[^\w\-]+/g, '')    // Remove non-word chars
-    .replace(/\-\-+/g, '-');     // Replace multiple dashes with one
+    .replace(/\s+/g, '-')        
+    .replace(/[^\w\-]+/g, '')    
+    .replace(/\-\-+/g, '-');     
   
   if (loading) {
     return (
       <div className="min-h-screen font-sans">
-        {/* Background skeleton */}
+        
         <div className="h-[60vh] bg-gray-300 animate-pulse" />
 
-        {/* Search Form Skeleton */}
+      
         <div className="bg-white py-8">
           <main className="container mx-auto px-4 flex flex-col items-center">
             <div className="w-full max-w-3xl space-y-4">

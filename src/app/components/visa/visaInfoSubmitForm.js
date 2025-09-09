@@ -3,11 +3,10 @@ import { useForm } from 'react-hook-form';
 import postPackageInfo from '@/services/tour/postPacageInfo';
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 import { useState } from 'react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-export default function VisaInfoSubmitForm({property_name}) {
+export default function VisaInfoSubmitForm({ property_name }) {
   const {
     register,
     handleSubmit,
@@ -21,37 +20,37 @@ export default function VisaInfoSubmitForm({property_name}) {
   };
 
   const onSubmit = async (data) => {
-  setIsSubmitting(true);
-  try {
-    console.log("Submitting:", { 
-      ...data, 
-      category: "visa", 
-      property_name: property_name 
-    });
+    setIsSubmitting(true);
+    try {
+      console.log("Submitting:", {
+        ...data,
+        category: "visa",
+        property_name: property_name
+      });
 
-    const apiResponse = await postPackageInfo({
-      ...data,
-      category: "visa",
-      property_name: property_name
-    });
+      const apiResponse = await postPackageInfo({
+        ...data,
+        category: "visa",
+        property_name: property_name
+      });
 
-    if (apiResponse?.error) {
-      throw new Error(apiResponse.error.message);
+      if (apiResponse?.error) {
+        throw new Error(apiResponse.error.message);
+      }
+
+      toast.success("Submitted Successfully");
+      // Optionally reset form here
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast.error(
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to submit. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-
-    toast.success("Submitted Successfully");
-    // Optionally reset form here
-  } catch (error) {
-    console.error("Submission error:", error);
-    toast.error(
-      error.response?.data?.message || 
-      error.message || 
-      "Failed to submit. Please try again."
-    );
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Request Visa Assistance </h1>
@@ -69,9 +68,8 @@ export default function VisaInfoSubmitForm({property_name}) {
             type="text"
             id="name"
             placeholder="Enter your name"
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.name ? 'border-red-500' : 'border-gray-300'
-            }`}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+              }`}
             {...register('name', { required: 'Name is required' })}
           />
           {errors.name && (
@@ -84,20 +82,19 @@ export default function VisaInfoSubmitForm({property_name}) {
             Phone Number
           </label>
           <> <div className="max-w-[200px]">
-    <PhoneInput
-      country={'bd'}
-      onChange={handlePhoneChange}
-      inputClass={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-        errors.number ? 'border-red-500' : 'border-gray-300'
-      }`}
-      containerClass="react-tel-input"
-      buttonClass="react-tel-input-btn"
-      inputProps={{
-        name: 'number',
-        id: 'number'
-      }}
-    />
-  </div></>
+            <PhoneInput
+              country={'bd'}
+              onChange={handlePhoneChange}
+              inputClass={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.number ? 'border-red-500' : 'border-gray-300'
+                }`}
+              containerClass="react-tel-input"
+              buttonClass="react-tel-input-btn"
+              inputProps={{
+                name: 'number',
+                id: 'number'
+              }}
+            />
+          </div></>
         </div>
 
         <div className="mb-6">
@@ -124,9 +121,8 @@ export default function VisaInfoSubmitForm({property_name}) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors ${
-            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
         >
           {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
