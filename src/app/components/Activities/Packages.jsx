@@ -1,9 +1,6 @@
 import ActivitiesCarousel from './ActivitiesCarousel';
 
 export default function Activities({ packages,property_id }) {
-
-  
-
   const contactNumber = {
     Phone: "+1234567890" 
   };

@@ -1,20 +1,15 @@
 "use client";
-
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-
-// Import icons
 import { FaRegClock } from "react-icons/fa";
 import { PiUsersThreeBold } from "react-icons/pi";
 import { TbWorldPlus } from "react-icons/tb";
 import { MdOutlineFreeCancellation } from "react-icons/md";
 import { FiArrowRight } from "react-icons/fi";
 
-// Icon size class
 const iconSize = "text-base";
 
-// Icon mapping
 const iconMap = {
     FaRegClock: <FaRegClock className={`text-blue-500 ${iconSize}`} />,
     PiUsersThree: <PiUsersThreeBold className={`text-green-600 ${iconSize}`} />,
@@ -30,12 +25,12 @@ const slugify = (text = "") =>
         .trim()
         .replace(/[\s\W-]+/g, "-");
 
-// Format duration string (e.g., "0h 3m" => "3m")
+
 const formatDuration = (value) => {
     if (!value) return "";
     const parts = value.split(" ");
     return parts
-        .filter((part) => !part.startsWith("0")) // filter out "0h" or "0m"
+        .filter((part) => !part.startsWith("0")) 
         .join(" ")
         .trim();
 };
@@ -73,8 +68,6 @@ const RelatedActivities = ({ packages = [] }) => {
                                 {pkg.summaries?.slice(0, 2).map((summary, index) => {
                                     const isClock = summary.icon_name === "FaRegClock";
                                     const value = isClock ? formatDuration(summary.value) : summary.value;
-
-                                    // Skip if value ends up empty (e.g., "0h 0m")
                                     if (!value) return null;
 
                                     return (
@@ -91,8 +84,6 @@ const RelatedActivities = ({ packages = [] }) => {
                                 {pkg.summaries?.slice(2, 4).map((summary, index) => {
                                     const isClock = summary.icon_name === "FaRegClock";
                                     const value = isClock ? formatDuration(summary.value) : summary.value;
-
-                                    // Skip if value ends up empty (e.g., "0h 0m")
                                     if (!value) return null;
 
                                     return (

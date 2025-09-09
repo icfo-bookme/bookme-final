@@ -1,19 +1,14 @@
 import ActivitiesSearch from "../../SearchBar/ActivitiesSearchBar/ActivitiesSearch";
-import TourSearch from "../../SearchBar/Tour/TourSearch";
-
 const HeroSection = () => {
   return (
     <section className="relative">
-      {/* Hero Image with Overlay */}
       <div className="relative h-[30vh] md:h-[60vh] w-full overflow-hidden">
-        {/* Background Image with Opacity Control */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: "url('/activities.jpg')",
           }}
         >
-          {/* Dark Overlay for better text contrast */}
           <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         </div>
         

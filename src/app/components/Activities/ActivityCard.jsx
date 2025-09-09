@@ -1,6 +1,4 @@
 'use client';
-
-// Import all possible icons from react-icons
 import { IoLocationOutline } from "react-icons/io5";
 import { FaRegClock, FaUsers, FaCommentDots } from "react-icons/fa";
 import { PiUsersThreeBold } from "react-icons/pi";
@@ -16,34 +14,22 @@ import Link from 'next/link';
 
 
 const iconMapping = {
-  // Location icons
   IoLocationOutline: IoLocationOutline,
-  
-  // Clock/time icons
   FaRegClock: FaRegClock,
   TbClock: TbClock,
   BiTime: BiTime,
   AiOutlineClockCircle: AiOutlineClockCircle,
-  
-  // User/people icons
   PiUsersThreeBold: PiUsersThreeBold,
   PiUsersThree: PiUsersThreeBold, 
   FaUsers: FaUsers,
   TbUsers: TbUsers,
   AiOutlineUser: AiOutlineUser,
-  
-  // Comment/discussion icons
   GoCommentDiscussion: GoCommentDiscussion,
   FaCommentDots: FaCommentDots,
   RiUserVoiceLine: RiUserVoiceLine,
   BiUserVoice: BiUserVoice,
-  
-  // Cancellation icons
   MdOutlineFreeCancellation: MdOutlineFreeCancellation,
-  
-  // Premium/quality icons
   GiDiamondHard: GiDiamondHard,
-  
   default: FaRegClock
 };
 
@@ -67,14 +53,12 @@ const ActivityCard = ({ activity }) => {
   
   const formatTimeDisplay = (timeString) => {
     if (!timeString) return '';
-    
-   
+
     return timeString
       .replace(/\b0h\s?/g, '')    
       .replace(/\s0m\b/g, '')       
       .replace(/\s+to\s+/, ' to '); 
   };
-
  
   const renderIcon = (iconName) => {
     
@@ -83,9 +67,8 @@ const ActivityCard = ({ activity }) => {
     return <IconComponent className="text-blue-500 text-xs" />;
   };
 
-  // Get the display text for a summary item
+
   const getSummaryText = (summary) => {
-    // Find the first non-empty key that's not icon_name or icon_import
     const validKeys = Object.keys(summary).filter(key => 
       key !== 'icon_name' && 
       key !== 'icon_import' && 
@@ -95,7 +78,6 @@ const ActivityCard = ({ activity }) => {
     
     if (validKeys.length > 0) {
       const text = summary[validKeys[0]];
-      // Format time if this appears to be a time-related summary
       if (validKeys[0] === 'Duration' || text.includes('h') || text.includes('m')) {
         return formatTimeDisplay(text);
       }
@@ -105,7 +87,6 @@ const ActivityCard = ({ activity }) => {
     return '';
   };
 
-  // Get the key for the summary text (to display the label)
   const getSummaryKey = (summary) => {
     const validKeys = Object.keys(summary).filter(key => 
       key !== 'icon_name' && 
@@ -123,7 +104,6 @@ const ActivityCard = ({ activity }) => {
       className="block"
     >
       <div className="group relative flex flex-col md:flex-row gap-5 p-5 border border-gray-200 rounded-xl  hover:shadow-sm transition-all duration-200 bg-white hover:border-blue-100">
-        {/* activity Image */}
         <div className="relative w-full md:w-2/5 h-[13rem] rounded-lg overflow-hidden">
           <Image
             src={`${process.env.NEXT_PUBLIC_BASE_URL}/storage/${activity.image}`}
@@ -141,7 +121,6 @@ const ActivityCard = ({ activity }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg"></div>
         </div>
 
-        {/* activity Details */}
         <div className="flex flex-col justify-between w-full md:w-3/5">
           <div>
             <div className="flex justify-between items-start">
@@ -164,7 +143,7 @@ const ActivityCard = ({ activity }) => {
                   <span
                     key={i}
                     className="flex items-start text-xs text-gray-700 bg-gray-50 border border-gray-200 px-3 py-1 rounded-full hover:bg-blue-50 hover:border-blue-200 transition-colors"
-                    title={summaryKey} // Show the key as tooltip
+                    title={summaryKey} 
                   >
                     <div className="mr-2">
                       {renderIcon(summary.icon_name)}
@@ -176,7 +155,6 @@ const ActivityCard = ({ activity }) => {
             </div>
           </div>
 
-          {/* Price and CTA - Updated layout with price on right */}
           <div className="flex  md:flex-row items-start  justify-between pt-1 border-t border-gray-100">
             <button
               style={{

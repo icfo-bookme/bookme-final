@@ -2,7 +2,6 @@ export const revalidate = 60;
 
 import HotelLoadingSkeleton from '@/app/components/hotel/Hotel/HotelLoadingSkeleton';
 import HotelCTA from '@/app/components/hotel/Hotel/HotelCTA';
-import TourPackageCard from '@/app/components/tourPackages/tourpackages/PackageCard';
 import getActivities from '@/services/Activities/getActivities';
 import HeroSection from '../components/Activities/ActivitiesPage/HeroSection';
 import ActivitiesCard from '../components/Activities/ActivitiesPage/ActivitiesCard';

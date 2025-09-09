@@ -1,7 +1,5 @@
-
 import getActivitiesDestinations from "@/services/Activities/getTourDestinations";
 import ListingSearchBar from "../tourPackages/ListingSearch/ListingSearch";
-
 
 export default async function ActivityListingSearch() {
   const data = await getActivitiesDestinations();
