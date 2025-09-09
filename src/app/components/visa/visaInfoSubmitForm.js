@@ -18,7 +18,6 @@ export default function VisaInfoSubmitForm({ property_name }) {
   const handlePhoneChange = (value) => {
     setValue('number', value);
   };
-
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
@@ -39,7 +38,7 @@ export default function VisaInfoSubmitForm({ property_name }) {
       }
 
       toast.success("Submitted Successfully");
-      // Optionally reset form here
+      
     } catch (error) {
       console.error("Submission error:", error);
       toast.error(

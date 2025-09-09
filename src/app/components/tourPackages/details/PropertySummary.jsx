@@ -31,7 +31,6 @@ export default function PropertySummary({ data }) {
         return <div>No property summary available</div>;
     }
 
-    // Function to dynamically get icon component
     const getIcon = (iconName) => {
         return (
             IoIcons[iconName] ||
@@ -41,7 +40,7 @@ export default function PropertySummary({ data }) {
             null
         );
     };
-    // Process requirements HTML to ensure proper formatting
+
     const processedRequirements = data.requirements
         ? data.requirements
             .replace(/&nbsp;/g, ' ')
@@ -77,7 +76,6 @@ export default function PropertySummary({ data }) {
                 })}
             </div>
            
-            {/* Requirements clickable text */}
             {data.requirements && (
                 <div className="mt-4">
                     <button
@@ -109,7 +107,7 @@ export default function PropertySummary({ data }) {
                         </div>
                         <div>
                             <Link
-                                href={`https://wa.me/8801967776777`}
+                                href={`https://wa.me/880196777677`}
                                 className="mx-[10px]"
                                 target="_blank"
                                 rel="noopener noreferrer"

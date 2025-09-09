@@ -6,7 +6,6 @@ import HotelCTA from '@/app/components/hotel/Hotel/HotelCTA';
 import getAllProperty from '@/services/packages/getAllProperty';
 import TourPackageCard from '@/app/components/tourPackages/tourpackages/PackageCard';
 
-// Helper function to calculate discounted price
 function calculateDiscountedPrice(originalPrice, discount) {
   return Math.round(originalPrice * (1 - discount / 100));
 }
@@ -33,7 +32,6 @@ export default async function HotelHome() {
     <div className="min-h-screen">
       <HeroSection />
 
-      {/* <DestinationSlider /> */}
       <main className="container mx-auto ">
         <section className="mt-12 ">
           <h2 className="text-xl sm:text-2xl md:text-2xl font-bold text-center mb-2 text-blue-950">

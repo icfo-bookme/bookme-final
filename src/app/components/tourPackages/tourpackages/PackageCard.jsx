@@ -7,7 +7,6 @@ import { IoLocationOutline } from "react-icons/io5";
 import { PiUsersThree } from "react-icons/pi";
 import { GoCommentDiscussion } from "react-icons/go";
 
-// Helper: Calculate discounted price
 function calculateDiscountedPrice(originalPrice, discount) {
     return Math.round(originalPrice * (1 - discount / 100));
 }

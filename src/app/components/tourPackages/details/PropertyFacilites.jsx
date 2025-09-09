@@ -33,7 +33,6 @@ export default function PropertyFacilities({ data }) {
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
-  // Detect visible section on scroll
   useEffect(() => {
     const handleScroll = () => {
       const sections = Object.entries(sectionRefs.current);
@@ -53,7 +52,6 @@ export default function PropertyFacilities({ data }) {
         window.history.replaceState(null, null, `#${currentSection}`);
       }
 
-      // If at very top, force first category
       if (window.scrollY < 50 && sections.length > 0) {
         const firstId = sections[0][0];
         if (firstId !== activeCategory) {
@@ -68,7 +66,6 @@ export default function PropertyFacilities({ data }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [activeCategory]);
 
-  // Horizontal nav scroll buttons for mobile
   useEffect(() => {
     const checkScrollButtons = () => {
       if (navRef.current && isMobile) {
@@ -102,10 +99,8 @@ export default function PropertyFacilities({ data }) {
     return <div className="p-5 text-gray-500">No property facilities available</div>;
   }
 
-  // Categories order: itineraries second if exists and not empty
   const categories = data.facilities ? [...Object.keys(data.facilities)] : [];
-  
-  // Only add itineraries if it exists and has content
+
   const hasItineraries = data.itineraries && Array.isArray(data.itineraries) && data.itineraries.length > 0;
   
   if (hasItineraries) {

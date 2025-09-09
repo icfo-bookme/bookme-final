@@ -19,7 +19,6 @@ const ListingSearchBar = ({
     const searchRef = useRef(null);
     const inputRef = useRef(null);
 
-    // Initialize destinations and handle URL params
     useEffect(() => {
         if (data?.length > 0) {
             setFilteredDestinations(data);
@@ -42,7 +41,6 @@ const ListingSearchBar = ({
         }
     }, [data, params]);
 
-    // Close suggestions when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (searchRef.current && !searchRef.current.contains(event.target)) {

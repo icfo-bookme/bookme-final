@@ -10,7 +10,6 @@ export default function Itineraries({ itineraries }) {
             <div className="p-5 text-gray-500">No itineraries available</div>
         );
     }
-
     const days = Object.keys(itineraries);
     const currentActivities = itineraries[days[activeTab]];
 

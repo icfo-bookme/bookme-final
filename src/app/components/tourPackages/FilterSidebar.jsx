@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { FiFilter } from 'react-icons/fi';
 
-// Price ranges
 const PRICE_RANGES = [
   { label: "Under BDT 10,000", min: 0, max: 10000 },
   { label: "BDT 10,000 - 20,000", min: 10000, max: 20000 },
@@ -14,7 +13,6 @@ const PRICE_RANGES = [
 const FilterSidebar = ({ tours, filters, setFilters }) => {
   const [showModal, setShowModal] = useState(false);
 
-  // Extract unique durations from tours
   const durations = [...new Set(tours.map(tour => {
     const durationSummary = tour.summaries?.find(s => s.icon_name === 'FaRegClock');
     return durationSummary ? durationSummary.value : null;
@@ -29,7 +27,6 @@ const FilterSidebar = ({ tours, filters, setFilters }) => {
     }));
   };
 
-  // Sidebar filter form
   const sidebarContent = (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 w-full max-w-sm">
       <h3 className="font-bold text-lg mb-2 text-blue-900">Filters</h3>
@@ -81,7 +78,6 @@ const FilterSidebar = ({ tours, filters, setFilters }) => {
   );
 
   const handleApplyFilters = () => {
-    // Here you could add any apply logic if needed
     setShowModal(false);
   };
 

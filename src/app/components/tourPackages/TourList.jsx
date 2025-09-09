@@ -9,7 +9,7 @@ const TourList = ({ tours }) => {
     priceRanges: [],
     durations: []
   });
-  const [sortOption, setSortOption] = useState(''); // 'price-low-high' | 'price-high-low' | ''
+  const [sortOption, setSortOption] = useState(''); 
 
   const priceRanges = [
     { label: "Under BDT 10,000", min: 0, max: 10000 },
@@ -18,10 +18,8 @@ const TourList = ({ tours }) => {
     { label: "Over BDT 50,000", min: 50000, max: Infinity }
   ];
 
-  // Filtering and sorting
   const filteredTours = useMemo(() => {
     let result = tours.filter(tour => {
-      // Price range filter
       if (filters.priceRanges.length > 0) {
         const priceRangeMatch = filters.priceRanges.some(rangeLabel => {
           const range = priceRanges.find(r => r.label === rangeLabel);
@@ -30,7 +28,6 @@ const TourList = ({ tours }) => {
         if (!priceRangeMatch) return false;
       }
 
-      // Duration filter
       if (filters.durations.length > 0) {
         const durationSummary = tour.summaries.find(s => s.icon_name === 'FaRegClock');
         const duration = durationSummary ? durationSummary.value : null;
@@ -46,7 +43,6 @@ const TourList = ({ tours }) => {
     } else if (sortOption === 'price-high-low') {
       result = [...result].sort((a, b) => b.price - a.price);
     }
-    // If Recommended (""), show default filtered order (original order preserved)
 
     return result;
   }, [tours, filters, sortOption]);
