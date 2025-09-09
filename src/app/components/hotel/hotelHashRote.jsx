@@ -32,27 +32,8 @@ export default function HotelHashRoute({ hotelId, initialHotelDetails, checkin, 
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
     checkMobile();
     window.addEventListener('resize', checkMobile);
-
-    // Fetch hotel details if not provided
-    if (!initialHotelDetails && hotelId) {
-      const fetchHotelDetails = async () => {
-        try {
-          setIsLoading(true);
-          const response = await fetch(`/api/hotels/${hotelId}`);
-          const data = await response.json();
-          setHotelDetails(data);
-        } catch (error) {
-          console.error('Error fetching hotel details:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchHotelDetails();
-    }
-
     return () => {
       window.removeEventListener('resize', checkMobile);
       if (observerRef.current) observerRef.current.disconnect();

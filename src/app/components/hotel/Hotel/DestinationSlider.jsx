@@ -1,4 +1,4 @@
-// app/destination-slider/page.jsx (Server Component)
+
 
 import DestinationSliderClient from "./DestinationSliderClient";
 
@@ -8,7 +8,7 @@ async function getDestinationData() {
     if (!response.ok) throw new Error('Failed to fetch destinations');
     
     const data = await response.json();
-    return data.slice(0, 21); // Take the first 21 items
+    return data.slice(0, 21); 
   } catch (error) {
     console.error('Error fetching destination data:', error);
     return [];

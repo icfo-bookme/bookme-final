@@ -1,6 +1,5 @@
 
 import HotelHashRoute from "@/app/components/hotel/hotelHashRote";
-import HotelCarousel from "@/app/components/hotel/HotelSlider";
 import getHotelDetails from "@/services/hotel/gethoteldetails";
 
 export default async function HotelDetailsPage({ params, searchParams }) {

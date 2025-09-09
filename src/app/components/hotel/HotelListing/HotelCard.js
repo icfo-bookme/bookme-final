@@ -23,10 +23,10 @@ const HotelCard = ({
     str
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '-')        
-      .replace(/[^\w\-]+/g, '')    
-      .replace(/\-\-+/g, '-');     
- 
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-');
+
   return (
     <Link
       href={`/hotel/list/details/${slugify(hotel.name)}/${hotel.id}?checkin=${checkin}&checkout=${checkout}&rooms=${rooms}&adult=${adult}`}

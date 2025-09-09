@@ -29,7 +29,6 @@ const MobileSearchForm = ({
   const isSelectingRef = useRef(false);
   const [inputClicked, setInputClicked] = useState(false);
 
-  // Handle input focus - always show suggestions
   const handleInputFocus = (e) => {
     setInputClicked(true);
     if (handleSearchFocus) {
@@ -38,21 +37,18 @@ const MobileSearchForm = ({
     setShowSuggestions(true);
   };
 
-  // Handle suggestion selection
   const handleSuggestionSelect = (destination, e) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
-    
-    // Set flag to prevent immediate closure
+
     isSelectingRef.current = true;
     
     if (selectDestination) {
       selectDestination(destination);
     }
 
-    // Update local state to ensure consistency
     if (destination.type === 'hotel') {
       if (setSelectedHotelId) setSelectedHotelId(destination.id);
       if (setSelectedLocationId) setSelectedLocationId(destination.destinationId || "");

@@ -1,4 +1,4 @@
-// app/destination-slider/DestinationSliderClient.jsx (Client Component)
+
 'use client';
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -21,7 +21,7 @@ export default function DestinationSliderClient({ destinations }) {
     const touchTimeoutRef = useRef(null);
    
     useEffect(() => {
-        setIsLoading(false); // Data is already loaded from server
+        setIsLoading(false); 
         
         const handleResize = () => {
             setIsMobile(window.innerWidth < 640);

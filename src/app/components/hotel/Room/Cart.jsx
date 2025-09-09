@@ -6,7 +6,6 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePickerModal from '@/utils/DatePickerModal';
 
-
 const Cart = ({ 
   cart, 
   isLargeScreen, 
@@ -24,7 +23,6 @@ const Cart = ({
 
     const datePickerRef = useRef(null);
 
-    // Close date picker if click outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -77,7 +75,6 @@ const Cart = ({
         setShowDatePickerModal(false);
     };
 
-    // Format date for display
     const formatDate = (date) => {
         return date.toLocaleDateString('en-US', { 
             weekday: 'short', 

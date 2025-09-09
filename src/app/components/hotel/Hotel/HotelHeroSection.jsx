@@ -1,6 +1,5 @@
 import HotelSearch from "../../SearchBar/Hotels/HotelSearch";
 
-
 const HotelHeroSection = () => {
   return (
     <section className="relative">

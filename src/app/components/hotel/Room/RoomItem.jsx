@@ -76,10 +76,10 @@ const RoomItem = ({ room, index, onViewDetails, onAddToCart }) => {
                         <div className="grid grid-cols-2 gap-4 mt-4">
                             <div>
                                 <button
-                                        onClick={() => setOpenModal(true)}
-                                    >
-                                        <i className="fa fa-eye text-blue-500" aria-hidden="true"></i> <span className="font-bold underline">Refund Policy</span>
-                                    </button>
+                                    onClick={() => setOpenModal(true)}
+                                >
+                                    <i className="fa fa-eye text-blue-500" aria-hidden="true"></i> <span className="font-bold underline">Refund Policy</span>
+                                </button>
 
                                 <p className="text-gray-600 mt-2 text-sm flex items-center gap-2">
                                     <i className="fa-solid fa-utensils"></i>

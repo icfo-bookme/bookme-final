@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 const RoomDetailsModal = ({ room, onClose }) => {
-    // Handle click outside the modal
+    
     const handleOutsideClick = (e) => {
         if (e.target === e.currentTarget) {
             onClose();

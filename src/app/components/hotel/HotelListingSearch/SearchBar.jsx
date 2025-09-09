@@ -31,7 +31,7 @@ const SearchBar = ({ initialValues }) => {
   const [selectedHotelId, setSelectedHotelId] = useState(initialValues?.hotelID || "");
   const [selectedDestination, setSelectedDestination] = useState(null);
 
-  // Search input and suggestions
+ 
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -39,7 +39,6 @@ const SearchBar = ({ initialValues }) => {
 
   const [error, setError] = useState(null);
 
-  // Date handling
   const today = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(today.getDate() + 1);
@@ -52,11 +51,9 @@ const SearchBar = ({ initialValues }) => {
   );
   const [dateRange, setDateRange] = useState([checkinDate, checkoutDate]);
 
-  // Guest summary text
   const guestText = `${rooms} Room${rooms > 1 ? "s" : ""}, ${adults} Adult${adults > 1 ? "s" : ""}${children > 0 ? `, ${children} Child${children > 1 ? "ren" : ""}` : ""
     }`;
 
-  // Get destination display name by id
   const getDestinationNameById = (locationID) => {
     const destination = destinations.find((d) => d.id === locationID);
     return destination ? `${destination.name}, ${destination.country}` : "Edit Search Information";

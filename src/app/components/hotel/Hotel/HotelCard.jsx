@@ -30,7 +30,7 @@ const findSimilarHotels = (searchTerm, hotels = []) => {
 const HotelCard = ({ hotelData = [] }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(12); // initially 12 cards
+  const [visibleCount, setVisibleCount] = useState(12); 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
 
   const loaderRef = useRef(null);
@@ -74,7 +74,7 @@ const HotelCard = ({ hotelData = [] }) => {
       .replace(/[^\w\u0980-\u09FF\-]+/g, "")
       .replace(/\-\-+/g, "-");
 
-  // 🔥 Infinite scroll with IntersectionObserver
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {

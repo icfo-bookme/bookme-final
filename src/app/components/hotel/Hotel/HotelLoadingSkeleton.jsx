@@ -1,10 +1,9 @@
 const HotelLoadingSkeleton = () => {
   return (
     <div className="min-h-screen font-sans">
-      {/* Background skeleton */}
+   
       <div className="h-[40vh] sm:h-[50vh] md:h-[60vh] bg-gray-300 animate-pulse" />
 
-      {/* Search Form Skeleton */}
       <div className="bg-white py-6 sm:py-8">
         <main className="container mx-auto px-4 sm:px-6 flex flex-col items-center">
           <div className="w-full max-w-3xl space-y-3 sm:space-y-4">
@@ -16,7 +15,6 @@ const HotelLoadingSkeleton = () => {
         </main>
       </div>
 
-      {/* Grid Skeleton */}
       <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6 sm:mb-8">
           Best Hotels for Your Next Trip

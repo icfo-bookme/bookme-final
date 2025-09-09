@@ -23,12 +23,11 @@ const MobileSearchHeader = ({
   const [displayText, setDisplayText] = useState("Search destinations");
   const [isTruncated, setIsTruncated] = useState(false);
 
-  // Update display text whenever dependencies change
   useEffect(() => {
     const updateDisplayText = () => {
       if (selectedHotelId) {
         const selectedHotel = hotels?.find(h => String(h.id) === String(selectedHotelId));
-        setDisplayText(selectedHotel 
+        setDisplayText(selectedHotel
           ? `${selectedHotel.name}, ${selectedHotel.city}`
           : "Select Hotel");
       } else if (selectedLocationId) {
@@ -44,7 +43,7 @@ const MobileSearchHeader = ({
   }, [selectedLocationId, selectedHotelId, searchQuery, hotels, getDestinationNameById]);
 
   return (
-    <div 
+    <div
       className="md:hidden p-4 bg-white rounded-xl shadow-sm cursor-pointer mb-4 border border-gray-200"
       onClick={() => setShowMobileSearch(true)}
       aria-label="Open search panel"
@@ -52,9 +51,9 @@ const MobileSearchHeader = ({
       <div className="flex justify-between items-center mb-3 gap-2">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <LuMapPin className="text-blue-600 min-w-[20px] flex-shrink-0" />
-          <div 
+          <div
             className={`font-bold text-blue-950 truncate ${isTruncated ? 'relative' : ''}`}
-            title={displayText} // Show full text on hover
+            title={displayText} 
           >
             {displayText}
           </div>

@@ -38,9 +38,6 @@ const HotelListContent = () => {
   const searchRef = useRef(null);
   const mobileFiltersRef = useRef(null);
 
-  // Data fetching and effect hooks...
-
-  // Filter and sort logic...
 
   if (loading) {
     return <LoadingSpinner />;

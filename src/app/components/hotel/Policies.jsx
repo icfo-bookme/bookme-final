@@ -2,7 +2,7 @@
 import React from 'react';
 
 export default function HotelPolicies({ Policies }) {
-  // Note the prop name should match what you're passing (polices or policies)
+
   if (!Policies || Policies.length === 0) {
     return <p className="text-gray-500">No policy information available</p>;
   }

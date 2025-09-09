@@ -26,13 +26,12 @@ const RoomCarousel = ({ images = [] }) => {
   const swiperRef = useRef(null);
   const fullscreenSwiperRef = useRef(null);
 
-  // Responsive layout handler
+ 
   useEffect(() => {
     const handleResize = () => {
       const isMobile = window.innerWidth < 768;
       const isTablet = window.innerWidth < 1024;
 
-      // Set heights
       const newCarouselHeight = isMobile ? 180 : 320;
       const newThumbsHeight = isMobile ? 60 : 90;
       const newThumbsPerView = isMobile ? 3 : isTablet ? 4 : 3;
@@ -41,7 +40,6 @@ const RoomCarousel = ({ images = [] }) => {
       setThumbsHeight(newThumbsHeight);
       setThumbsPerView(newThumbsPerView);
 
-      // Layout styles
       setContainerStyle({
         width: "100%",
         maxWidth: "100%"
@@ -53,7 +51,6 @@ const RoomCarousel = ({ images = [] }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Initialize autoplay
   useEffect(() => {
     const timer = setTimeout(() => {
       if (swiperRef.current) {
