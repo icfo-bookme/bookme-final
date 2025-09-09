@@ -1,6 +1,5 @@
 import PrimaryButton from "@/utils/PrimaryButton"
 import Image from "next/image"
-import Link from "next/link"
 import { FaMapMarkerAlt, FaPlane, FaPlaneDeparture } from "react-icons/fa"
 import { RiWhatsappFill } from "react-icons/ri"
 
@@ -11,22 +10,21 @@ export const Card = ({ flightRoutes }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                 {flightRoutes?.map(route => (
                     <div key={route.id} className="bg-white hover:border hover:border-blue-950 rounded-2xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl border border-blue-100">
-                        <div className="p-6">
-                            {/* Main route information with cities on sides */}
+                        <div className="px-3 py-6">
+                            
                             <div className="flex flex-col items-center justify-between">
                                 <div className="flex justify-between w-full">
-                                    {/* Origin city */}
+                                   
                                     <div className="text-left w-2/5">
-                                        <h3 className="text-lg font-bold text-slate-800 truncate">{route.origin_city}</h3>
+                                        <h3 className="text-base font-bold text-slate-800 truncate">{route.origin_city}</h3>
                                         <div className="flex items-center text-slate-500 text-xs mt-1">
                                             <FaMapMarkerAlt size={10} className="mr-1 flex-shrink-0" />
                                             <span className="truncate">{route.origin_airport_name}</span>
                                         </div>
                                     </div>
 
-                                    {/* Destination city */}
                                     <div className="text-right w-2/5">
-                                        <h3 className="text-lg font-bold text-slate-800 truncate">{route.destination_city}</h3>
+                                        <h3 className="text-base font-bold text-slate-800 truncate">{route.destination_city}</h3>
                                         <div className="flex items-center justify-end text-slate-500 text-xs mt-1">
                                             <FaMapMarkerAlt size={10} className="mr-1 flex-shrink-0" />
                                             <span className="truncate">{route.destination_airport_name}</span>
@@ -34,7 +32,7 @@ export const Card = ({ flightRoutes }) => {
                                     </div>
                                 </div>
 
-                                {/* Flight path visualization */}
+                                
                                 <div className="relative -top-[52px] right-2 mx-auto w-[50%] flex items-center justify-center">
                                     <span className="font-semibold -mt-5 text-blue-700 text-xs">{route.flight_duration}</span>
                                     <div className="h-0.5 bg-blue-200 w-full mx-auto absolute top-1/2 transform -translate-y-1/2"></div>
@@ -48,7 +46,7 @@ export const Card = ({ flightRoutes }) => {
                                 </div>
                             </div>
 
-                           {/* Additional details and pricing */}
+                           
                             <div className="flex flex-col sm:flex-row justify-between items-center pt-1 border-t border-slate-100 mt-0 ">
                                 <div className="flex items-center mb-4 sm:mb-0 w-full sm:w-auto justify-center sm:justify-start">
                                     {route.airline_icon_url ? (
@@ -93,14 +91,14 @@ export const Card = ({ flightRoutes }) => {
 
                                 <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-center sm:justify-end mt-4 sm:mt-0">
                                     <a
-                                        href="https://wa.me/8801967776777"
+                                        href="https://wa.me/880196777677"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="w-full sm:w-auto"
                                     >
                                         <PrimaryButton className="flex items-center justify-center whitespace-nowrap text-sm py-2.5 px-5 shadow-md hover:shadow-lg w-full sm:w-auto">
                                             Book Now
-                                            <RiWhatsappFill size={20} className="ml-2 text-green-500" />
+                                            <RiWhatsappFill size={20} className="ml-2 text-green-200 " />
                                         </PrimaryButton>
                                     </a>
                                 </div>

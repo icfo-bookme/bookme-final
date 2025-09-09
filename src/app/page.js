@@ -1,6 +1,6 @@
+// checked
 import { Roboto } from "next/font/google";
 import { Suspense } from "react";
-
 import Banner from "./components/Home/Banner";
 import Tangour from "./components/Home/Tangour/Tangour";
 import Sundarban from "./components/Home/sundarban/sundarban";
@@ -8,7 +8,6 @@ import SaintMartin from "./components/Home/Saintmartin/SaintMartin";
 import PromotionsPage from "./components/Home/PromotionsPage";
 import getServicesData from "@/services/homepage/getServicesData";
 import HpmepageBlog from "./components/pre-footer-content/Homepage";
-
 import HotelMain from "./components/Home/Hotel/Main";
 import TravelBookingTabs from "./components/SearchBar/SearchBar";
 import VisaMain from "./components/Home/Visa/Main";

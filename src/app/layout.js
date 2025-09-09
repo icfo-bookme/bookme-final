@@ -1,3 +1,4 @@
+// checked
 import Footer from "./components/shared/Footer/Footer";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -10,10 +11,8 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
 });
-// This is the main layout of the website with all
+
 export default function DashboardLayout({ children }) {
-
-
   return (
     <html lang="en" data-theme="white">
       <head>
@@ -33,7 +32,6 @@ export default function DashboardLayout({ children }) {
         <PaginationProvider>
           <SearchProvider>
             {" "}
-            {/* Wrap children inside provider */}
             <div>
               <div className="bg-white">
                 <main>

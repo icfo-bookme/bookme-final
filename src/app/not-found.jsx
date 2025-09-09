@@ -1,4 +1,4 @@
-// app/not-found.jsx
+// checked
 'use client';
 
 import Link from 'next/link';

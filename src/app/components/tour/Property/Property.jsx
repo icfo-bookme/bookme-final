@@ -6,49 +6,36 @@ import { useSearch } from "@/SearchContext";
 import { usePagination } from "@/services/tour/usePagination";
 import PropertyFilters from "./PropertyFilters";
 import PropertyCard from "./PropertyCard";
-
 import PropertyNoResults from "./PropertyNoResults";
 import PropertyPagination from "./PropertyPagination";
 import TanguarHaorHouseboat from "../../pre-footer-content/Tangua";
 import LoadingSpinner from "@/utils/LoadingSpinner";
 import Banner from "../Banner/Banner";
 
-export default function PropertyList({ id }) {
+export default function PropertyList({ id, initialData }) {
+  console.log("Initial data:", initialData);
   const { searchTerm, setSearchTerm } = useSearch();
   const { currentPage, handlePageChange, setCurrentPage } = usePagination();
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(initialData || []);
   const [popularData, setPopularData] = useState([]);
   const [price, setPrice] = useState(10000);
   const [sortOption, setSortOption] = useState("1");
-  const [loading, setLoading] = useState(true);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [loading, setLoading] = useState(!initialData);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(!!initialData);
   const [propertyNames, setPropertyNames] = useState([]);
 
   const itemsPerPage = 10;
 
-  // Fetch property data
+ 
+
+  // Extract property names from initial data if available
   useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const locationId = id;
-        const result = await propertySummary(locationId);
-        setData(result);
-        
-        const names = result.map(property => property.property_name);
-        setPropertyNames(names);
-      } catch (error) {
-        console.error("Error fetching property data:", error);
-      } finally {
-        setLoading(false);
-        setInitialLoadComplete(true);
-      }
+    if (initialData && initialData.length > 0) {
+      const names = initialData.map(property => property.property_name);
+      setPropertyNames(names);
     }
-    fetchData();
-  }, [id]);
+  }, [initialData]);
 
-
-  
   // Fetch popular property data when sort option changes to "Most Popular"
   useEffect(() => {
     async function fetchPopularData() {
@@ -160,8 +147,8 @@ export default function PropertyList({ id }) {
         <Banner id={id} />
         
         {/* Filters Overlay - LG devices only */}
-        <div className="hidden w-[80%] mx-auto  lg:block absolute bottom-0 left-0 right-0 transform translate-y-1/2 z-10">
-          <div className="container mx-auto px-4 ">
+        <div className="hidden w-[80%] mx-auto lg:block absolute bottom-0 left-0 right-0 transform translate-y-1/2 z-10">
+          <div className="container mx-auto px-4">
             <PropertyFilters
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
@@ -177,7 +164,7 @@ export default function PropertyList({ id }) {
       </div>
 
       {/* Main Content */}
-      <div className="container bg-white md:w-[85%] mx-auto px-4 pt-16 lg:pt-24"> {/* Added padding to account for overlap */}
+      <div className="container bg-white md:w-[85%] mx-auto px-4 pt-16 lg:pt-24">
         {/* Mobile Filters (shown only on smaller screens) */}
         <div className="lg:hidden mb-6">
           <PropertyFilters
@@ -226,5 +213,4 @@ export default function PropertyList({ id }) {
       </div>
     </div>
   );
-
 }

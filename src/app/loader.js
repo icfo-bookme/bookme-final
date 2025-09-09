@@ -1,7 +1,5 @@
+// checked
 import HotelLoadingSkeleton from "./components/hotel/Hotel/HotelLoadingSkeleton";
-
-
-
 
 export default function Loading() {
   return (

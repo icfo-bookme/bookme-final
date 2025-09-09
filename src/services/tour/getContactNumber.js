@@ -3,11 +3,11 @@ const getContactNumber = async () => {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/contact-attributes `,
       {
-        cache: "no-store", // Ensure no caching
+        cache: "no-store", 
       }
     );
     const data = await res.json();
-    console.log(data);
+  
     return data;
   } catch (error) {
     return [];

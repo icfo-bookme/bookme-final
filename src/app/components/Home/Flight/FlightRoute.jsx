@@ -1,7 +1,5 @@
+// checked
 import getFlightRoutes from "@/services/Flight/getFlightRoute";
-import PrimaryButton from "@/utils/PrimaryButton";
-import Image from "next/image";
-import { FaPlane, FaClock, FaMapMarkerAlt, FaTag, FaCalendarAlt, FaArrowRight } from 'react-icons/fa';
 import { Tab } from "../../Flight/Routes/Tab";
 
 export default async function FlightRoute() {
@@ -13,12 +11,12 @@ export default async function FlightRoute() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-7">
           <div className="w-full text-center mb-5">
-        <h2 className="text-xl md:text-2xl font-bold text-[#00026E] mb-2">
-           Top Flight Deals
-        </h2>
-        <div className="w-20 h-1 bg-[#0678B4] mx-auto"></div>
-      </div>
-         
+            <h2 className="text-xl md:text-2xl font-bold text-[#00026E] mb-2">
+              Top Flight Deals
+            </h2>
+            <div className="w-20 h-1 bg-[#0678B4] mx-auto"></div>
+          </div>
+
         </div>
 
         <Tab flightRoutes={{ domestic: flightdomesticRoutes, international: flightinternationalRoutes }} />

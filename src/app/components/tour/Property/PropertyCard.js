@@ -21,7 +21,7 @@ const propertySlug = containsBangla(propertyName)
   ? slugify(propertyName)
   : slugify(propertyName);
 
-console.log(`y/${propertySlug}/402`);
+
 
 
 
