@@ -95,9 +95,9 @@ const slugify = (str) =>
   str
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')                      // Replace spaces with dashes
-    .replace(/[^\w\u0980-\u09FF\-]+/g, '')     // Allow Bangla + word chars + hyphen
-    .replace(/\-\-+/g, '-');                   // Replace multiple dashes with one
+    .replace(/\s+/g, '-')                      
+    .replace(/[^\w\u0980-\u09FF\-]+/g, '')    
+    .replace(/\-\-+/g, '-');                   
 
     return (
         <div className={`${roboto.className} bg-blue-50 w-full mx-auto  max-w-7xl`}>

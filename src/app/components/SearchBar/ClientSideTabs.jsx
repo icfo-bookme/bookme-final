@@ -7,13 +7,11 @@ import {
   FaPassport,
   FaShip,
   FaHiking,
-  FaCar, // ✅ new icon for Car Rental
+  FaCar, 
 } from "react-icons/fa";
 
 const ClientSideTabs = ({ initialTab, components, icons }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
-
-  // Update URL query param when activeTab changes without reload
   useEffect(() => {
     const url = new URL(window.location);
     url.searchParams.set("tab", activeTab);
@@ -63,7 +61,7 @@ const ClientSideTabs = ({ initialTab, components, icons }) => {
           Tours
         </TabButton>
 
-        {/* ✅ Activities Tab */}
+      
         <TabButton
           active={activeTab === "activities"}
           icon={icons.activities}
@@ -72,7 +70,6 @@ const ClientSideTabs = ({ initialTab, components, icons }) => {
           Activities
         </TabButton>
 
-        {/* ✅ New Car Rental Tab */}
         <TabButton
           active={activeTab === "carRental"}
           icon={icons.carRental}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import SearchButton from "../../../utils/SearchButton";
+import SearchButton from "../../../../utils/SearchButton";
 import getCountries from "@/services/visa/getCountries";
 import { LuMapPin } from "react-icons/lu";
 
@@ -48,11 +48,11 @@ const VisaSearch = () => {
     return str
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '-')                      // Replace spaces with dashes
-      .replace(/[^\w\-]+/g, '')                  // Remove non-word chars except hyphen
-      .replace(/\-\-+/g, '-')                    // Replace multiple dashes with one
-      .replace(/^-+/, '')                        // Trim dashes from start
-      .replace(/-+$/, '');                       // Trim dashes from end
+      .replace(/\s+/g, '-')                      
+      .replace(/[^\w\-]+/g, '')                  
+      .replace(/\-\-+/g, '-')                    
+      .replace(/^-+/, '')                       
+      .replace(/-+$/, '');                     
   };
 
   const coachLeven = (a, b) => {
@@ -151,14 +151,12 @@ const VisaSearch = () => {
     if (!selectedLocationId) {
       alert("Please select a valid destination");
     } else {
-      // Find the selected destination
+      
       const selectedDestination = destinations.find(dest => dest.id === selectedLocationId);
       if (selectedDestination) {
-        // Create the URL with slugified country name and ID
         const countrySlug = slugify(selectedDestination.name);
         router.push(`/visa/${countrySlug}/${selectedLocationId}`);
       } else {
-        // Fallback to just the ID if destination not found
         router.push(`/visa/${selectedLocationId}`);
       }
     }

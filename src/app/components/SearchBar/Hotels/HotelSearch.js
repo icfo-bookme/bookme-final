@@ -1,4 +1,3 @@
-// app/components/HotelSearch.tsx
 import React from "react";
 import getDestination from "@/services/hotel/getDestination";
 import getAllHotels from "@/services/hotel/getAllHotels";

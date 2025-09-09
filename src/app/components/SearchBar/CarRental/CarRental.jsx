@@ -18,7 +18,7 @@ const CarRentalSearchBar = ({ locationsData }) => {
 
     const [isMobile, setIsMobile] = useState(false);
 
-    // ✅ Detect screen size and update isMobile
+  
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768); // Tailwind 'md' breakpoint
@@ -28,7 +28,7 @@ const CarRentalSearchBar = ({ locationsData }) => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // ✅ Set default pickup/dropoff once locationsData is loaded
+    
     useEffect(() => {
         if (
             locations.length >= 2 &&

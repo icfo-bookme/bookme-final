@@ -6,20 +6,18 @@ import {
   FaPassport,
   FaShip,
   FaHiking,
-  FaCar, // added for car rental
+  FaCar, 
 } from "react-icons/fa";
 
 import HotelSearch from "./Hotels/HotelSearch";
-// import FlightSearch from "./FlightSearch";
-import VisaSearch from "./VisaSearch";
+import VisaSearch from "./Visa/VisaSearch";
 import ShipsSearch from "./ShipsSearch";
 import TourSearch from "./Tour/TourSearch";
 import ClientSideTabs from "./ClientSideTabs";
 import ActivitiesSearch from "./ActivitiesSearchBar/ActivitiesSearch";
-import CarRentalSearch from "./CarRental/CarRentalSearch"; // import the car rental component
+import CarRentalSearch from "./CarRental/CarRentalSearch"; 
 
 const TravelBookingTabs = ({ searchParams }) => {
-  // Pass initial tab value to client component
   const initialTab = searchParams.tab || "hotel";
 
   return (

@@ -1,3 +1,4 @@
+// checked
 'use client';
 
 import { useEffect, useRef, useState } from "react";
@@ -72,9 +73,9 @@ export default function Hotel({ data = [] }) {
     str
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '-')        // Replace spaces with dashes
-      .replace(/[^\w\-]+/g, '')    // Remove non-word chars
-      .replace(/\-\-+/g, '-');     // Replace multiple dashes with one
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-');
 
   return (
     <div className={`${roboto.className} bg-blue-50 w-full mx-auto max-w-7xl`}>

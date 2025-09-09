@@ -15,7 +15,5 @@ export default function CarRentalSearch() {
     fetchData();
   }, []);
 
-  
-
   return <CarRentalSearchBar locationsData={data} />;
 }

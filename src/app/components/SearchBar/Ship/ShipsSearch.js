@@ -59,21 +59,18 @@ const ShipsSearch = () => {
       return;
     }
 
-    // Find the selected destination from the destinations array
     const selectedDestination = destinations.find(dest => dest.id === selectedLocationId);
 
     if (selectedDestination) {
-      // Create the slug from the destination name
       const destinationSlug = slugify(selectedDestination.name);
-      // Construct the URL with both slug and ID
+      
       router.push(`/tour/${destinationSlug}/${selectedLocationId}`);
     } else {
-      // Fallback to just the ID if destination not found (shouldn't happen normally)
+     
       router.push(`/tour/${selectedLocationId}`);
     }
   };
 
-  // Levenshtein Distance
   const levenshteinDistance = (a, b) => {
     const m = a.length;
     const n = b.length;
@@ -188,9 +185,9 @@ const ShipsSearch = () => {
     str
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '-')                      // Replace spaces with dashes
-      .replace(/[^\w\u0980-\u09FF\-]+/g, '')     // Allow Bangla + word chars + hyphen
-      .replace(/\-\-+/g, '-');                   // Replace multiple dashes with one
+      .replace(/\s+/g, '-')                      
+      .replace(/[^\w\u0980-\u09FF\-]+/g, '')    
+      .replace(/\-\-+/g, '-');                  
 
 
   if (error) {

@@ -10,26 +10,8 @@ import "swiper/css/navigation";
 import "swiper/css/free-mode";
 import { TailSpin } from "react-loader-spinner";
 import { Roboto } from "next/font/google";
-import LoadingSpinner from "@/utils/LoadingSpinner";
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400"] });
-
-const fetchWithTimeout = async (url, options = {}, timeout = 8000) => {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    return response;
-  } catch (error) {
-    clearTimeout(timeoutId);
-    throw error;
-  }
-};
 
 export default function PromotionsPage() {
   const [promotions, setPromotions] = useState([]);
@@ -54,32 +36,12 @@ export default function PromotionsPage() {
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    const maxRetries = 3;
-    let retryCount = 0;
-    const cacheKey = 'promotions-cache';
-    const cacheExpiry = 5 * 60 * 1000; // 5 minutes cache
-
     async function fetchPromotions() {
       try {
-        if (isMounted) setLoading(true);
-
-        // Check cache first
-        const cachedData = localStorage.getItem(cacheKey);
-        if (cachedData) {
-          const { data, timestamp } = JSON.parse(cachedData);
-          if (Date.now() - timestamp < cacheExpiry) {
-            if (isMounted) {
-              setPromotions(data);
-              setError(null);
-            }
-            return;
-          }
-        }
-
-        const response = await fetchWithTimeout(
+        setLoading(true);
+        const response = await fetch(
           'https://www.bookme.com.bd/admin/api/homepage/hot-package',
-          { cache: 'no-store' } // Bypass browser cache
+          { cache: 'no-store' }
         );
 
         if (!response.ok) {
@@ -87,37 +49,16 @@ export default function PromotionsPage() {
         }
 
         const { data } = await response.json();
-
-        if (isMounted) {
-          setPromotions(data);
-          setError(null);
-
-          // Update cache
-          localStorage.setItem(cacheKey, JSON.stringify({
-            data,
-            timestamp: Date.now()
-          }));
-        }
+        setPromotions(data);
+        setError(null);
       } catch (err) {
-        if (isMounted) {
-          if (retryCount < maxRetries) {
-            retryCount++;
-            await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
-            await fetchPromotions();
-          } else {
-            setError(err.message || 'Failed to fetch promotions. Please try again later.');
-          }
-        }
+        setError(err.message || 'Failed to fetch promotions. Please try again later.');
       } finally {
-        if (isMounted) setLoading(false);
+        setLoading(false);
       }
     }
 
     fetchPromotions();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   const stopAutoplay = () => {
@@ -148,11 +89,30 @@ export default function PromotionsPage() {
     }
   };
 
-  // Function to handle retry
+ 
   const handleRetry = () => {
     setError(null);
     setLoading(true);
     setPromotions([]);
+    
+    // Refetch promotions
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/homepage/hot-package`, { cache: 'no-store' })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(({ data }) => {
+        setPromotions(data);
+        setError(null);
+      })
+      .catch(err => {
+        setError(err.message || 'Failed to fetch promotions. Please try again later.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
@@ -166,7 +126,7 @@ export default function PromotionsPage() {
 
       {loading ? (
         <div className="flex justify-center items-center h-[300px]">
-          <LoadingSpinner height="60" width="60" color="#0678B4" ariaLabel="loading" />
+          <TailSpin height="60" width="60" color="#0678B4" ariaLabel="loading" />
         </div>
       ) : error ? (
         <div className="text-center py-10">

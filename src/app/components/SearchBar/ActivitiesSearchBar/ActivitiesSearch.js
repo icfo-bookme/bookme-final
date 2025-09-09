@@ -14,7 +14,5 @@ export default function ActivitiesSearch() {
     fetchData();
   }, []);
 
-  
-
   return <ActivitiesSearchBar data={data} />;
 }
