@@ -2,7 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FaMapMarkerAlt, FaCalendarAlt, FaClock, FaExchangeAlt } from "react-icons/fa";
+import {
+    FaMapMarkerAlt,
+    FaCalendarAlt,
+    FaClock,
+    FaExchangeAlt,
+    FaEdit,
+    FaTimes
+} from "react-icons/fa";
 import SearchButton from "@/utils/SearchButton";
 
 const CarRentalSearchBar = ({ locationsData, initialParams }) => {
@@ -18,17 +25,17 @@ const CarRentalSearchBar = ({ locationsData, initialParams }) => {
     });
 
     const [isMobile, setIsMobile] = useState(false);
+    const [showMobileModal, setShowMobileModal] = useState(false);
 
-    // Set initial values from URL params
+    // Detect mobile screen
     useEffect(() => {
         const updateScreenSize = () => {
             setIsMobile(window.innerWidth < 768);
         };
 
         updateScreenSize();
-        window.addEventListener('resize', updateScreenSize);
-
-        return () => window.removeEventListener('resize', updateScreenSize);
+        window.addEventListener("resize", updateScreenSize);
+        return () => window.removeEventListener("resize", updateScreenSize);
     }, []);
 
     // Set initial values from URL params
@@ -61,13 +68,13 @@ const CarRentalSearchBar = ({ locationsData, initialParams }) => {
         e.preventDefault();
 
         const pickupId = searchParamsState.pickupLocation.id;
-
         const params = new URLSearchParams();
         params.set("dropoff", searchParamsState.dropoffLocation.id);
         params.set("date", searchParamsState.pickupDate);
         params.set("time", searchParamsState.pickupTime);
 
         router.push(`/Car/list/${pickupId}?${params.toString()}`);
+        setShowMobileModal(false); // Close modal if open
     };
 
     const SearchableLocationField = ({ label, field }) => {
@@ -174,84 +181,117 @@ const CarRentalSearchBar = ({ locationsData, initialParams }) => {
         </div>
     );
 
-    return (
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md mb-6">
-            <form onSubmit={handleSearch} className="w-full">
-                <div className="flex flex-col md:flex-row items-end gap-4">
-                    {/* Pickup Location */}
-                    <div className="w-full md:w-1/4">
-                        <SearchableLocationField label="PICKUP LOCATION" field="pickupLocation" />
-                    </div>
+    const FormFields = () => (
+        <>
+            <div className="w-full md:w-1/4">
+                <SearchableLocationField label="PICKUP LOCATION" field="pickupLocation" />
+            </div>
 
-                    {/* Swap Button for Desktop */}
-                    {!isMobile && (
-                        <div className="h-12 flex items-center justify-center px-2 md:mt-6">
+            {!isMobile && (
+                <div className="h-12 flex items-center justify-center px-2 md:mt-6">
+                    <button
+                        type="button"
+                        onClick={swapLocations}
+                        className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-colors"
+                        aria-label="Swap pickup and dropoff locations"
+                    >
+                        <FaExchangeAlt className="h-5 w-5" />
+                    </button>
+                </div>
+            )}
+
+            <div className="w-full md:w-1/4">
+                <SearchableLocationField label="DROPOFF LOCATION" field="dropoffLocation" />
+            </div>
+
+            <div className="w-full md:w-2/5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <DateTimeSearchField
+                    label="PICKUP DATE"
+                    type="date"
+                    value={searchParamsState.pickupDate}
+                    onChange={(e) =>
+                        setSearchParamsState((prev) => ({
+                            ...prev,
+                            pickupDate: e.target.value,
+                        }))
+                    }
+                />
+                <DateTimeSearchField
+                    label="PICKUP TIME"
+                    type="time"
+                    value={searchParamsState.pickupTime}
+                    onChange={(e) =>
+                        setSearchParamsState((prev) => ({
+                            ...prev,
+                            pickupTime: e.target.value,
+                        }))
+                    }
+                />
+            </div>
+        </>
+    );
+
+    return (
+        <>
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-md mb-6">
+                <form onSubmit={handleSearch} className="w-full">
+                    {isMobile ? (
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex-1">
+                                <SearchableLocationField label="PICKUP LOCATION" field="pickupLocation" />
+                            </div>
                             <button
                                 type="button"
-                                onClick={swapLocations}
-                                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-colors"
-                                aria-label="Swap pickup and dropoff locations"
+                                onClick={() => setShowMobileModal(true)}
+                                className="text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center gap-1"
                             >
-                                <FaExchangeAlt className="h-5 w-5" />
+                                <FaEdit /> Edit
                             </button>
                         </div>
+                    ) : (
+                        <div className="flex flex-col md:flex-row items-end gap-4">
+                            {FormFields()}
+                            <div className="w-full md:w-1/6 mt-2 md:mt-0">
+                                <SearchButton type="submit" className="w-full h-12 px-4">
+                                    Modify Search
+                                </SearchButton>
+                            </div>
+                        </div>
                     )}
+                </form>
+            </div>
 
-                    {/* Dropoff Location */}
-                    <div className="w-full md:w-1/4">
-                        <SearchableLocationField label="DROPOFF LOCATION" field="dropoffLocation" />
-                    </div>
-
-                    {/* Date and Time Fields */}
-                    <div className="w-full md:w-2/5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <DateTimeSearchField
-                            label="PICKUP DATE"
-                            type="date"
-                            value={searchParamsState.pickupDate}
-                            onChange={(e) =>
-                                setSearchParamsState((prev) => ({
-                                    ...prev,
-                                    pickupDate: e.target.value,
-                                }))
-                            }
-                        />
-                        <DateTimeSearchField
-                            label="PICKUP TIME"
-                            type="time"
-                            value={searchParamsState.pickupTime}
-                            onChange={(e) =>
-                                setSearchParamsState((prev) => ({
-                                    ...prev,
-                                    pickupTime: e.target.value,
-                                }))
-                            }
-                        />
-                    </div>
-
-                    {/* Search Button */}
-                    <div className="w-full md:w-1/6 mt-2 md:mt-0">
-                        <SearchButton type="submit" className="w-full h-12 px-4">
-                          Modify  Search
-                        </SearchButton>
+            {/* Mobile Modal */}
+            {isMobile && showMobileModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center p-4">
+                    <div className="bg-white w-full max-w-lg rounded-lg p-6 relative">
+                        <button
+                            onClick={() => setShowMobileModal(false)}
+                            className="absolute top-3 right-3 text-blue-800 hover:text-red-500"
+                        >
+                            <FaTimes />
+                        </button>
+                        <form onSubmit={handleSearch} className="space-y-4">
+                            {FormFields()}
+                            <div>
+                                <SearchButton type="submit" className="w-full h-12">
+                                    Modify Search
+                                </SearchButton>
+                            </div>
+                            <div className="flex justify-center mt-2">
+                                <button
+                                    type="button"
+                                    onClick={swapLocations}
+                                    className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-2"
+                                >
+                                    <FaExchangeAlt /> Swap Locations
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-
-                {/* Swap Button for Mobile */}
-                {isMobile && (
-                    <div className="w-full flex justify-center mt-4">
-                        <button
-                            type="button"
-                            onClick={swapLocations}
-                            className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-colors"
-                            aria-label="Swap pickup and dropoff locations"
-                        >
-                            <FaExchangeAlt className="h-4 w-4" />
-                            <span className="text-sm">Swap Locations</span>
-                        </button>
-                    </div>
-                )}
-            </form>
-        </div>
+            )}
+        </>
     );
 };
 

@@ -10,6 +10,6 @@ export default async function ActivityListingSearch() {
   }
 
   return (
-    <ListingSearchBar label="ACTIVITIES/DESTINATIONS" query="/activities/list/"  data={data} />
+    <ListingSearchBar label="DESTINATIONS" query="/activities/list/"  data={data} />
   )
 }

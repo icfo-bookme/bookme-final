@@ -17,10 +17,10 @@ export default async function PackagesPage({ params }) {
   return (
     <div className="  md:px-4 md:py-8">
       <div className='md:container max-w-7xl md:w-[90%] mx-auto'>
-        <div className='pt-12 px-4 md:px-0'>
+        <div className='pt-16 px-4 md:px-0'>
           <ActivityListingSearch />
         </div>
-        <div className='bg-blue-100 mx-auto  rounded-md'>
+        <div className='bg-blue-100 mx-auto pt-1 rounded-md'>
           <ActivityList activities={data} />
         </div>
       </div>

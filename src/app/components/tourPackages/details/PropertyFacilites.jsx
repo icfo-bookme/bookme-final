@@ -102,9 +102,13 @@ export default function PropertyFacilities({ data }) {
     return <div className="p-5 text-gray-500">No property facilities available</div>;
   }
 
-  // Categories order: itineraries second if exists
+  // Categories order: itineraries second if exists and not empty
   const categories = data.facilities ? [...Object.keys(data.facilities)] : [];
-  if (data.itineraries) {
+  
+  // Only add itineraries if it exists and has content
+  const hasItineraries = data.itineraries && Array.isArray(data.itineraries) && data.itineraries.length > 0;
+  
+  if (hasItineraries) {
     const existingIndex = categories.indexOf("itineraries");
     if (existingIndex > -1) categories.splice(existingIndex, 1);
     if (categories.length > 0) categories.splice(1, 0, "itineraries");
@@ -167,7 +171,7 @@ export default function PropertyFacilities({ data }) {
       <div className="lg:grid grid-cols-12 gap-6">
         <div className="col-span-12 lg:col-span-9 space-y-8">
           {categories.map((category) => {
-            if (category === "itineraries" && data.itineraries) {
+            if (category === "itineraries" && hasItineraries) {
               return (
                 <section
                   key="itineraries"
@@ -201,7 +205,7 @@ export default function PropertyFacilities({ data }) {
                                   </div>
                                 )}
                                 <h3 className="text-lg font-bold text-blue-950">
-                                  {facility.name || category}
+                                  {facility.name || category.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                                 </h3>
                               </div>
                               <div

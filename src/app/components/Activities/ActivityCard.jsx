@@ -14,7 +14,7 @@ import { AiOutlineUser, AiOutlineClockCircle } from "react-icons/ai";
 import Image from 'next/image';
 import Link from 'next/link';
 
-// Centralized icon mapping - add new icons here as needed
+
 const iconMapping = {
   // Location icons
   IoLocationOutline: IoLocationOutline,
@@ -163,7 +163,7 @@ const ActivityCard = ({ activity }) => {
                 return (
                   <span
                     key={i}
-                    className="flex items-center text-xs text-gray-700 bg-gray-50 border border-gray-200 px-3 py-1 rounded-full hover:bg-blue-50 hover:border-blue-200 transition-colors"
+                    className="flex items-start text-xs text-gray-700 bg-gray-50 border border-gray-200 px-3 py-1 rounded-full hover:bg-blue-50 hover:border-blue-200 transition-colors"
                     title={summaryKey} // Show the key as tooltip
                   >
                     <div className="mr-2">
@@ -177,7 +177,7 @@ const ActivityCard = ({ activity }) => {
           </div>
 
           {/* Price and CTA - Updated layout with price on right */}
-          <div className="flex  md:flex-row md:items-center justify-between pt-1 border-t border-gray-100">
+          <div className="flex  md:flex-row items-start  justify-between pt-1 border-t border-gray-100">
             <button
               style={{
                 background: "linear-gradient(90deg, #313881, #0678B4)",

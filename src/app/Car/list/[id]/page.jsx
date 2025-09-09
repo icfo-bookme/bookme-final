@@ -1,8 +1,6 @@
-import ActivityList from '@/app/components/Activities/ActivityList';
+
 import CarRentalSearchBar from '@/app/components/car/CarRentalSearchBar';
 import VehicleList from '@/app/components/car/VehicleList';
-import PackageListingSearch from '@/app/components/tourPackages/ListingSearch/Search';
-
 import getCarBrand from '@/services/Car/getCarBrand';
 import getCarList from '@/services/Car/getCarList';
 import getCarModel from '@/services/Car/getCarModel';

@@ -35,7 +35,7 @@ export default function ActivitiesCarousel({ packages = [], property_id }) {
     pickupLocation: ""
   });
 
-  // Generate time slots from 8:00 AM to 4:00 PM with 30-minute intervals
+  
   const generateTimeSlots = () => {
     const times = [];
     for (let hour = 8; hour <= 16; hour++) {
@@ -96,12 +96,12 @@ export default function ActivitiesCarousel({ packages = [], property_id }) {
         console.error("Error fetching pickup destinations:", error);
         // Fallback locations on error
         setPickupLocations([
-          "Dhaka City Center",
-          "Airport Terminal",
-          "Gulshan Circle 1",
-          "Uttara Sector 7",
-          "Dhanmondi 27"
-        ]);
+            "Dhaka City Center",
+            "Airport Terminal",
+            "Gulshan Circle 1",
+            "Uttara Sector 7",
+            "Dhanmondi 27"
+          ]);
       } finally {
         setFetchingPickup(false);
       }
@@ -208,19 +208,6 @@ export default function ActivitiesCarousel({ packages = [], property_id }) {
     return "";
   };
 
-  const getSlidesPerView = () => {
-    if (packages.length <= 3) {
-      return packages.length;
-    }
-    return {
-      350: 1.4,
-      640: 1.5,
-      768: 2,
-      1024: 3,
-      1280: 3
-    };
-  };
-
   const handleAddToCart = (pkg) => {
     setSelectedPackage(pkg);
     setBookingDetails({
@@ -283,31 +270,27 @@ export default function ActivitiesCarousel({ packages = [], property_id }) {
             ref={swiperRef}
             modules={[Navigation, Pagination, Autoplay, FreeMode]}
             spaceBetween={16}
-            slidesPerView={getSlidesPerView()}
-            centeredSlides={packages.length <= 3 ? false : true}
-            loop={packages.length > 3}
-            initialSlide={packages.length > 3 ? 1 : 0}
+            slidesPerView={1}
+            centeredSlides={true}
+           
+            initialSlide={1}
             speed={isMobile ? 1000 : 1000}
-            autoplay={
-              packages.length > 3 ? {
-                delay: 5000,
-                disableOnInteraction: false,
-                pauseOnMouseEnter: true,
-              } : false
-            }
-            navigation={
-              packages.length > 3 ? {
-                nextEl: '.package-swiper-button-next',
-                prevEl: '.package-swiper-button-prev',
-              } : false
-            }
+            autoplay={{
+              delay: 5000,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
+            }}
+            navigation={{
+              nextEl: '.package-swiper-button-next',
+              prevEl: '.package-swiper-button-prev',
+            }}
             pagination={
               showPagination ? {
                 clickable: true,
               } : false
             }
             freeMode={{
-              enabled: isMobile && packages.length > 3,
+              enabled: isMobile,
               momentum: true,
               momentumRatio: 2,
               velocityRatio: 3.5,
@@ -319,51 +302,55 @@ export default function ActivitiesCarousel({ packages = [], property_id }) {
             onTouchEnd={handleTouchEnd}
             onSliderMove={handleTouchStart}
             onTransitionEnd={handleTouchEnd}
-            breakpoints={
-              packages.length > 3 ? {
-                350: {
-                  slidesPerView: 1.4,
-                  centeredSlides: true,
-                  speed: 300,
-                  freeMode: {
-                    enabled: true,
-                    momentum: true,
-                    momentumRatio: 5,
-                    velocityRatio: 5.5,
-                    sticky: false
-                  },
+            breakpoints={{
+              350: {
+                slidesPerView: 1.2,
+                centeredSlides: true,
+                spaceBetween: 10,
+                speed: 300,
+                freeMode: {
+                  enabled: true,
+                  momentum: true,
+                  momentumRatio: 5,
+                  velocityRatio: 5.5,
+                  sticky: false
                 },
-                640: {
-                  slidesPerView: 1.5,
-                  centeredSlides: true,
-                  freeMode: {
-                    enabled: true,
-                    momentum: true,
-                    momentumRatio: 2,
-                    velocityRatio: 3.5,
-                    sticky: false
-                  },
+              },
+              640: {
+                slidesPerView: 1.2,
+                centeredSlides: true,
+                spaceBetween: 10,
+                speed: 400,
+                freeMode: {
+                  enabled: true,
+                  momentum: true,
+                  momentumRatio: 2,
+                  velocityRatio: 3.5,
+                  sticky: false
                 },
-                768: {
-                  slidesPerView: 2,
-                  centeredSlides: false,
-                  speed: 500,
-                  freeMode: false,
-                },
-                1024: {
-                  slidesPerView: 3,
-                  slidesPerGroup: 1,
-                  speed: 700,
-                  freeMode: false,
-                },
-                1280: {
-                  slidesPerView: 3,
-                  slidesPerGroup: 1,
-                  speed: 800,
-                  freeMode: false,
-                }
-              } : undefined
-            }
+              },
+              768: {
+                slidesPerView: 2,
+                centeredSlides: false,
+                spaceBetween: 16,
+                speed: 500,
+                freeMode: false,
+              },
+              1024: {
+                slidesPerView: 3,
+                slidesPerGroup: 1,
+                spaceBetween: 16,
+                speed: 700,
+                freeMode: false,
+              },
+              1280: {
+                slidesPerView: 3,
+                slidesPerGroup: 1,
+                spaceBetween: 16,
+                speed: 800,
+                freeMode: false,
+              }
+            }}
             className="w-full md:w-[90%] lg:w-[89%] mx-auto"
           >
             {packages.map((pkg) => (
@@ -449,7 +436,7 @@ export default function ActivitiesCarousel({ packages = [], property_id }) {
                         {/* Add to Cart Button */}
                         <button
                           onClick={() => handleAddToCart(pkg)}
-                           style={{ background: "linear-gradient(90deg, #313881, #0678B4)" }}
+                          style={{ background: "linear-gradient(90deg, #313881, #0678B4)" }}
                           className="flex-1 text-sm px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 transition-colors"
                         >
                           Book Now

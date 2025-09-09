@@ -5,6 +5,7 @@ import PropertySlider from "./PropertySlider";
 import PropertySummary from "./PropertySummary";
 import RelatedActivities from "../../Activities/RelatedActivities";
 import Tab from "../../car/DetailsTab/tab";
+import CarPropertySummary from "../../car/CarPropertySummary";
 // import { RelatedActivities } from "../../Activities/RelatedActivities";
 
 export default async function PropertyDetails({ data }) {
@@ -84,7 +85,7 @@ const relatedPackages = await getRelatedActivities(data.destination_id, data.id)
                             <PropertySlider images={data.images} />
                         </div>
                         <div className="md:col-span-3">
-                            <PropertySummary data={data} />
+                            <CarPropertySummary data={data} />
                         </div>
                     </div>
 
