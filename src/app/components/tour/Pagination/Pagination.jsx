@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // For Next.js App Router
+import { useRouter } from "next/navigation"; 
 
 const Pagination = ({ currentPage, totalPages, handlePageChange }) => {
   const [visiblePages, setVisiblePages] = useState([]);
-  const router = useRouter(); // Now properly used inside a client component
+  const router = useRouter();
 
-  // Scroll to top whenever currentPage changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
@@ -30,11 +29,10 @@ const Pagination = ({ currentPage, totalPages, handlePageChange }) => {
     return () => window.removeEventListener("resize", calculateVisiblePages);
   }, [currentPage, totalPages]);
 
-  // Handle page reset when clicking the home logo
   useEffect(() => {
     const handleRouteChange = (url) => {
       if (url === "/") {
-        handlePageChange(1); // Reset to page 1 when navigating home
+        handlePageChange(1);
       }
     };
 

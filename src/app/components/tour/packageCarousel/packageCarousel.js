@@ -21,10 +21,8 @@ const PackageCarousel = ({
     return <div>No packages available</div>;
   }
 
-  // Calculate the maximum width based on the number of packages
   const maxWidthClass = propertyPackages.length === 1 ? 'max-w-md' : 'max-w-full';
 
-  // Determine slidesPerView based on number of packages
   const getSlidesPerView = (packageCount, breakpoint) => {
     if (packageCount === 1) return 1;
     if (breakpoint === 'xs') return Math.min(1.4, packageCount);
@@ -35,10 +33,9 @@ const PackageCarousel = ({
     return Math.min(3, packageCount);
   };
 
-  // Determine initial slide based on device size and package count
   const getInitialSlide = () => {
     if (propertyPackages.length <= 1) return 0;
-    return 1; // Start from second slide
+    return 1; 
   };
 
   return (
@@ -64,7 +61,7 @@ const PackageCarousel = ({
           640: {
             slidesPerView: getSlidesPerView(propertyPackages.length, 'sm'),
             spaceBetween: 16,
-            centeredSlides: true, // Enable centered slides for sm breakpoint
+            centeredSlides: true, 
           },
           768: {
             slidesPerView: getSlidesPerView(propertyPackages.length, 'md'),

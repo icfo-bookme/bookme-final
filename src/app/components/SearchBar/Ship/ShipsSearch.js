@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import SearchButton from "../../../utils/SearchButton";
+
 import getTourDestination from "@/services/getTourDestination";
 import { useRouter } from "next/navigation";
 import { LuMapPin } from "react-icons/lu";
+import SearchButton from "@/utils/SearchButton";
 
 const ShipsSearch = () => {
   const router = useRouter();

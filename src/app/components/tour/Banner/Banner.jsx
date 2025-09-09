@@ -53,11 +53,8 @@ export default function Banner({ id }) {
                 style={{ width: "100%", height: "100%" }}
               />
             </div>
-
-            {/* Content Overlay - now inside SwiperSlide */}
             <div className="absolute inset-0 bg-black bg-opacity-30 z-10 pointer-events-none"></div>
 
-            {/* Text Content - now using image-specific data */}
             <div className="absolute inset-0 flex items-center h-full px-4 md:px-8 z-20 pointer-events-none">
               <div className="font-heading text-white w-full lg:w-3/5 space-y-6 pl-8 lg:pl-16 text-left">
                 <h4 className="sm:text-3xl text-[20px] lg:text-4xl font-bold mb-4">

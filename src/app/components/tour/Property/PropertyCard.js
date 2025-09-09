@@ -9,9 +9,9 @@ export default function PropertyCard({ property, index, onCardClick }) {
  const slugify = (str) =>
   str
     .trim()
-    .replace(/\s+/g, '-')        // Replace spaces with dashes
-    .replace(/[^\w\u0980-\u09FF\-\(\)]+/g, '')  // Allow Bangla chars, (), -, and word chars
-    .replace(/\-\-+/g, '-')      // Replace multiple dashes with one;
+    .replace(/\s+/g, '-')        
+    .replace(/[^\w\u0980-\u09FF\-\(\)]+/g, '')  
+    .replace(/\-\-+/g, '-')     
 
 const containsBangla = (text) => /[\u0980-\u09FF]/.test(text);
 
@@ -20,10 +20,6 @@ const propertyName = property.property_name;
 const propertySlug = containsBangla(propertyName)
   ? slugify(propertyName)
   : slugify(propertyName);
-
-
-
-
 
   return (
     <div key={property.property_id} data-index={index} className="mb-5">

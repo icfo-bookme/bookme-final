@@ -11,7 +11,6 @@ const ContactForm = ({ propertyDetails, category, headline }) => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  //data submit
 
   const onSubmit = async (data) => {
     const emailData = {
@@ -21,7 +20,6 @@ const ContactForm = ({ propertyDetails, category, headline }) => {
       message: data.additionalInfo,
     };
 
-    //data to post on the email
     const apiData = {
       name: `${data.firstName} ${data.lastName}`,
       number: data.phoneNumber,
@@ -92,7 +90,7 @@ const ContactForm = ({ propertyDetails, category, headline }) => {
 
           </div>
 
-          {/* Phone Number */}
+
           <div>
             <label
               htmlFor="phoneNumber"
@@ -107,7 +105,7 @@ const ContactForm = ({ propertyDetails, category, headline }) => {
               {...register("phoneNumber", {
                 required: "Phone number is required",
                 pattern: {
-                  value: /^[0-9]{11,}$/, // At least 11 digits
+                  value: /^[0-9]{11,}$/, 
                   message: "Phone number must be at least 11 digits and contain only numbers",
                 },
               })}
@@ -118,7 +116,6 @@ const ContactForm = ({ propertyDetails, category, headline }) => {
             )}
           </div>
 
-          {/* Email Address */}
           <div>
             <label
               htmlFor="email"

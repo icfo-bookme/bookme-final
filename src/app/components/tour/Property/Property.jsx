@@ -26,9 +26,6 @@ export default function PropertyList({ id, initialData }) {
 
   const itemsPerPage = 10;
 
- 
-
-  // Extract property names from initial data if available
   useEffect(() => {
     if (initialData && initialData.length > 0) {
       const names = initialData.map(property => property.property_name);
@@ -36,7 +33,6 @@ export default function PropertyList({ id, initialData }) {
     }
   }, [initialData]);
 
-  // Fetch popular property data when sort option changes to "Most Popular"
   useEffect(() => {
     async function fetchPopularData() {
       if (sortOption === "4") {
@@ -146,7 +142,6 @@ export default function PropertyList({ id, initialData }) {
       <div className="w-full pt-[40px] md:pt-[50px] relative">
         <Banner id={id} />
         
-        {/* Filters Overlay - LG devices only */}
         <div className="hidden w-[80%] mx-auto lg:block absolute bottom-0 left-0 right-0 transform translate-y-1/2 z-10">
           <div className="container mx-auto px-4">
             <PropertyFilters
@@ -165,7 +160,7 @@ export default function PropertyList({ id, initialData }) {
 
       {/* Main Content */}
       <div className="container bg-white md:w-[85%] mx-auto px-4 pt-16 lg:pt-24">
-        {/* Mobile Filters (shown only on smaller screens) */}
+        {/* Mobile Filters  */}
         <div className="lg:hidden mb-6">
           <PropertyFilters
             searchTerm={searchTerm}

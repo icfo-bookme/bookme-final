@@ -11,11 +11,11 @@ import {
 
 import HotelSearch from "./Hotels/HotelSearch";
 import VisaSearch from "./Visa/VisaSearch";
-import ShipsSearch from "./ShipsSearch";
 import TourSearch from "./Tour/TourSearch";
 import ClientSideTabs from "./ClientSideTabs";
 import ActivitiesSearch from "./ActivitiesSearchBar/ActivitiesSearch";
 import CarRentalSearch from "./CarRental/CarRentalSearch"; 
+import ShipsSearch from "./Ship/ShipsSearch";
 
 const TravelBookingTabs = ({ searchParams }) => {
   const initialTab = searchParams.tab || "hotel";
