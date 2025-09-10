@@ -252,8 +252,8 @@ const CarRentalSearchBar = ({ locationsData, initialParams }) => {
                         <div className="flex flex-col md:flex-row items-end gap-4">
                             {FormFields()}
                             <div className="w-full md:w-1/6 mt-2 md:mt-0">
-                                <SearchButton type="submit" className="w-full h-12 px-4">
-                                    Modify Search
+                                <SearchButton type="submit" className="w-full h-12 ">
+                                    Modify 
                                 </SearchButton>
                             </div>
                         </div>

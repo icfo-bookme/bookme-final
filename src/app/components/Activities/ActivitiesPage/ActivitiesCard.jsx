@@ -198,7 +198,7 @@ const ActivitiesCard = ({ packageData = [] }) => {
                                         {pkg.summaries && pkg.summaries.length > 0 && (
                                             <>
                                                 <div className="grid grid-cols-4 gap-2 mb-3 text-xs sm:text-sm text-gray-600">
-                                                    {pkg.summaries.map((summary, index) => (
+                                                    {pkg.summaries.slice(0, 2).map((summary, index) => (
                                                         <div
                                                             key={index}
                                                             className="flex items-start col-span-2"
@@ -208,7 +208,17 @@ const ActivitiesCard = ({ packageData = [] }) => {
                                                         </div>
                                                     ))}
                                                 </div>
-                                                
+                                                 <div className="grid grid-cols-4 gap-2 mb-3 text-xs sm:text-sm text-gray-600">
+                                                    {pkg.summaries.slice(2, 3).map((summary, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="flex items-start col-span-4"
+                                                        >
+                                                            {renderSummaryIcon(summary.icon_name)}
+                                                            <span className="ml-1">{summary.value}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                                
                                             </>
                                         )}

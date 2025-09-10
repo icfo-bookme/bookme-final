@@ -32,7 +32,7 @@ export default async function page({ params, searchParams }) {
   return (
     <div className="md:px-4 py-8 bg-blue-100">
       <div className='md:container max-w-7xl md:w-[90%] mx-auto'>
-        <div className='pt-5  px-4 mb-6 md:mb-0 md:px-0'>
+        <div className='pt-5 md:w-[97%] mx-auto px-4 mb-6 md:mb-0 md:px-0'>
           <CarRentalSearchBar 
             locationsData={destination} 
             initialParams={initialSearchParams} 

@@ -7,11 +7,11 @@ export default function Faq() {
 				<p className="p-2 text-sm font-medium tracking-wider text-center uppercase text-blue-600">
 					How It Works
 				</p>
-				<h2 className="mb-2 text-2xl font-bold leading-none text-center sm:text-3xl">
+				<h2 className="mb-2 text-2xl font-bold text-blue-950 leading-none text-center sm:text-3xl">
 					Frequently Asked Questions
 				</h2>
                 <div className="w-20 mb-6 h-1 bg-[#0678B4] mx-auto"></div>
-				<div className="flex flex-col divide-y sm:px-8 lg:px-12 xl:px-32 dark:divide-gray-300">
+				<div className="flex flex-col divide-y sm:px-8 lg:px-12 xl:px-32 text-blue-950">
 					
 					<details>
 						<summary className="py-4 outline-none cursor-pointer focus:underline">
