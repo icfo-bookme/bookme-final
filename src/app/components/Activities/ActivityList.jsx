@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { FiFilter } from 'react-icons/fi';
 import ActivityCard from './ActivityCard';
 
@@ -11,6 +11,8 @@ const ActivityList = ({ activities }) => {
   });
   const [sortOption, setSortOption] = useState('');
   const [showModal, setShowModal] = useState(false);
+  
+  const modalRef = useRef(null);
 
   const priceRanges = [
     { label: "Under BDT 10,000", min: 0, max: 10000 },
@@ -25,6 +27,20 @@ const ActivityList = ({ activities }) => {
     { label: "1 to 5 hours", min: 60, max: 300 },
     { label: "5 hours to 1 day", min: 300, max: 1440 }
   ];
+
+  // Handle click outside of modal to close it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showModal && modalRef.current && !modalRef.current.contains(event.target)) {
+        setShowModal(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showModal]);
 
   const parseDurationToMinutes = (durationString) => {
     if (!durationString) return 0;
@@ -136,7 +152,7 @@ const ActivityList = ({ activities }) => {
   };
 
   const FilterSection = () => (
-    <div className="bg-white sticky top-16 p-4 rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-white h-full sticky top-16 p-4 rounded-lg shadow-sm border border-gray-200">
       <h3 className="font-semibold text-lg mb-4 text-blue-900">Filters</h3>
       
       {/* Price Filter */}
@@ -249,8 +265,11 @@ const ActivityList = ({ activities }) => {
 
       {/* Mobile Filter Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black mt-16 z-50 flex items-end md:items-center justify-center">
-          <div className="bg-white w-full mt-12 h-full md:max-w-md md:rounded-lg overflow-y-auto">
+        <div className="fixed inset-0  z-50 flex items-end md:items-center justify-center">
+          <div 
+            ref={modalRef}
+            className="bg-white w-full h-[70%] my-auto md:max-w-md md:rounded-lg overflow-y-auto"
+          >
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-semibold">Filters</h3>
               <button 

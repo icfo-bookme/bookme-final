@@ -15,7 +15,7 @@ export default async function Page() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
                 <h2 className="text-2xl text-center font-bold text-gray-800 mb-1">Our Popular Car Models</h2>
                 <div className="w-20 h-1 mb-4 bg-[#0678B4] mx-auto"></div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {carModels.map((model) => (
                         <div
                             key={model.id}
@@ -46,7 +46,10 @@ export default async function Page() {
                     ))}
                 </div>
             </div>
-            <Faq />
+            <div className="max-w-4xl md:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 mb-20">
+                <Faq />
+            </div>
+
         </div>
     );
 }

@@ -233,7 +233,7 @@ const CarRentalSearchBar = ({ locationsData, initialParams }) => {
 
     return (
         <>
-            <div className="bg-white p-4 md:p-6 rounded-lg shadow-md mb-6">
+            <div className="bg-white p-4 md:p-6 rounded-lg mb-6">
                 <form onSubmit={handleSearch} className="w-full">
                     {isMobile ? (
                         <div className="flex items-center justify-between gap-4">
@@ -243,7 +243,7 @@ const CarRentalSearchBar = ({ locationsData, initialParams }) => {
                             <button
                                 type="button"
                                 onClick={() => setShowMobileModal(true)}
-                                className="text-blue-600 bg-slate-200 p-3 mt-3 rounded-lg hover:text-blue-800 text-sm font-semibold flex items-center gap-1"
+                                className="text-blue-600 bg-slate-200 p-3 mt-4 rounded-lg hover:text-blue-800 text-sm font-semibold flex items-center gap-1"
                             >
                                 <FaEdit /> Edit
                             </button>
@@ -263,7 +263,7 @@ const CarRentalSearchBar = ({ locationsData, initialParams }) => {
 
             {/* Mobile Modal */}
             {isMobile && showMobileModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center p-4">
+                <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center">
                     <div className="bg-white w-full max-w-lg rounded-lg p-6 relative">
                         <button
                             onClick={() => setShowMobileModal(false)}
