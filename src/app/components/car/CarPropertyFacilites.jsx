@@ -5,8 +5,10 @@ import * as FaIcons from "react-icons/fa";
 import * as PiIcons from "react-icons/pi";
 import * as GoIcons from "react-icons/go";
 import * as TbIcons from "react-icons/tb";
-import ContactForm from "../../tour/ContactForm/ContactForm";
-import Itineraries from "./itineraries";
+import Itineraries from "../tourPackages/details/itineraries";
+import ContactForm from "../tour/ContactForm/ContactForm";
+// import ContactForm from "../../tour/ContactForm/ContactForm";
+// import Itineraries from "./itineraries";
 
 const getIconComponent = (iconImportString) => {
   if (!iconImportString) return null;
@@ -17,7 +19,7 @@ const getIconComponent = (iconImportString) => {
   return iconPackages[packageKey.toLowerCase()]?.[iconName] || null;
 };
 
-export default function PropertyFacilities({ data }) {
+export default function CarPropertyFacilities({ data }) {
   const [activeCategory, setActiveCategory] = useState(null);
   const sectionRefs = useRef({});
   const navRef = useRef(null);
@@ -33,7 +35,6 @@ export default function PropertyFacilities({ data }) {
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
-  // Detect visible section on scroll
   useEffect(() => {
     const handleScroll = () => {
       const sections = Object.entries(sectionRefs.current);
@@ -53,7 +54,6 @@ export default function PropertyFacilities({ data }) {
         window.history.replaceState(null, null, `#${currentSection}`);
       }
 
-      // If at very top, force first category
       if (window.scrollY < 50 && sections.length > 0) {
         const firstId = sections[0][0];
         if (firstId !== activeCategory) {
@@ -68,7 +68,6 @@ export default function PropertyFacilities({ data }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [activeCategory]);
 
-  // Horizontal nav scroll buttons for mobile
   useEffect(() => {
     const checkScrollButtons = () => {
       if (navRef.current && isMobile) {
@@ -102,9 +101,11 @@ export default function PropertyFacilities({ data }) {
     return <div className="p-5 text-gray-500">No property facilities available</div>;
   }
 
-  // Categories order: itineraries second if exists
   const categories = data.facilities ? [...Object.keys(data.facilities)] : [];
-  if (data.itineraries) {
+
+  const hasItineraries =  data.itineraries.length > 0;
+  
+  if (hasItineraries) {
     const existingIndex = categories.indexOf("itineraries");
     if (existingIndex > -1) categories.splice(existingIndex, 1);
     if (categories.length > 0) categories.splice(1, 0, "itineraries");
@@ -167,7 +168,7 @@ export default function PropertyFacilities({ data }) {
       <div className="lg:grid grid-cols-12 gap-6">
         <div className="col-span-12 lg:col-span-9 space-y-8">
           {categories.map((category) => {
-            if (category === "itineraries" && data.itineraries) {
+            if (category === "itineraries" && hasItineraries) {
               return (
                 <section
                   key="itineraries"
@@ -201,7 +202,7 @@ export default function PropertyFacilities({ data }) {
                                   </div>
                                 )}
                                 <h3 className="text-lg font-bold text-blue-950">
-                                  {facility.name || category}
+                                  {facility.name || category.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
                                 </h3>
                               </div>
                               <div

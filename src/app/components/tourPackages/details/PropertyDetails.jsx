@@ -6,6 +6,7 @@ import PropertySummary from "./PropertySummary";
 import RelatedActivities from "../../Activities/RelatedActivities";
 import Tab from "../../car/DetailsTab/tab";
 import CarPropertySummary from "../../car/CarPropertySummary";
+import CarPropertyFacilities from "../../car/CarPropertyFacilites";
 
 export default async function PropertyDetails({ data }) {
     if (!data) {
@@ -89,7 +90,7 @@ export default async function PropertyDetails({ data }) {
                     </div>
 
                     <div>
-                        <PropertyFacilities data={data} />
+                        <CarPropertyFacilities data={data} />
                     </div>
                 </>
             )}

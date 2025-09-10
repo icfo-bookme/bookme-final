@@ -243,7 +243,7 @@ const CarRentalSearchBar = ({ locationsData, initialParams }) => {
                             <button
                                 type="button"
                                 onClick={() => setShowMobileModal(true)}
-                                className="text-blue-600 hover:text-blue-800 text-sm font-semibold flex items-center gap-1"
+                                className="text-blue-600 bg-slate-200 p-3 mt-3 rounded-lg hover:text-blue-800 text-sm font-semibold flex items-center gap-1"
                             >
                                 <FaEdit /> Edit
                             </button>

@@ -6,6 +6,7 @@ import getTourDestination from "@/services/getTourDestination";
 import { useRouter } from "next/navigation";
 import { LuMapPin } from "react-icons/lu";
 import SearchButton from "@/utils/SearchButton";
+import useScrollOnFocus from "@/hooks/useScrollOnFocus";
 
 const ShipsSearch = () => {
   const router = useRouter();
@@ -16,7 +17,7 @@ const ShipsSearch = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
-
+  const [inputRef, handleFocus] = useScrollOnFocus()
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -64,10 +65,10 @@ const ShipsSearch = () => {
 
     if (selectedDestination) {
       const destinationSlug = slugify(selectedDestination.name);
-      
+
       router.push(`/tour/${destinationSlug}/${selectedLocationId}`);
     } else {
-     
+
       router.push(`/tour/${selectedLocationId}`);
     }
   };
@@ -186,9 +187,9 @@ const ShipsSearch = () => {
     str
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, '-')                      
-      .replace(/[^\w\u0980-\u09FF\-]+/g, '')    
-      .replace(/\-\-+/g, '-');                  
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\u0980-\u09FF\-]+/g, '')
+      .replace(/\-\-+/g, '-');
 
 
   if (error) {
@@ -217,9 +218,14 @@ const ShipsSearch = () => {
               </div>
               <input
                 type="text"
+                ref={inputRef}
                 value={searchQuery}
                 onChange={handleSearchChange}
-                onFocus={handleSearchFocus}
+                onFocus={(e) => {
+                  handleSearchFocus(e);
+                  handleFocus(e);
+                }}
+
                 placeholder="Search destinations..."
                 className="p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg pl-10"
               />

@@ -161,12 +161,12 @@ const VehicleCard = ({ vehicle }) => {
           </div>
 
           {/* Price and CTA */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between pt-3 border-t border-gray-100">
+          <div className="flex  flex-row items-start md:items-center justify-between pt-3 border-t border-gray-100">
             <button
               style={{
                 background: "linear-gradient(90deg, #313881, #0678B4)",
               }}
-              className="mt-3 md:mt-0 inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white rounded-lg hover:from-blue-800 hover:to-blue-700 transition-all shadow-sm hover:shadow-md"
+              className="mt-8  md:mt-0 inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white rounded-lg hover:from-blue-800 hover:to-blue-700 transition-all shadow-sm hover:shadow-md"
             >
               Rent Now
               <i className="fa-solid fa-arrow-right ml-2 text-xs"></i>

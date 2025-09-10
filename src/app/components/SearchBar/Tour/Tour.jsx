@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { LuMapPin } from "react-icons/lu";
 import SearchButton from "../../../../utils/SearchButton";
+import useScrollOnFocus from "@/hooks/useScrollOnFocus";
 
 const TourSearchBar = ({ data }) => {
   const router = useRouter();
@@ -13,7 +14,7 @@ const TourSearchBar = ({ data }) => {
   const [filteredDestinations, setFilteredDestinations] = useState([]);
   const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
   const searchRef = useRef(null);
-
+  const [inputRef, handleFocus] = useScrollOnFocus()
   useEffect(() => {
     if (data?.length > 0) {
       setFilteredDestinations(data);
@@ -175,9 +176,14 @@ const TourSearchBar = ({ data }) => {
                 </div>
                 <input
                   type="text"
+                  ref={inputRef}
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  onFocus={handleSearchFocus}
+                  onFocus={(e) => {
+                    handleSearchFocus(e);
+                    handleFocus(e);
+                  }}
+
                   placeholder="Search tour destinations..."
                   className="p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg pl-10"
                 />

@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import { LuMapPin } from "react-icons/lu";
 import SearchSuggestions from "./SearchSuggestions";
+import useScrollOnFocus from "@/hooks/useScrollOnFocus";
 
 const LocationSearch = ({
   destinations,
@@ -18,7 +19,7 @@ const LocationSearch = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
   const searchRef = useRef(null);
-
+  const [inputRef, handleFocus] = useScrollOnFocus();
   const calculateMatchScore = (item, query, isHotel = false) => {
     if (!query) return 0;
 
@@ -188,10 +189,15 @@ const LocationSearch = ({
           <LuMapPin className="h-5 w-5 text-blue-600" />
         </div>
         <input
+          ref={inputRef}
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          onFocus={handleSearchFocus}
+          onFocus={(e) => {
+            handleSearchFocus(e);
+            handleFocus(e); 
+          }}
+
           placeholder="City, hotel, or area"
           className="pl-9 p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-colors w-full font-medium text-blue-950 text-base"
         />
