@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import SearchButton from "../../../../utils/SearchButton";
 import getCountries from "@/services/visa/getCountries";
 import { LuMapPin } from "react-icons/lu";
+import useScrollOnClick from "@/hooks/useScrollOnFocus";
 
 const VisaSearch = () => {
   const router = useRouter();
@@ -16,7 +17,7 @@ const VisaSearch = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [isFirst, setIsFirst] = useState(true);
   const ref = useRef(null);
-
+  const [inputRef, handleClick] = useScrollOnClick(150);
   useEffect(() => {
     (async () => {
       try {
@@ -175,6 +176,8 @@ const VisaSearch = () => {
             </div>
             <input
               type="text"
+              ref={inputRef}
+              onClick={handleClick}
               value={searchQuery}
               onChange={onChange}
               onFocus={onFocus}

@@ -6,7 +6,8 @@ import getTourDestination from "@/services/getTourDestination";
 import { useRouter } from "next/navigation";
 import { LuMapPin } from "react-icons/lu";
 import SearchButton from "@/utils/SearchButton";
-import useScrollOnFocus from "@/hooks/useScrollOnFocus";
+import useScrollOnClick from "@/hooks/useScrollOnFocus";
+
 
 const ShipsSearch = () => {
   const router = useRouter();
@@ -17,7 +18,7 @@ const ShipsSearch = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
-  const [inputRef, handleFocus] = useScrollOnFocus()
+  const [inputRef, handleClick] = useScrollOnClick(150)
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -220,10 +221,10 @@ const ShipsSearch = () => {
                 type="text"
                 ref={inputRef}
                 value={searchQuery}
+                onClick={handleClick}
                 onChange={handleSearchChange}
                 onFocus={(e) => {
                   handleSearchFocus(e);
-                  handleFocus(e);
                 }}
 
                 placeholder="Search destinations..."

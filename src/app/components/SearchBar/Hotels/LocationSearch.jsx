@@ -3,7 +3,8 @@
 import React, { useState, useRef } from "react";
 import { LuMapPin } from "react-icons/lu";
 import SearchSuggestions from "./SearchSuggestions";
-import useScrollOnFocus from "@/hooks/useScrollOnFocus";
+
+import useScrollOnClick from "@/hooks/useScrollOnFocus";
 
 const LocationSearch = ({
   destinations,
@@ -19,7 +20,7 @@ const LocationSearch = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
   const searchRef = useRef(null);
-  const [inputRef, handleFocus] = useScrollOnFocus();
+  const [inputRef, handleClick] = useScrollOnClick(150)
   const calculateMatchScore = (item, query, isHotel = false) => {
     if (!query) return 0;
 
@@ -192,10 +193,10 @@ const LocationSearch = ({
           ref={inputRef}
           type="text"
           value={searchQuery}
+          onClick={handleClick}
           onChange={handleSearchChange}
           onFocus={(e) => {
             handleSearchFocus(e);
-            handleFocus(e); 
           }}
 
           placeholder="City, hotel, or area"

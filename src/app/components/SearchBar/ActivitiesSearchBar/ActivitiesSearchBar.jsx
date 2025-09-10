@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { LuMapPin } from "react-icons/lu";
 import SearchButton from "@/utils/SearchButton";
 import { FaHiking } from "react-icons/fa";
+import useScrollOnClick from "@/hooks/useScrollOnFocus";
 
 const ActivitiesSearchBar = ({ data }) => {
     const router = useRouter();
@@ -13,7 +14,7 @@ const ActivitiesSearchBar = ({ data }) => {
     const [filteredDestinations, setFilteredDestinations] = useState([]);
     const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
     const searchRef = useRef(null);
-
+    const [inputRef, handleClick] = useScrollOnClick(150)
     useEffect(() => {
         if (data?.length > 0) {
             setFilteredDestinations(data);
@@ -176,6 +177,8 @@ const ActivitiesSearchBar = ({ data }) => {
                                 </div>
                                 <input
                                     type="text"
+                                    ref={inputRef}
+                                    onClick={handleClick}
                                     value={searchQuery}
                                     onChange={handleSearchChange}
                                     onFocus={handleSearchFocus}
