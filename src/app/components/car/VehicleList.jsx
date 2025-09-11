@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import VehicleCard from './VehicleCard';
 import { FiFilter, FiX } from 'react-icons/fi';
+import VehicleCard from './VehicleCard';
 
 const VehicleList = ({ vehicles, models, brands }) => {
   const [filters, setFilters] = useState({
@@ -34,10 +34,8 @@ const VehicleList = ({ vehicles, models, brands }) => {
     return map;
   }, [models]);
 
-
   const filteredVehicles = useMemo(() => {
     return vehicles.filter(vehicle => {
-    
       if (filters.search && !vehicle.property_name.toLowerCase().includes(filters.search.toLowerCase())) {
         return false;
       }
@@ -73,7 +71,7 @@ const VehicleList = ({ vehicles, models, brands }) => {
         if (!hasMatchingSeats) return false;
       }
 
-      // Brand filter - check if vehicle has a brand and if it matches
+      // Brand filter
       if (filters.brands.length > 0) {
         const vehicleBrandId = vehicle.brand?.brand_id?.toString();
         if (!vehicleBrandId || !filters.brands.includes(vehicleBrandId)) {
@@ -81,7 +79,7 @@ const VehicleList = ({ vehicles, models, brands }) => {
         }
       }
 
-      // Model filter - check if vehicle has a model and if it matches
+      // Model filter
       if (filters.models.length > 0) {
         const vehicleModelId = vehicle.brand?.model_id?.toString();
         if (!vehicleModelId || !filters.models.includes(vehicleModelId)) {
@@ -165,9 +163,10 @@ const VehicleList = ({ vehicles, models, brands }) => {
 
   // Filter sidebar component
   const FilterSidebar = ({ isModal = false, filtersToUse, onCheckboxChange }) => (
-    <div className={`bg-white p-4 rounded-lg shadow-sm border border-gray-200 ${!isModal ? 'sticky top-16 h-[calc(100vh-120px)] overflow-y-auto' : ''}`}>
+    <div className={`bg-white p-4 rounded-lg shadow-sm border border-gray-200 ${!isModal ? 'sticky top-16 h-[calc(100vh-120px)] overflow-y-auto' : 'h-full'}`}>
+      
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold text-blue-900">Filters</h2>
+      <h1 className="text-blue-950 md:block hidden font-bold">Filter</h1>
         {isFilterActive && !isModal && (
           <button
             onClick={clearFilters}
@@ -248,23 +247,6 @@ const VehicleList = ({ vehicles, models, brands }) => {
       <div className="mt-4 text-sm text-gray-600 border-t pt-3">
         Showing {filteredVehicles.length} of {vehicles.length} vehicles
       </div>
-
-      {isModal && (
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={() => setShowModal(false)}
-            className="flex-1 py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-          >
-            Close
-          </button>
-          <button
-            onClick={applyFilters}
-            className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Apply Filters
-          </button>
-        </div>
-      )}
     </div>
   );
 
@@ -277,7 +259,7 @@ const VehicleList = ({ vehicles, models, brands }) => {
           className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition"
         >
           <FiFilter size={18} />
-          <span>Filters</span>
+          <span className="text-blue-100">Filters</span>
           {isFilterActive && (
             <span className="ml-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
               !
@@ -288,16 +270,34 @@ const VehicleList = ({ vehicles, models, brands }) => {
 
       {/* Mobile Filter Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 md:hidden">
-          <div className="bg-white rounded-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col md:hidden">
+          <div className="bg-white rounded-t-lg mt-14 flex-1 overflow-hidden flex flex-col">
             <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-lg font-bold">Filters</h2>
+              <h2 className="text-lg text-blue-950 font-bold">Filters</h2>
               <button onClick={() => setShowModal(false)}>
                 <FiX size={24} />
               </button>
             </div>
-            <div className="p-4">
+            <div className="flex-1 overflow-y-auto">
               <FilterSidebar isModal={true} filtersToUse={tempFilters} onCheckboxChange={handleTempCheckboxChange} />
+            </div>
+            
+            {/* Fixed Bottom Buttons */}
+            <div className="p-4 border-t bg-white">
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="flex-1 py-3 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={applyFilters}
+                  className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                >
+                  Apply Filters
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -368,7 +368,7 @@ const VehicleList = ({ vehicles, models, brands }) => {
             </div>
           )}
 
-          {filteredVehicles.length > 0 ? (
+         {filteredVehicles.length > 0 ? (
             <div className="space-y-6">
               {filteredVehicles.map((vehicle) => (
                 <VehicleCard key={vehicle.id} vehicle={vehicle} />

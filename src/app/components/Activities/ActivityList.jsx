@@ -268,10 +268,10 @@ const ActivityList = ({ activities }) => {
         <div className="fixed inset-0  z-50 flex items-end md:items-center justify-center">
           <div 
             ref={modalRef}
-            className="bg-white w-full h-[70%] my-auto md:max-w-md md:rounded-lg overflow-y-auto"
+            className="bg-white w-full h-[85%] my-auto md:max-w-md md:rounded-lg overflow-y-auto"
           >
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Filters</h3>
+              <h3 className="text-lg text-blue-950 font-semibold">Filters</h3>
               <button 
                 onClick={() => setShowModal(false)}
                 className="text-gray-500 hover:text-gray-700"

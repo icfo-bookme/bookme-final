@@ -34,7 +34,7 @@ const VehicleCard = ({ vehicle }) => {
     }
   };
 
-  // Format price with commas and decimals
+
   const formatPrice = (price) => {
     if (!price) return '0';
     return parseFloat(price).toLocaleString('en-IN', {
@@ -42,7 +42,7 @@ const VehicleCard = ({ vehicle }) => {
     });
   };
 
-  // Calculate base price for 4 hours and 40 km
+
   const basePrice = vehicle.price_upto_4_hours && vehicle.kilometer_price 
     ? parseFloat(vehicle.price_upto_4_hours) * 4 + parseFloat(vehicle.kilometer_price) * 40 
     : 0;
@@ -106,7 +106,7 @@ const VehicleCard = ({ vehicle }) => {
         displayText: "",
         showFeature: true
       };
-    }).filter(summary => summary.showFeature); // Filter out features that shouldn't be shown
+    }).filter(summary => summary.showFeature); 
   };
 
   const processedSummaries = processSummaries();
