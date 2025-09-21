@@ -1,5 +1,5 @@
 // app/Main.jsx
-import PromotionsPage from "./PromotionsPage";
+import PromotionsPage from "../PromotionsPage";
 
 const fetchWithTimeout = async (url, options = {}, timeout = 8000) => {
   const controller = new AbortController();

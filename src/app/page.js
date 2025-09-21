@@ -5,7 +5,7 @@ import Banner from "./components/Home/Banner";
 import Tangour from "./components/Home/Tangour/Tangour";
 import Sundarban from "./components/Home/sundarban/sundarban";
 import SaintMartin from "./components/Home/Saintmartin/SaintMartin";
-import PromotionsPage from "./components/Home/Promotion/PromotionsPage";
+import PromotionsPage from "./components/Home/PromotionsPage";
 import getServicesData from "@/services/homepage/getServicesData";
 import HpmepageBlog from "./components/pre-footer-content/Homepage";
 import HotelMain from "./components/Home/Hotel/Main";
