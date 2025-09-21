@@ -115,34 +115,28 @@ export default function Visa({ data = [] }) {
             onSliderMove={handleTouchStart}
             onTransitionEnd={handleTouchEnd}
             breakpoints={{
-              350: {
-                slidesPerView: 1.4,
+              320: {
+                slidesPerView: 1.2,
                 centeredSlides: true,
                 speed: 300,
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 1.6,  // Reduced to limit scroll distance
-                  momentumVelocityRatio: 1.4,  // Reduced to limit scroll velocity
-                  momentumBounce: true,
-                  momentumBounceRatio: 1.2,
-                  minimumVelocity: 1.02,
-                  sticky: true,  // Changed to true for better control
+                  momentumRatio: 5,
+                  velocityRatio: 5.5,
+                  sticky: false
                 },
               },
               640: {
                 slidesPerView: 1.5,
                 centeredSlides: true,
-                speed: 300,
+                speed: 400,
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 0.7,  // Reduced to limit scroll distance
-                  momentumVelocityRatio: 0.5,  // Reduced to limit scroll velocity
-                  momentumBounce: true,
-                  momentumBounceRatio: 0.3,
-                  minimumVelocity: 0.02,
-                  sticky: true,
+                  momentumRatio: 2,
+                  velocityRatio: 3.5,
+                  sticky: false
                 },
               },
               768: {
