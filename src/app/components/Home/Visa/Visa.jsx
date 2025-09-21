@@ -122,7 +122,7 @@ export default function Visa({ data = [] }) {
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 5,
+                  momentumRatio: 2,
                   velocityRatio: 5.5,
                   sticky: false
                 },
@@ -134,7 +134,7 @@ export default function Visa({ data = [] }) {
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 2,
+                  momentumRatio: 0.2,
                   velocityRatio: 3.5,
                   sticky: false
                 },
