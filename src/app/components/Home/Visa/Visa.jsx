@@ -135,7 +135,7 @@ export default function Visa({ data = [] }) {
                   enabled: true,
                   momentum: true,
                   momentumRatio: 0.2,
-                  velocityRatio: 3.5,
+                  velocityRatio: 1.5,
                   sticky: false
                 },
               },
