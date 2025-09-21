@@ -137,11 +137,11 @@ export default function Visa({ data = [] }) {
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 1.7,  // Reduced to limit scroll distance
-                  momentumVelocityRatio: 1.5,  // Reduced to limit scroll velocity
+                  momentumRatio: 0.7,  // Reduced to limit scroll distance
+                  momentumVelocityRatio: 0.5,  // Reduced to limit scroll velocity
                   momentumBounce: true,
-                  momentumBounceRatio: 1.3,
-                  minimumVelocity: 1.02,
+                  momentumBounceRatio: 0.3,
+                  minimumVelocity: 0.02,
                   sticky: true,
                 },
               },
