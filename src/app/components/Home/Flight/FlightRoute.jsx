@@ -2,7 +2,7 @@
 import getFlightRoutes from "@/services/Flight/getFlightRoute";
 import { Tab } from "../../Flight/Routes/Tab";
 
-export default async function FlightRoute() {
+export default async function FlightRoute({homepage = 'true'}) {
   const flightdomesticRoutes = await getFlightRoutes('domestic');
   const flightinternationalRoutes = await getFlightRoutes('international');
 
@@ -19,7 +19,7 @@ export default async function FlightRoute() {
 
         </div>
 
-        <Tab flightRoutes={{ domestic: flightdomesticRoutes, international: flightinternationalRoutes }} />
+        <Tab homepage={homepage} flightRoutes={{ domestic: flightdomesticRoutes, international: flightinternationalRoutes }} />
       </div>
     </div>
   );

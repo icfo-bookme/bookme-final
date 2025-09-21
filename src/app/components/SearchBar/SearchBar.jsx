@@ -1,12 +1,11 @@
 import React from "react";
 import {
   FaHotel,
-  FaPlaneDeparture,
   FaMapMarkedAlt,
   FaPassport,
   FaShip,
   FaHiking,
-  FaCar, 
+  FaCar,
 } from "react-icons/fa";
 
 import HotelSearch from "./Hotels/HotelSearch";
@@ -14,11 +13,12 @@ import VisaSearch from "./Visa/VisaSearch";
 import TourSearch from "./Tour/TourSearch";
 import ClientSideTabs from "./ClientSideTabs";
 import ActivitiesSearch from "./ActivitiesSearchBar/ActivitiesSearch";
-import CarRentalSearch from "./CarRental/CarRentalSearch"; 
+import CarRentalSearch from "./CarRental/CarRentalSearch";
 import ShipsSearch from "./Ship/ShipsSearch";
 
-const TravelBookingTabs = ({ searchParams }) => {
-  const initialTab = searchParams.tab || "hotel";
+const TravelBookingTabs = async ({ searchParams }) => {
+  const params = await searchParams;
+  const initialTab = params?.tab || "hotel";
 
   return (
     <div className="md:bg-white md:border border-gray-300 rounded-lg text-blue-950">
@@ -26,21 +26,19 @@ const TravelBookingTabs = ({ searchParams }) => {
         initialTab={initialTab}
         components={{
           hotel: <HotelSearch />,
-          // flight: <FlightSearch />,
           ships: <ShipsSearch />,
           tour: <TourSearch />,
           visa: <VisaSearch />,
           activities: <ActivitiesSearch />,
-          carRental: <CarRentalSearch />, 
+          carRental: <CarRentalSearch />,
         }}
         icons={{
           hotel: <FaHotel />,
-          // flight: <FaPlaneDeparture />,
           ships: <FaShip />,
           tour: <FaMapMarkedAlt />,
           visa: <FaPassport />,
           activities: <FaHiking />,
-          carRental: <FaCar />, 
+          carRental: <FaCar />,
         }}
       />
     </div>

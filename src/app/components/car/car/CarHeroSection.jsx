@@ -5,9 +5,9 @@ const CarHeroSection = () => {
   return (
     <section className="relative">
       <div
-        className="h-[30vh] md:h-[40vh] w-full bg-cover bg-center"
+        className="h-[30vh] md:h-[50vh] w-full bg-cover bg-center"
         style={{
-          backgroundImage: "url('/car.jpg')",
+          backgroundImage: "url('/car.png')",
         }}
       >
         <div className="absolute inset-0"></div>

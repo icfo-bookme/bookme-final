@@ -8,10 +8,13 @@ import { useForm } from "react-hook-form";
 import { useSearch } from "@/SearchContext";
 import getContactNumber from "@/services/tour/getContactNumber";
 
-import { FaPhone, FaWhatsapp, FaBars, FaTimes, FaChevronRight, FaChevronDown } from "react-icons/fa";
+import { FaPhone, FaWhatsapp, FaBars, FaTimes, FaChevronRight, FaChevronDown, FaUser, FaSignOutAlt } from "react-icons/fa";
 import { usePagination } from "@/services/tour/usePagination";
 import { useRouter } from "next/navigation";
 import getTourDestination from "@/services/getTourDestination";
+import { Avatar, Dropdown } from "flowbite-react";
+import { useUser } from "@/lib/UserContext";
+import PrimaryButton from "@/utils/PrimaryButton";
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400"] });
 
@@ -19,12 +22,15 @@ const BookMeHeader = () => {
   const { searchTerm, setSearchTerm } = useSearch();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPackageTourOpen, setIsPackageTourOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [contactNumber, setContactNumber] = useState([]);
   const [destinations, setDestinations] = useState([]);
   const { currentPage, handlePageChange } = usePagination();
   const router = useRouter();
   const packageTourRef = useRef(null);
   const mobileMenuRef = useRef(null);
+  const userDropdownRef = useRef(null);
+  const { user, logoutUser } = useUser();
 
   const toggleMobileMenu = useCallback(() => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -37,6 +43,10 @@ const BookMeHeader = () => {
     e.stopPropagation();
     setIsPackageTourOpen(!isPackageTourOpen);
   }, [isPackageTourOpen]);
+
+  const toggleUserDropdown = useCallback(() => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
+  }, [isUserDropdownOpen]);
 
   const {
     register,
@@ -70,6 +80,9 @@ const BookMeHeader = () => {
         setIsMobileMenuOpen(false);
         setIsPackageTourOpen(false);
       }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setIsUserDropdownOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -85,7 +98,14 @@ const BookMeHeader = () => {
   const closeAllMenus = useCallback(() => {
     setIsMobileMenuOpen(false);
     setIsPackageTourOpen(false);
+    setIsUserDropdownOpen(false);
   }, []);
+
+  const handleLogout = () => {
+    logoutUser();
+    setIsUserDropdownOpen(false);
+    router.push("/");
+  };
 
   const slugify = (str) =>
     str
@@ -113,7 +133,9 @@ const BookMeHeader = () => {
               priority
             />
           </Link>
-          
+          <button onClick={closeAllMenus} className="text-gray-500">
+            <FaTimes className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Menu Items */}
@@ -231,6 +253,36 @@ const BookMeHeader = () => {
           </ul>
         </nav>
 
+        {/* User Section - Mobile */}
+        <div className="p-4 border-t border-gray-200">
+          {user ? (
+            <div className="flex items-center gap-3 mb-4">
+              <Avatar rounded />
+              <div>
+                <p className="text-sm font-medium text-gray-900">{user.name || user.email}</p>
+                <button
+                  onClick={handleLogout}
+                  className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1 mt-1"
+                >
+                  <FaSignOutAlt className="text-xs" /> Sign Out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-4">
+              <Link
+                href="/login"
+                onClick={closeAllMenus}
+                className="w-full"
+              >
+                <PrimaryButton className="w-full py-2.5 text-sm">
+                  Sign In
+                </PrimaryButton>
+              </Link>
+            </div>
+          )}
+        </div>
+
         {/* Contact Footer */}
         <div className="p-4 border-t border-gray-200 bg-gray-50">
           <h3 className="text-lg font-semibold text-[#00026E] mb-3">Contact Us</h3>
@@ -252,7 +304,7 @@ const BookMeHeader = () => {
               <FaWhatsapp className="text-xl z-10" />
             </Link>
           </div>
-          <div>
+          {/* <div>
             <p className="text-sm text-gray-600">Call Anytime</p>
             <a
               href={`tel:${contactNumber?.Phone}`}
@@ -260,7 +312,7 @@ const BookMeHeader = () => {
             >
               {contactNumber?.Phone}
             </a>
-          </div>
+          </div> */}
         </div>
       </div>
     );
@@ -270,7 +322,7 @@ const BookMeHeader = () => {
     <header className={`header-area-three ${roboto.className} bg-white`}>
       <div className="main-header fixed w-full z-50 bg-white shadow-md shadow-slate-500">
         <div className="header-bottom text-[#00026E]">
-          <div className="container w-[95%] lg:w-[84%] mx-auto">
+          <div className="container w-[95%] lg:w-[85%] mx-auto">
             <div className="flex justify-between items-center py-2">
               <div className="logo">
                 <Link href={"/"} prefetch className="cursor-pointer">
@@ -371,10 +423,10 @@ const BookMeHeader = () => {
                 </Link>
               </div>
 
-              {/* Desktop Contact Info */}
-              <div className="ml-3 hidden lg:flex items-center justify-center gap-2">
+              {/* Desktop Contact Info and User Section */}
+              <div className="ml-3 hidden lg:flex items-center justify-center gap-4">
                 <div className="flex items-center">
-                  <div className="flex items-center  mr-5">
+                  <div className="flex items-center mr-5">
                     <a target="_blank" href={`tel:${contactNumber?.Phone}`} className="w-[38px] h-[38px] -mr-4">
                       <div className="phone-call-nav md:w-[40px] md:h-[40px] w-[36px] h-[36px] ">
                         <FaPhone className="md:ml-[12px] md:mt-[12px] mt-[9px] ml-[10px]" />
@@ -392,14 +444,103 @@ const BookMeHeader = () => {
                     </Link>
                   </div>
 
-                  <div>
+                  {/* <div>
                     <p className="text-sm text-gray-900">Call Anytime</p>
                     <h4 className="text-lg font-semibold">
                       <a href="#" className="text-gray-800">
                         {contactNumber?.Phone?.slice(3)}
                       </a>
                     </h4>
-                  </div>
+                  </div> */}
+                </div>
+
+                {/* User Section - Desktop */}
+                <div className="relative" ref={userDropdownRef}>
+                  {user ? (
+                    <>
+                      <button
+                        onClick={toggleUserDropdown}
+                        className="flex items-center gap-2 p-2 rounded-full border border-gray-300 hover:bg-blue-100 transition-all duration-200"
+                      >
+                        {/* SVG Avatar Icon */}
+                        <div className="relative">
+                          <svg
+                            className="w-7 h-7 text-blue-600"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"
+                            />
+                          </svg>
+
+                          {/* Optional online status dot */}
+                          <span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-white"></span>
+                        </div>
+
+                        {/* Dropdown arrow */}
+                        <svg
+                          className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${isUserDropdownOpen ? 'rotate-180' : ''
+                            }`}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+
+
+                      {isUserDropdownOpen && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-30 border border-gray-200">
+                          <div
+                           
+                            className="flex mb-2 items-center gap-2 mt-2 p-2 rounded-full  transition-colors"
+                          >
+                            <Avatar className="h-5 " rounded />
+                            <span className="text-sm font-medium  text-gray-700">{user.name || user.email}</span>
+
+                          </div>
+                          <hr />
+                          <Link
+                            href="/dashboard"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setIsUserDropdownOpen(false)}
+                          >
+                            Dashboard
+                          </Link>
+                          <Link
+                            href="/profile"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setIsUserDropdownOpen(false)}
+                          >
+                            Profile
+                          </Link>
+                          <Link
+                            href="/bookings"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setIsUserDropdownOpen(false)}
+                          >
+                            My Bookings
+                          </Link>
+                          <hr className="my-1" />
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                          >
+                            <FaSignOutAlt className="text-xs" /> Sign Out
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link href="/login">
+                      <PrimaryButton className="py-2 px-4 text-sm">
+                        Sign In
+                      </PrimaryButton>
+                    </Link>
+                  )}
                 </div>
               </div>
 

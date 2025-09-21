@@ -14,6 +14,8 @@ import VisaMain from "./components/Home/Visa/Main";
 import TangourMain from "./components/Home/Tangour/Main";
 import LoadingSpinner from "./components/SearchBar/Hotels/LoadingSpinner";
 import FlightRoute from "./components/Home/Flight/FlightRoute";
+import CTASection from "./components/Home/CTASection/CTASection";
+import Faq from "./components/Faq/Faq";
 
 export const dynamic = "force-dynamic";
 
@@ -144,6 +146,14 @@ export default async function Home({ searchParams }) {
       </section>
       <section>
         <FlightRoute />
+      </section>
+
+      <section className="">
+        <CTASection />
+      </section>
+
+        <section className="">
+        <Faq />
       </section>
 
       {/* Blog Section */}

@@ -189,7 +189,7 @@ export default function Visa({ data = [] }) {
                       <div>
                         <span className="text-xs sm:text-sm text-gray-600">Starting from</span>
                         <div className="font-bold text-lg sm:text-xl text-blue-900">
-                          {country?.properties[0]?.property_uinit[0]?.price[0]?.price?.toLocaleString()} BDT
+                          {Math.round(country?.properties[0]?.property_uinit[0]?.price[0]?.price) } BDT
                         </div>
                       </div>
                       <Link

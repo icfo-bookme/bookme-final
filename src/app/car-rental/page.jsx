@@ -9,7 +9,7 @@ export default async function Page() {
     const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "";
 
     return (
-        <div className="pt-12">
+        <div className="pt-10">
             <CarHeroSection />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">

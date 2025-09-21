@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { MdAddIcCall } from 'react-icons/md';
+import { RiWhatsappFill } from 'react-icons/ri';
 
 const HotelCTA = () => {
   return (
@@ -11,10 +13,13 @@ const HotelCTA = () => {
       </p>
       <Link
         href="/contact"
-        className="inline-block px-4 sm:px-6 py-2 sm:py-3 text-white text-sm sm:text-base font-medium rounded-lg transition-colors duration-200"
+        className=" flex item-center justify-center w-96 mx-auto px-4 sm:px-6 py-2 sm:py-3 text-white text-sm sm:text-base font-medium rounded-lg transition-colors duration-200"
         style={{ background: "linear-gradient(90deg, #313881, #1678B4)" }}
       >
         Contact Our Travel Experts
+         <MdAddIcCall size={20} className="ml-2 text-green-200 " />
+         <RiWhatsappFill size={20} className="ml-2 text-green-200 " />
+        
       </Link>
     </section>
   );

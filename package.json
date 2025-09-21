@@ -3,7 +3,7 @@
     "@emailjs/browser": "^4.4.1",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@lottiefiles/dotlottie-react": "^0.13.0",
-    "axios": "^1.7.7",
+    "axios": "^1.12.2",
     "date-fns": "^4.1.0",
     "flowbite-react": "^0.10.2",
     "next": "^15.1.6",

@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { LuMapPin } from "react-icons/lu";
 import SearchSuggestions from "./SearchSuggestions";
-
 import useScrollOnClick from "@/hooks/useScrollOnFocus";
 
 const LocationSearch = ({
@@ -19,8 +18,79 @@ const LocationSearch = ({
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
+  const [placeholder, setPlaceholder] = useState("City, hotel, or area"); 
+  const [stopTypewriter, setStopTypewriter] = useState(false); 
   const searchRef = useRef(null);
-  const [inputRef, handleClick] = useScrollOnClick(150)
+  const [inputRef, handleClick] = useScrollOnClick(150);
+
+  // Handle click outside to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!destinations.length && !hotels.length) return;
+
+    const typewriterItems = [
+      ...destinations.map(dest => `${dest.name}, ${dest.country}`),
+      ...hotels.map(hotel => `${hotel.hotel_name}, ${hotel.street_address}`)
+    ];
+
+    let currentIndex = 0;    
+    let charIndex = 0;     
+    let isDeleting = false;  
+
+    const typingSpeed = 50;    
+    const deletingSpeed = 50;    
+    const pauseBetweenWords = 3500; 
+
+    const typeWriter = () => {
+      if (stopTypewriter) return; 
+
+      const currentText = typewriterItems[currentIndex];
+
+      if (!isDeleting) {
+        // Typing characters forward
+        setPlaceholder(currentText.slice(0, charIndex + 1));
+        charIndex++;
+
+        // If full text is typed, start deleting after pause
+        if (charIndex === currentText.length) {
+          isDeleting = true;
+          setTimeout(typeWriter, pauseBetweenWords);
+          return;
+        }
+      } else {
+        // Deleting characters
+        setPlaceholder(currentText.slice(0, charIndex - 1));
+        charIndex--;
+
+        // When fully deleted, move to the next item
+        if (charIndex === 0) {
+          isDeleting = false;
+          currentIndex = (currentIndex + 1) % typewriterItems.length;
+        }
+      }
+
+      // Adjust speed for typing or deleting
+      const delay = isDeleting ? deletingSpeed : typingSpeed;
+      setTimeout(typeWriter, delay);
+    };
+
+    const startTyping = setTimeout(typeWriter, typingSpeed);
+
+    return () => clearTimeout(startTyping);
+  }, [destinations, hotels, stopTypewriter]);
+
   const calculateMatchScore = (item, query, isHotel = false) => {
     if (!query) return 0;
 
@@ -31,11 +101,9 @@ const LocationSearch = ({
       : `${itemName}, ${item.country}`.toLowerCase();
     const queryText = query.toLowerCase().trim();
 
-    // Exact match bonus (highest priority)
     if (itemName === queryText) return 1000;
     if (itemFullText === queryText) return 950;
 
-    // Exact match with location/country
     if (itemFullText.includes(queryText)) {
       const matchPos = itemFullText.indexOf(queryText);
       return 900 + (matchPos === 0 ? 50 : 0);
@@ -146,7 +214,9 @@ const LocationSearch = ({
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
+    setStopTypewriter(true); // Stop typewriter once user types
     updateSuggestions(query);
+
     if (!query) {
       setSelectedLocationId("");
       setSelectedHotelId("");
@@ -154,6 +224,7 @@ const LocationSearch = ({
   };
 
   const handleSearchFocus = () => {
+    setStopTypewriter(true); // Stop typewriter when input is focused
     if (isFirstInputInteraction) {
       setIsFirstInputInteraction(false);
       setSearchQuery("");
@@ -170,6 +241,7 @@ const LocationSearch = ({
   };
 
   const selectItem = (item) => {
+    setStopTypewriter(true); // Stop typewriter when selecting an item
     if (item.type === 'destination') {
       setSearchQuery(`${item.name}, ${item.country}`);
       setSelectedLocationId(item.id);
@@ -195,11 +267,8 @@ const LocationSearch = ({
           value={searchQuery}
           onClick={handleClick}
           onChange={handleSearchChange}
-          onFocus={(e) => {
-            handleSearchFocus(e);
-          }}
-
-          placeholder="City, hotel, or area"
+          onFocus={handleSearchFocus}
+          placeholder={placeholder }
           className="pl-9 p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-600 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition-colors w-full font-medium text-blue-950 text-base"
         />
         <SearchSuggestions

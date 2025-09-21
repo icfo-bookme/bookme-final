@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { SearchProvider } from "@/SearchContext";
 import { PaginationProvider } from "@/services/tour/usePagination";
 import HeaderWrapper from "./components/HeadWrapper/HeaderWrapper";
+import { UserProvider } from "@/lib/UserContext";
 
 // Font setup at module scope
 const inter = Inter({
@@ -35,11 +36,13 @@ export default function DashboardLayout({ children }) {
             <div>
               <div className="bg-white">
                 <main>
+                  <UserProvider>
                   <div className="">
                     <HeaderWrapper />
                   </div>
                   <div className="min-h-[100vh] py-[12px]">{children}</div>
                   <Footer />
+                  </UserProvider>
                 </main>
               </div>
             </div>

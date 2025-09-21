@@ -91,13 +91,13 @@ export default function SundarbanShips() {
             }, 3000);
         }
     };
-const slugify = (str) =>
-  str
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')                      
-    .replace(/[^\w\u0980-\u09FF\-]+/g, '')    
-    .replace(/\-\-+/g, '-');                   
+    const slugify = (str) =>
+        str
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\u0980-\u09FF\-]+/g, '')
+            .replace(/\-\-+/g, '-');
 
     return (
         <div className={`${roboto.className} bg-blue-50 w-full mx-auto  max-w-7xl`}>
@@ -227,11 +227,16 @@ const slugify = (str) =>
                                                                 property.property_uinit?.flatMap((unit) =>
                                                                     unit.price?.map((priceObj) => priceObj.price)
                                                                 ) || [];
-                                                            return prices.length > 0
-                                                                ? `${Math.min(...prices).toLocaleString()} TK`
-                                                                : "N/A";
+
+                                                            if (prices.length > 0) {
+                                                                const minPrice = Math.min(...prices);
+                                                                return `${Math.round(minPrice).toLocaleString()} TK`;
+                                                            } else {
+                                                                return <span className='text-sm'>Contact for Price</span>;
+                                                            }
                                                         })()}
                                                     </span>
+
                                                 </div>
                                                 <Link
                                                     href={`/Property/${slugify(property.property_name)}/${property.property_id}`}

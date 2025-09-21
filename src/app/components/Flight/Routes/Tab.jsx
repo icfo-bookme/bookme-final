@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card } from "./Card";
 
-export const Tab = ({ flightRoutes }) => {
+export const Tab = ({ flightRoutes , homepage }) => {
     const [activeTab, setActiveTab] = useState('domestic');
 
     return (
@@ -41,9 +41,9 @@ export const Tab = ({ flightRoutes }) => {
 
 
             {activeTab === 'domestic' ? (
-                <Card flightRoutes={flightRoutes.domestic} />
+                <Card homepage={homepage} flightRoutes={flightRoutes.domestic} />
             ) : (
-                <Card flightRoutes={flightRoutes.international} />
+                <Card homepage={homepage} flightRoutes={flightRoutes.international} />
             )}
         </div>
     );

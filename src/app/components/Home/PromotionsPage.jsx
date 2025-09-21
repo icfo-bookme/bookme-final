@@ -159,7 +159,7 @@ export default function PromotionsPage() {
     <div className={`${roboto.className} bg-blue-50 w-full mx-auto max-w-7xl`}>
       <div className="w-full text-center mb-5">
         <h2 className="text-xl md:text-2xl font-bold text-blue-800 mb-2">
-          Save & Explore Global Destinations!
+          Hot Package Deals
         </h2>
         <div className="w-20 h-1 bg-blue-600 mx-auto"></div>
       </div>

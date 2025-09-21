@@ -201,10 +201,18 @@ const TourPackageCard = ({ packageData = [] }) => {
                                                 <p className="text-2xs xs:text-xs text-gray-500">
                                                     Starting From
                                                 </p>
-                                                <p className="text-base sm:text-lg font-bold text-blue-600">
-                                                    {price.toLocaleString()} BDT
-                                                </p>
+
+                                                {price && price > 0 ? (
+                                                    <p className="text-base sm:text-lg font-bold text-blue-600">
+                                                        {price.toLocaleString()} BDT
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-base font-medium text-blue-500">
+                                                        Contact for price
+                                                    </p>
+                                                )}
                                             </div>
+
                                             <Link
                                                 href={`/${slugify(pkg.property_name)}/${pkg.id}`}
                                                 style={{

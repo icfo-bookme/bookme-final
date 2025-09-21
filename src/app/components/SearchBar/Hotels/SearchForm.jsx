@@ -19,7 +19,7 @@ const SearchForm = ({ destinations, hotels, defaultDestination }) => {
   const [selectedLocationId, setSelectedLocationId] = useState(defaultDestination?.id || "");
   const [selectedHotelId, setSelectedHotelId] = useState("");
   const [searchQuery, setSearchQuery] = useState(
-    defaultDestination ? `${defaultDestination.name}, ${defaultDestination.country}` : ""
+     ""
   );
 
   const today = new Date();

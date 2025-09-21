@@ -190,10 +190,17 @@ export default function Hotel({ data = [] }) {
                     <div className="mt-auto pt-4 flex justify-between items-center">
                       <div>
                         <span className="text-xs sm:text-sm text-gray-600">Starting from</span>
-                        <div className="font-bold text-lg sm:text-xl text-blue-900">
-                          {hotel.lowest_price?.toLocaleString()} TK
-                        </div>
+                        {hotel.lowest_price > 0 ? (
+                          <div className="font-bold text-lg sm:text-xl text-blue-900">
+                            {hotel.lowest_price.toLocaleString()} TK
+                          </div>
+                        ) : (
+                          <div className="text-sm text-blue-500 font-medium">
+                            Contact for price
+                          </div>
+                        )}
                       </div>
+
                       <Link
                         href={`/hotel/list/details/${slugify(hotel.hotel_name)}/${hotel.hotel_id}`}
                         style={{ background: "linear-gradient(90deg, #313881, #0678B4)" }}

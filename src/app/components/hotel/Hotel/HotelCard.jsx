@@ -30,7 +30,7 @@ const findSimilarHotels = (searchTerm, hotels = []) => {
 const HotelCard = ({ hotelData = [] }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(12); 
+  const [visibleCount, setVisibleCount] = useState(12);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
 
   const loaderRef = useRef(null);
@@ -197,13 +197,15 @@ const HotelCard = ({ hotelData = [] }) => {
                   </div>
                   <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-auto">
                     <div>
-                      <p className="text-base sm:text-lg font-bold text-blue-600">
-                        {discountedPrice.toLocaleString()} BDT
-                        <span className="text-2xs font-normal text-gray-500">
-                          {" "}
-                          / night
-                        </span>
-                      </p>
+                      {discountedPrice ? (
+                        <p className="text-base sm:text-lg font-bold text-blue-600">
+                          {discountedPrice.toLocaleString()} BDT
+                          <span className="text-2xs font-normal text-gray-500"> / night</span>
+                        </p>
+                      ) : (
+                        <p className="text-sm text-blue-500 font-medium">Contact for price</p>
+                      )}
+
                     </div>
                     <Link
                       href={`/hotel/list/details/${slugify(

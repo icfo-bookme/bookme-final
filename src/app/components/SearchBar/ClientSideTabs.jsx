@@ -7,16 +7,23 @@ import {
   FaPassport,
   FaShip,
   FaHiking,
-  FaCar, 
+  FaCar,
 } from "react-icons/fa";
 
 const ClientSideTabs = ({ initialTab, components, icons }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
   useEffect(() => {
     const url = new URL(window.location);
-    url.searchParams.set("tab", activeTab);
-    window.history.replaceState(null, "", url.toString());
+    if (activeTab === "hotel") {
+      // Remove the tab query parameter if hotel is active
+      url.searchParams.delete("tab");
+    } else {
+      // Set the tab query parameter for other tabs
+      url.searchParams.set("tab", activeTab);
+    }
+    window.history.replaceState(null, "", url.pathname + url.search);
   }, [activeTab]);
+
 
   return (
     <>
@@ -61,7 +68,7 @@ const ClientSideTabs = ({ initialTab, components, icons }) => {
           Tours
         </TabButton>
 
-      
+
         <TabButton
           active={activeTab === "activities"}
           icon={icons.activities}
@@ -75,10 +82,10 @@ const ClientSideTabs = ({ initialTab, components, icons }) => {
           icon={icons.carRental}
           onClick={() => setActiveTab("carRental")}
         >
-         <div className="flex   items-center gap-2">
-          <span>Car</span> <span className="hidden md:block">Rental</span>
-         </div>
-         
+          <div className="flex   items-center gap-2">
+            <span>Car</span> <span className="hidden md:block">Rental</span>
+          </div>
+
         </TabButton>
       </div>
 
@@ -92,11 +99,10 @@ const ClientSideTabs = ({ initialTab, components, icons }) => {
 const TabButton = ({ active, icon, children, onClick }) => (
   <button
     onClick={onClick}
-    className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm md:text-base font-medium transition-colors ${
-      active
+    className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-3 sm:px-4 sm:py-4 text-xs sm:text-sm md:text-base font-medium transition-colors ${active
         ? "text-blue-950 border-b-2 border-blue-950"
         : "text-gray-500 hover:text-blue-800"
-    }`}
+      }`}
     type="button"
   >
     <span className="text-lg sm:text-xl">{icon}</span>

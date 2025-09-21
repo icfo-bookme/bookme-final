@@ -1,20 +1,25 @@
 import PrimaryButton from "@/utils/PrimaryButton"
 import Image from "next/image"
+import Link from "next/link"
 import { FaMapMarkerAlt, FaPlane, FaPlaneDeparture } from "react-icons/fa"
 import { RiWhatsappFill } from "react-icons/ri"
 
+export const Card = ({ flightRoutes, homepage }) => {
+    // Determine which routes to display
+    const displayRoutes = homepage === 'true'
+        ? flightRoutes?.slice(0, 6)
+        : flightRoutes;
 
-export const Card = ({ flightRoutes }) => {
     return (
         <div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                {flightRoutes?.map(route => (
+
+
+                {displayRoutes?.map(route => (
                     <div key={route.id} className="bg-white hover:border hover:border-blue-950 rounded-2xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl border border-blue-100">
                         <div className="px-3 py-6">
-                            
                             <div className="flex flex-col items-center justify-between">
                                 <div className="flex justify-between w-full">
-                                   
                                     <div className="text-left w-2/5">
                                         <h3 className="text-base font-bold text-slate-800 truncate">{route.origin_city}</h3>
                                         <div className="flex items-center text-slate-500 text-xs mt-1">
@@ -32,21 +37,19 @@ export const Card = ({ flightRoutes }) => {
                                     </div>
                                 </div>
 
-                                
                                 <div className="relative -top-[52px] right-2 mx-auto w-[50%] flex items-center justify-center">
-                                    <span className="font-semibold -mt-5 text-blue-700 text-xs">{route.flight_duration}</span>
-                                    <div className="h-0.5 bg-blue-200 w-full mx-auto absolute top-1/2 transform -translate-y-1/2"></div>
+                                    <span className="font-semibold -mt-5 text-blue-700 text-[8px] md:text-xs">{route.flight_duration}</span>
+                                    <div className="h-0.5 bg-blue-200 w-[calc(100%-1rem)] mx-auto absolute top-1/2 transform -translate-y-1/2"></div>
 
                                     <div className="relative bg-white px-2 z-10">
                                         <div className="h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center">
                                             <FaPlaneDeparture className="text-white transform " size={16} />
                                         </div>
                                     </div>
-                                    <span className="font-semibold -mt-5 text-blue-700 text-xs">{route.number_of_stops === "0" ? "Non-" : `${route.number_of_stops}`} stop</span>
+                                    <span className="font-semibold -mt-5 text-blue-700 text-[8px] md:text-xs">{route.number_of_stops === "0" ? "Non-stop" : `${route.number_of_stops} stop${route.number_of_stops > 1 ? 's' : ''}`}</span>
                                 </div>
                             </div>
 
-                           
                             <div className="flex flex-col sm:flex-row justify-between items-center pt-1 border-t border-slate-100 mt-0 ">
                                 <div className="flex items-center mb-4 sm:mb-0 w-full sm:w-auto justify-center sm:justify-start">
                                     {route.airline_icon_url ? (
@@ -71,12 +74,12 @@ export const Card = ({ flightRoutes }) => {
                                             {route.discount_percent > 0 ? (
                                                 <>
                                                     <span className="text-lg sm:text-xl font-bold text-slate-800">
-                                                        ${(route.base_price * (1 - route.discount_percent / 100)).toFixed(2)}
+                                                        {Math.round(route.base_price * (1 - route.discount_percent / 100)).toFixed(2)}
                                                     </span>
-                                                    <span className="ml-2 text-xs sm:text-sm text-slate-500 line-through">${route.base_price}</span>
+                                                    <span className="ml-2 text-xs sm:text-sm text-slate-500 line-through">{Math.round(route.base_price)} TK</span>
                                                 </>
                                             ) : (
-                                                <span className="text-lg sm:text-xl font-bold text-slate-800">${route.base_price}</span>
+                                                <span className="text-lg sm:text-xl font-bold text-slate-800">{Math.round(route.base_price)} TK</span>
                                             )}
 
                                             {route.discount_percent > 0 && (
@@ -106,7 +109,23 @@ export const Card = ({ flightRoutes }) => {
                         </div>
                     </div>
                 ))}
+
+
             </div>
+            {homepage === 'true' && (
+                <div className="w-full flex justify-center mt-8 md:mt-10">
+                    <Link
+                        href="/flight"
+                        style={{ background: "linear-gradient(90deg, #313881, #0678B4)" }}
+                        className="px-3 py-1 md:px-8 md:py-3.5 text-white font-medium rounded-md hover:opacity-90 transition-opacity inline-flex items-center"
+                    >
+                        See More
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 ml-2">
+                            <path fillRule="evenodd" d="M5 10a.75.75 0 01.75-.75h6.638L10.23 7.29a.75.75 0 111.04-1.08l3.5 3.25a.75.75 0 010 1.08l-3.5 3.25a.75.75 0 11-1.04-1.08l2.158-1.96H5.75A.75.75 0 015 10z" clipRule="evenodd" />
+                        </svg>
+                    </Link>
+                </div>
+            )}
 
             {flightRoutes?.length === 0 && (
                 <div className="text-center py-16 bg-white rounded-2xl shadow-md col-span-full">

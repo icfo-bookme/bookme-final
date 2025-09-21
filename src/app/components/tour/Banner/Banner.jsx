@@ -58,10 +58,10 @@ export default function Banner({ id }) {
             <div className="absolute inset-0 flex items-center h-full px-4 md:px-8 z-20 pointer-events-none">
               <div className="font-heading text-white w-full lg:w-3/5 space-y-6 pl-8 lg:pl-16 text-left">
                 <h4 className="sm:text-3xl text-[20px] lg:text-4xl font-bold mb-4">
-                  {image?.title || "Plan tours to dream locations in just a click!"}
+                  {image?.title || ""}
                 </h4>
                 <p className="text-[12px] sm:text-[16px]">
-                  {image?.subtitle || "Travel is a transformative and enriching experience that allows individuals to explore new destinations, cultures, and landscapes."}
+                  {image?.subtitle || ""}
                 </p>
 
               </div>

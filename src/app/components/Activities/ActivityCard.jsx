@@ -20,7 +20,7 @@ const iconMapping = {
   BiTime: BiTime,
   AiOutlineClockCircle: AiOutlineClockCircle,
   PiUsersThreeBold: PiUsersThreeBold,
-  PiUsersThree: PiUsersThreeBold, 
+  PiUsersThree: PiUsersThreeBold,
   FaUsers: FaUsers,
   TbUsers: TbUsers,
   AiOutlineUser: AiOutlineUser,
@@ -50,18 +50,18 @@ const ActivityCard = ({ activity }) => {
       .replace(/[^\w\-]+/g, '')
       .replace(/\-\-+/g, '-');
 
-  
+
   const formatTimeDisplay = (timeString) => {
     if (!timeString) return '';
 
     return timeString
-      .replace(/\b0h\s?/g, '')    
-      .replace(/\s0m\b/g, '')       
-      .replace(/\s+to\s+/, ' to '); 
+      .replace(/\b0h\s?/g, '')
+      .replace(/\s0m\b/g, '')
+      .replace(/\s+to\s+/, ' to ');
   };
- 
+
   const renderIcon = (iconName) => {
-    
+
     const cleanIconName = iconName ? iconName.replace(/['"]/g, '').trim() : '';
     const IconComponent = iconMapping[cleanIconName] || iconMapping.default;
     return <IconComponent className="text-blue-500 text-xs" />;
@@ -69,13 +69,13 @@ const ActivityCard = ({ activity }) => {
 
 
   const getSummaryText = (summary) => {
-    const validKeys = Object.keys(summary).filter(key => 
-      key !== 'icon_name' && 
-      key !== 'icon_import' && 
-      summary[key] && 
+    const validKeys = Object.keys(summary).filter(key =>
+      key !== 'icon_name' &&
+      key !== 'icon_import' &&
+      summary[key] &&
       summary[key].trim() !== ''
     );
-    
+
     if (validKeys.length > 0) {
       const text = summary[validKeys[0]];
       if (validKeys[0] === 'Duration' || text.includes('h') || text.includes('m')) {
@@ -83,18 +83,18 @@ const ActivityCard = ({ activity }) => {
       }
       return text;
     }
-    
+
     return '';
   };
 
   const getSummaryKey = (summary) => {
-    const validKeys = Object.keys(summary).filter(key => 
-      key !== 'icon_name' && 
-      key !== 'icon_import' && 
-      summary[key] && 
+    const validKeys = Object.keys(summary).filter(key =>
+      key !== 'icon_name' &&
+      key !== 'icon_import' &&
+      summary[key] &&
       summary[key].trim() !== ''
     );
-    
+
     return validKeys.length > 0 ? validKeys[0] : '';
   };
 
@@ -138,12 +138,12 @@ const ActivityCard = ({ activity }) => {
                 const summaryText = getSummaryText(summary);
                 const summaryKey = getSummaryKey(summary);
                 if (!summaryText) return null;
-                
+
                 return (
                   <span
                     key={i}
                     className="flex items-start text-xs text-gray-700 bg-gray-50 border border-gray-200 px-3 py-1 rounded-full hover:bg-blue-50 hover:border-blue-200 transition-colors"
-                    title={summaryKey} 
+                    title={summaryKey}
                   >
                     <div className="mr-2">
                       {renderIcon(summary.icon_name)}
@@ -168,18 +168,27 @@ const ActivityCard = ({ activity }) => {
 
             <div className="text-right mt-3 md:mt-0">
               <span className="text-xs text-gray-500 block">Starting From:</span>
-              <div className="flex items-end justify-end gap-2">
-                {activity.original_price && parseFloat(activity.original_price) > parseFloat(activity.final_price || activity.price || 0) && (
-                  <p className="text-sm text-gray-500 line-through">
-                    {formatPrice(activity.original_price)}
+
+              {parseFloat(activity.final_price || activity.price || 0) > 0 ? (
+                <div className="flex items-end justify-end gap-2">
+                  {activity.original_price &&
+                    parseFloat(activity.original_price) >
+                    parseFloat(activity.final_price || activity.price || 0) && (
+                      <p className="text-sm text-gray-500 line-through">
+                        {formatPrice(activity.original_price)}
+                      </p>
+                    )}
+                  <p className="text-xl font-bold text-blue-800">
+                    {formatPrice(activity.final_price || activity.price)}
                   </p>
-                )}
-                <p className="text-xl font-bold text-blue-800">
-                  {formatPrice(activity.final_price || activity.price || 0)}
-                </p>
-              </div>
+                </div>
+              ) : (
+                <p className="text-base text-blue-500 mt-1">Contact for price</p>
+              )}
+
               <p className="text-xs text-gray-500 mt-1">for entire package</p>
             </div>
+
           </div>
         </div>
       </div>

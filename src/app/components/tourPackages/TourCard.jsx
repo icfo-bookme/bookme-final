@@ -97,18 +97,25 @@ const TourCard = ({ tour }) => {
 
             <div className="text-right">
               <span className="text-xs text-gray-500 block">Starting From:</span>
-              <div className="flex items-end justify-end gap-2">
-                {tour.original_price && tour.original_price > (tour.price || 0) && (
-                  <p className="text-sm text-gray-500 line-through">
-                    {formatPrice(tour.original_price)}
+
+              {tour.price && tour.price > 0 ? (
+                <div className="flex items-end justify-end gap-2">
+                  {tour.original_price && tour.original_price > tour.price && (
+                    <p className="text-sm text-gray-500 line-through">
+                      {formatPrice(tour.original_price)}
+                    </p>
+                  )}
+                  <p className="text-xl font-bold text-blue-800">
+                    {formatPrice(tour.price)}
                   </p>
-                )}
-                <p className="text-xl font-bold text-blue-800">
-                  {formatPrice(tour.price || 0)}
-                </p>
-              </div>
+                </div>
+              ) : (
+                <p className="text-base text-blue-500 mt-1">Contact for price</p>
+              )}
+
               <p className="text-xs text-gray-500 mt-1">for entire package</p>
             </div>
+
           </div>
         </div>
       </div>
