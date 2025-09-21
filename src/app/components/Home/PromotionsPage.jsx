@@ -60,58 +60,39 @@ export default function PromotionsPage() {
     const cacheKey = 'promotions-cache';
     const cacheExpiry = 5 * 60 * 1000; // 5 minutes cache
 
-    async function fetchPromotions() {
-      try {
-        if (isMounted) setLoading(true);
+  async function fetchPromotions() {
+  try {
+    if (isMounted) setLoading(true);
 
-        // Check cache first
-        const cachedData = localStorage.getItem(cacheKey);
-        if (cachedData) {
-          const { data, timestamp } = JSON.parse(cachedData);
-          if (Date.now() - timestamp < cacheExpiry) {
-            if (isMounted) {
-              setPromotions(data);
-              setError(null);
-            }
-            return;
-          }
-        }
+    const response = await fetchWithTimeout(
+      'https://www.bookme.com.bd/admin/api/homepage/hot-package'
+    );
 
-        const response = await fetchWithTimeout(
-          'https://www.bookme.com.bd/admin/api/homepage/hot-package',
-          { cache: 'no-store' } // Bypass browser cache
-        );
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
+    }
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
-        }
+    const { data } = await response.json();
 
-        const { data } = await response.json();
-
-        if (isMounted) {
-          setPromotions(data);
-          setError(null);
-
-          // Update cache
-          localStorage.setItem(cacheKey, JSON.stringify({
-            data,
-            timestamp: Date.now()
-          }));
-        }
-      } catch (err) {
-        if (isMounted) {
-          if (retryCount < maxRetries) {
-            retryCount++;
-            await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
-            await fetchPromotions();
-          } else {
-            setError(err.message || 'Failed to fetch promotions. Please try again later.');
-          }
-        }
-      } finally {
-        if (isMounted) setLoading(false);
+    if (isMounted) {
+      setPromotions(data);
+      setError(null);
+    }
+  } catch (err) {
+    if (isMounted) {
+      if (retryCount < maxRetries) {
+        retryCount++;
+        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        await fetchPromotions();
+      } else {
+        setError(err.message || 'Failed to fetch promotions. Please try again later.');
       }
     }
+  } finally {
+    if (isMounted) setLoading(false);
+  }
+}
+
 
     fetchPromotions();
 
@@ -198,14 +179,7 @@ export default function PromotionsPage() {
               nextEl: '.promo-swiper-button-next',
               prevEl: '.promo-swiper-button-prev',
             }}
-            freeMode={{
-              enabled: isMobile,
-              momentum: true,
-              momentumRatio: 2,
-              velocityRatio: 3.5,
-              sticky: false,
-            }}
-            resistanceRatio={1}
+            resistanceRatio={0.5}
             touchStartPreventDefault={false}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
@@ -219,9 +193,12 @@ export default function PromotionsPage() {
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 5,
-                  velocityRatio: 5.5,
-                  sticky: false
+                  momentumRatio: 0.6,  // Reduced to limit scroll distance
+                  momentumVelocityRatio: 0.4,  // Reduced to limit scroll velocity
+                  momentumBounce: true,
+                  momentumBounceRatio: 0.2,
+                  minimumVelocity: 0.02,
+                  sticky: true,  // Changed to true for better control
                 },
               },
               640: {
@@ -231,9 +208,12 @@ export default function PromotionsPage() {
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 2,
-                  velocityRatio: 3.5,
-                  sticky: false
+                  momentumRatio: 0.7,  // Reduced to limit scroll distance
+                  momentumVelocityRatio: 0.5,  // Reduced to limit scroll velocity
+                  momentumBounce: true,
+                  momentumBounceRatio: 0.3,
+                  minimumVelocity: 0.02,
+                  sticky: true,
                 },
               },
               768: {
@@ -244,13 +224,13 @@ export default function PromotionsPage() {
               },
               1024: {
                 slidesPerView: 3,
-                slidesPerGroup: 3,
+                slidesPerGroup: 3,  // This will make it snap 3 slides at a time
                 speed: 700,
                 freeMode: false,
               },
               1280: {
                 slidesPerView: 3,
-                slidesPerGroup: 3,
+                slidesPerGroup: 3,  // This will make it snap 3 slides at a time
                 speed: 800,
                 freeMode: false,
               }

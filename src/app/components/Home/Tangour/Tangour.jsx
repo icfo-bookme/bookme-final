@@ -136,16 +136,19 @@ export default function Tangour({ data = [] }) {
             onSliderMove={handleTouchStart}
             onTransitionEnd={handleTouchEnd}
             breakpoints={{
-              350: {
-                slidesPerView: 1.4,
+              320: {
+                slidesPerView: 1.2,
                 centeredSlides: true,
                 speed: 300,
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 5,
-                  velocityRatio: 5.5,
-                  sticky: false
+                  momentumRatio: 0.6,  // Reduced to limit scroll distance
+                  momentumVelocityRatio: 0.4,  // Reduced to limit scroll velocity
+                  momentumBounce: true,
+                  momentumBounceRatio: 0.2,
+                  minimumVelocity: 0.02,
+                  sticky: true,  // Changed to true for better control
                 },
               },
               640: {
@@ -155,9 +158,12 @@ export default function Tangour({ data = [] }) {
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 2,
-                  velocityRatio: 3.5,
-                  sticky: false
+                  momentumRatio: 0.7,  // Reduced to limit scroll distance
+                  momentumVelocityRatio: 0.5,  // Reduced to limit scroll velocity
+                  momentumBounce: true,
+                  momentumBounceRatio: 0.3,
+                  minimumVelocity: 0.02,
+                  sticky: true,
                 },
               },
               768: {

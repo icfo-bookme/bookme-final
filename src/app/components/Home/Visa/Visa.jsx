@@ -108,14 +108,7 @@ export default function Visa({ data = [] }) {
               nextEl: '.visa-swiper-button-next',
               prevEl: '.visa-swiper-button-prev',
             }}
-            freeMode={{
-              enabled: isMobile,
-              momentum: true,
-              momentumRatio: 2,
-              velocityRatio: 3.5,
-              sticky: false,
-            }}
-            resistanceRatio={1}
+            resistanceRatio={0.5}
             touchStartPreventDefault={false}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
@@ -129,21 +122,27 @@ export default function Visa({ data = [] }) {
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 5,
-                  velocityRatio: 5.5,
-                  sticky: false
+                  momentumRatio: 0.6,  // Reduced to limit scroll distance
+                  momentumVelocityRatio: 0.4,  // Reduced to limit scroll velocity
+                  momentumBounce: true,
+                  momentumBounceRatio: 0.2,
+                  minimumVelocity: 0.02,
+                  sticky: true,  // Changed to true for better control
                 },
               },
               640: {
                 slidesPerView: 1.5,
                 centeredSlides: true,
-                speed: 400,
+                speed: 300,
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 2,
-                  velocityRatio: 3.5,
-                  sticky: false
+                  momentumRatio: 0.7,  // Reduced to limit scroll distance
+                  momentumVelocityRatio: 0.5,  // Reduced to limit scroll velocity
+                  momentumBounce: true,
+                  momentumBounceRatio: 0.3,
+                  minimumVelocity: 0.02,
+                  sticky: true,
                 },
               },
               768: {
@@ -154,13 +153,13 @@ export default function Visa({ data = [] }) {
               },
               1024: {
                 slidesPerView: 3,
-                slidesPerGroup: 3,
+                slidesPerGroup: 3,  // This will make it snap 3 slides at a time
                 speed: 700,
                 freeMode: false,
               },
               1280: {
                 slidesPerView: 3,
-                slidesPerGroup: 3,
+                slidesPerGroup: 3,  // This will make it snap 3 slides at a time
                 speed: 800,
                 freeMode: false,
               }
@@ -189,7 +188,7 @@ export default function Visa({ data = [] }) {
                       <div>
                         <span className="text-xs sm:text-sm text-gray-600">Starting from</span>
                         <div className="font-bold text-lg sm:text-xl text-blue-900">
-                          {Math.round(country?.properties[0]?.property_uinit[0]?.price[0]?.price) } BDT
+                          {Math.round(country?.properties[0]?.property_uinit[0]?.price[0]?.price)} BDT
                         </div>
                       </div>
                       <Link
