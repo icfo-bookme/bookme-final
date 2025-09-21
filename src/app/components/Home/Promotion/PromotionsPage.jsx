@@ -193,12 +193,9 @@ export default function PromotionsPage() {
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 0.6,  // Reduced to limit scroll distance
-                  momentumVelocityRatio: 0.4,  // Reduced to limit scroll velocity
-                  momentumBounce: true,
-                  momentumBounceRatio: 0.2,
-                  minimumVelocity: 0.02,
-                  sticky: true,  // Changed to true for better control
+                  momentumRatio: 2,
+                  velocityRatio: 5.5,
+                  sticky: false
                 },
               },
               640: {
@@ -208,12 +205,9 @@ export default function PromotionsPage() {
                 freeMode: {
                   enabled: true,
                   momentum: true,
-                  momentumRatio: 0.7,  // Reduced to limit scroll distance
-                  momentumVelocityRatio: 0.5,  // Reduced to limit scroll velocity
-                  momentumBounce: true,
-                  momentumBounceRatio: 0.3,
-                  minimumVelocity: 0.02,
-                  sticky: true,
+                  momentumRatio: 0.2,
+                  velocityRatio: 1.5,
+                  sticky: false
                 },
               },
               768: {
