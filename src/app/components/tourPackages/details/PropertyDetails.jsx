@@ -12,7 +12,6 @@ export default async function PropertyDetails({ data }) {
     if (!data) {
         return <div>No property details available</div>;
     }
-    console.log("Property Details Data:", data);
     const { category_id } = data;
 
     const relatedPackages = await getRelatedActivities(data.destination_id, data.id);

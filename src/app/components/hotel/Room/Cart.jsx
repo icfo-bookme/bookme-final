@@ -15,13 +15,35 @@ const Cart = ({
   checkout: initialCheckout, 
   onDatesChange = () => {}
 }) => {
-    const [checkin, setCheckin] = useState(new Date(initialCheckin));
-    const [checkout, setCheckout] = useState(new Date(initialCheckout));
+    // Set default dates if not provided
+    const getDefaultDates = () => {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        return {
+            checkin: initialCheckin ? new Date(initialCheckin) : today,
+            checkout: initialCheckout ? new Date(initialCheckout) : tomorrow
+        };
+    };
+
+    const [checkin, setCheckin] = useState(getDefaultDates().checkin);
+    const [checkout, setCheckout] = useState(getDefaultDates().checkout);
     const [showDatePickerModal, setShowDatePickerModal] = useState(false);
-    const [tempCheckin, setTempCheckin] = useState(new Date(initialCheckin));
-    const [tempCheckout, setTempCheckout] = useState(new Date(initialCheckout));
+    const [tempCheckin, setTempCheckin] = useState(getDefaultDates().checkin);
+    const [tempCheckout, setTempCheckout] = useState(getDefaultDates().checkout);
 
     const datePickerRef = useRef(null);
+
+    // Update dates when props change
+    useEffect(() => {
+        if (initialCheckin && initialCheckout) {
+            setCheckin(new Date(initialCheckin));
+            setCheckout(new Date(initialCheckout));
+            setTempCheckin(new Date(initialCheckin));
+            setTempCheckout(new Date(initialCheckout));
+        }
+    }, [initialCheckin, initialCheckout]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {

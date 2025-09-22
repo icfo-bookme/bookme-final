@@ -29,20 +29,20 @@ export default async function Home() {
     loading = false;
   }
   const slugify = (str) =>
-  str
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')        
-    .replace(/[^\w\-]+/g, '')    
-    .replace(/\-\-+/g, '-');     
-  
+    str
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-');
+
   if (loading) {
     return (
       <div className="min-h-screen font-sans">
-        
+
         <div className="h-[60vh] bg-gray-300 animate-pulse" />
 
-      
+
         <div className="bg-white py-8">
           <main className="container mx-auto px-4 flex flex-col items-center">
             <div className="w-full max-w-3xl space-y-4">
@@ -108,7 +108,7 @@ export default async function Home() {
         <div className="flex justify-center items-center ">
           <div className='grid xs:grid-cols-2 grid-cols-2 gap-5 md:grid-cols-4'>
             {visaData.map((country, ind) => (
-              
+
               <Link
                 key={ind}
                 href={`/visa/${slugify(country.name)}/${country?.id}`}
@@ -190,37 +190,49 @@ export default async function Home() {
                       </div>
                     ))}
 
-                   
+
                   </div>
-                   {/* Price and CTA */}
-                   <div className="mt-auto pt-3 lg:-mt-8 p-4 lg:pt-4 pb-2 lg:pb-4 border-t border-gray-100 flex justify-between items-center">
-                      <div className='flex justify-between gap-1 lg:-mt-4 lg:gap-3 lg:block'>
-                        <p className="text-xs text-gray-500">Starting from:</p>
+                  {/* Price and CTA */}
+                  <div className="mt-auto pt-3 lg:-mt-8 p-4 lg:pt-4 pb-2 lg:pb-4 border-t border-gray-100 flex justify-between items-center">
+                    <div className='flex justify-between gap-1 lg:-mt-4 lg:gap-3 lg:block'>
+                      <p className="text-xs text-gray-500">Starting from:</p>
+                      <p className="text-sm lg:text-xl font-bold text-blue-600">
                         <p className="text-sm lg:text-xl font-bold text-blue-600">
-                          {Math.ceil(country?.properties[0]?.property_uinit[0]?.price[0]?.price).toLocaleString()} BDT
+                          {
+                            Math.ceil(country?.properties[0]?.property_uinit[0]?.price[0]?.price) === 0 ? (
+                              <span className='text-sm'>Contact for Price</span>
+                            ) : (
+                              <span>
+                                {Math.ceil(country?.properties[0]?.property_uinit[0]?.price[0]?.price).toLocaleString()} BDT
+                              </span>
+                            )
+                          }
+
                         </p>
-                      </div>
-                      <button
-                        style={{
-                          background: "linear-gradient(90deg, #313881, #0678B4)",
-                        }}
-                        className="px-3 hidden py-1.5 lg:px-4 lg:py-2 hover:bg-blue-700 text-white text-xs lg:text-sm font-medium rounded-lg transition-colors duration-200 lg:flex items-center"
-                      >
-                        Details
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          className="w-3 h-3 lg:w-4 lg:h-4 ml-1"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M5 10a.75.75 0 01.75-.75h6.638L10.23 7.29a.75.75 0 111.04-1.08l3.5 3.25a.75.75 0 010 1.08l-3.5 3.25a.75.75 0 11-1.04-1.08l2.158-1.96H5.75A.75.75 0 015 10z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
+
+                      </p>
                     </div>
+                    <button
+                      style={{
+                        background: "linear-gradient(90deg, #313881, #0678B4)",
+                      }}
+                      className="px-3 hidden py-1.5 lg:px-4 lg:py-2 hover:bg-blue-700 text-white text-xs lg:text-sm font-medium rounded-lg transition-colors duration-200 lg:flex items-center"
+                    >
+                      Details
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="w-3 h-3 lg:w-4 lg:h-4 ml-1"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5 10a.75.75 0 01.75-.75h6.638L10.23 7.29a.75.75 0 111.04-1.08l3.5 3.25a.75.75 0 010 1.08l-3.5 3.25a.75.75 0 11-1.04-1.08l2.158-1.96H5.75A.75.75 0 015 10z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </Link>
             ))}

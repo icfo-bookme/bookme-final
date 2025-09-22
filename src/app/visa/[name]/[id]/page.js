@@ -252,12 +252,32 @@ export default function VisaDetailsPage({ params }) {
                         <div className="text-sm text-gray-500 mb-1">Validity</div>
                         <div className="text-base font-bold">{unit?.Validity} Days</div>
                       </div>
-                      <div className="flex-1">
-                        <div className="text-sm text-gray-500 mb-1">Max Stay</div>
-                        <div className="text-base font-bold">{unit?.Max_Stay} Days</div>
-                      </div>
+                      {
+                        unit?.Max_Stay > 0 ? (
+                          <div className="flex-1">
+                            <div className="text-sm text-gray-500 mb-1">Max Stay</div>
+                            <div className="text-base font-bold">{unit?.Max_Stay} Days</div>
+                          </div>
+                        ) : null
+                      }
+
+
+
                     </div>
-                    <p className="text-lg font-semibold">BDT {Math.ceil(unit?.price[0]?.price)} <span className="text-base font-light">/person</span></p>
+
+                    <p className="text-lg font-semibold">
+                      {
+                        Math.ceil(unit?.price[0]?.price) === 0 ? (
+                          <span>Contact for Price</span>
+                        ) : (
+                          <>
+                            BDT {Math.ceil(unit?.price[0]?.price).toLocaleString()}
+                            <span className="text-base font-light">/person</span>
+                          </>
+                        )
+                      }
+                    </p>
+
                   </div>
                   <p className="text-[#f59d3f]  text-sm mt-2">
                     ⚠️ Please contact our Visa department for Document processing.

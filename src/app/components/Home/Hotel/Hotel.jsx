@@ -156,13 +156,13 @@ export default function Hotel({ data = [] }) {
               },
               1024: {
                 slidesPerView: 3,
-                slidesPerGroup: 3,  // This will make it snap 3 slides at a time
+                slidesPerGroup: 3,  
                 speed: 700,
                 freeMode: false,
               },
               1280: {
                 slidesPerView: 3,
-                slidesPerGroup: 3,  // This will make it snap 3 slides at a time
+                slidesPerGroup: 3,  
                 speed: 800,
                 freeMode: false,
               }
