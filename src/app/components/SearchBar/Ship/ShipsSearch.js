@@ -1,13 +1,11 @@
-"use client";
+'use client';
 
 import { useEffect, useState, useRef } from "react";
-
 import getTourDestination from "@/services/getTourDestination";
 import { useRouter } from "next/navigation";
 import { LuMapPin } from "react-icons/lu";
 import SearchButton from "@/utils/SearchButton";
 import useScrollOnClick from "@/hooks/useScrollOnFocus";
-
 
 const ShipsSearch = () => {
   const router = useRouter();
@@ -18,7 +16,9 @@ const ShipsSearch = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
-  const [inputRef, handleClick] = useScrollOnClick(150)
+  const [placeholder, setPlaceholder] = useState("Search destinations...");
+  const [stopTypewriter, setStopTypewriter] = useState(false);
+  const [inputRef, handleClick] = useScrollOnClick(150);
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -28,12 +28,6 @@ const ShipsSearch = () => {
         if (response?.success) {
           const visibleDestinations = response.data.filter((dest) => dest.isShow === "yes");
           setDestinations(visibleDestinations);
-
-          if (visibleDestinations.length > 0) {
-            const first = visibleDestinations[0];
-            setSearchQuery(`${first.name}, ${first.country}`);
-            setSelectedLocationId(first.id);
-          }
         }
       } catch (error) {
         setError("Failed to load destinations");
@@ -44,16 +38,204 @@ const ShipsSearch = () => {
     fetchData();
   }, []);
 
+  // Typewriter effect for placeholder with "Search Ships For" prefix
+  useEffect(() => {
+    if (!destinations.length) return;
+
+    const typewriterItems = destinations.map(dest => `${dest.name}, ${dest.country}`);
+    const prefix = "Search Ships For ";
+
+    let currentIndex = 0;    
+    let charIndex = 0;     
+    let isDeleting = false;  
+    let currentText = "";
+
+    const typingSpeed = 120;    
+    const deletingSpeed = 120;    
+    const pauseBetweenWords = 3500; 
+
+    const typeWriter = () => {
+      if (stopTypewriter) return; 
+
+      currentText = typewriterItems[currentIndex];
+
+      if (!isDeleting) {
+        // Typing characters forward - always show prefix + current text
+        const displayText = prefix + currentText.slice(0, charIndex + 1);
+        setPlaceholder(displayText);
+        charIndex++;
+
+        // If full text is typed, start deleting after pause
+        if (charIndex === currentText.length) {
+          isDeleting = true;
+          setTimeout(typeWriter, pauseBetweenWords);
+          return;
+        }
+      } else {
+        // Deleting characters - always keep prefix
+        const displayText = prefix + currentText.slice(0, charIndex - 1);
+        setPlaceholder(displayText);
+        charIndex--;
+
+        // When fully deleted, move to the next item
+        if (charIndex === 0) {
+          isDeleting = false;
+          currentIndex = (currentIndex + 1) % typewriterItems.length;
+        }
+      }
+
+      // Adjust speed for typing or deleting
+      const delay = isDeleting ? deletingSpeed : typingSpeed;
+      setTimeout(typeWriter, delay);
+    };
+
+    const startTyping = setTimeout(typeWriter, typingSpeed);
+
+    return () => clearTimeout(startTyping);
+  }, [destinations, stopTypewriter]);
+
+  // Handle click outside to close suggestions
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showSuggestions && searchRef.current && !searchRef.current.contains(event.target)) {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSuggestions(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showSuggestions]);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const calculateMatchScore = (item, query) => {
+    if (!query) return 0;
+
+    const itemName = item?.name?.toLowerCase();
+    const itemLocation = item?.country?.toLowerCase();
+    const itemFullText = `${itemName}, ${itemLocation}`.toLowerCase();
+    const queryText = query.toLowerCase().trim();
+
+    if (itemName === queryText) return 1000;
+    if (itemFullText === queryText) return 950;
+
+    if (itemFullText.includes(queryText)) {
+      const matchPos = itemFullText.indexOf(queryText);
+      return 900 + (matchPos === 0 ? 50 : 0);
+    }
+
+    if (itemName.startsWith(queryText)) return 850;
+
+    if (itemName.includes(queryText)) {
+      const matchPos = itemName.indexOf(queryText);
+      return 800 + (50 - Math.min(matchPos, 50));
+    }
+
+    const queryWords = queryText.split(/\s+/);
+    const allWordsMatch = queryWords.every(word =>
+      (itemName || '').includes(word) || (itemLocation || '').includes(word)
+    );
+    if (allWordsMatch) {
+      const matchedWordsCount = queryWords.filter(word =>
+        itemName.includes(word)
+      ).length;
+      return 700 + (matchedWordsCount * 50);
+    }
+
+    let partialMatchScore = 0;
+    for (let i = 0; i <= queryText.length - 3; i++) {
+      const substring = queryText.substring(i, i + 3);
+      if (itemName.includes(substring)) {
+        const pos = itemName.indexOf(substring);
+        partialMatchScore += 100 +
+          (substring.length * 20) +
+          (pos === 0 ? 50 : (pos < 3 ? 30 : 0));
+      }
+    }
+
+    if (partialMatchScore > 0) return Math.min(partialMatchScore, 699);
+
+    let charMatchScore = 0;
+    let queryIndex = 0;
+    for (let i = 0; i < itemName.length && queryIndex < queryText.length; i++) {
+      if (itemName[i] === queryText[queryIndex]) {
+        charMatchScore += 10;
+        queryIndex++;
+      }
+    }
+
+    return Math.min((charMatchScore / queryText.length) * 100, 600);
+  };
+
+  const updateSuggestions = (query) => {
+    if (!query) {
+      const defaultSuggestions = destinations.map(dest => ({
+        ...dest,
+        type: 'destination',
+        score: 0,
+        displayName: `${dest.name}, ${dest.country}`
+      }));
+      setSuggestions(defaultSuggestions);
+      return;
+    }
+
+    const scoredItems = destinations.map(dest => ({
+      ...dest,
+      type: 'destination',
+      score: calculateMatchScore(dest, query),
+      displayName: `${dest.name}, ${dest.country}`
+    }));
+
+    const sorted = scoredItems
+      .filter(item => item.score > 50)
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        const aNameMatch = a.name.toLowerCase().includes(query.toLowerCase());
+        const bNameMatch = b.name.toLowerCase().includes(query.toLowerCase());
+
+        if (aNameMatch && !bNameMatch) return -1;
+        if (!aNameMatch && bNameMatch) return 1;
+
+        const aNameLength = a.name.length;
+        const bNameLength = b.name.length;
+        if (aNameLength !== bNameLength) return aNameLength - bNameLength;
+
+        return a.displayName.localeCompare(b.displayName);
+      });
+
+    setSuggestions(sorted);
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    setStopTypewriter(true); // Stop typewriter once user types
+    updateSuggestions(query);
+
+    if (!query) {
+      setSelectedLocationId("");
+    }
+  };
+
+  const handleSearchFocus = () => {
+    setStopTypewriter(true); // Stop typewriter when input is focused
+    if (isFirstInputInteraction) {
+      setIsFirstInputInteraction(false);
+      setSearchQuery("");
+      setSelectedLocationId("");
+      setSuggestions(destinations.map(d => ({ ...d, type: 'destination' })));
+    } else {
+      updateSuggestions(searchQuery);
+    }
+    setShowSuggestions(true);
+  };
+
+  const selectItem = (item) => {
+    setStopTypewriter(true); // Stop typewriter when selecting an item
+    setSearchQuery(`${item.name}, ${item.country}`);
+    setSelectedLocationId(item.id);
+    setShowSuggestions(false);
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -66,62 +248,10 @@ const ShipsSearch = () => {
 
     if (selectedDestination) {
       const destinationSlug = slugify(selectedDestination.name);
-
       router.push(`/tour/${destinationSlug}/${selectedLocationId}`);
     } else {
-
       router.push(`/tour/${selectedLocationId}`);
     }
-  };
-
-  const levenshteinDistance = (a, b) => {
-    const m = a.length;
-    const n = b.length;
-    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
-    for (let i = 0; i <= m; i++) dp[i][0] = i;
-    for (let j = 0; j <= n; j++) dp[0][j] = j;
-
-    for (let i = 1; i <= m; i++) {
-      for (let j = 1; j <= n; j++) {
-        if (a[i - 1] === b[j - 1]) {
-          dp[i][j] = dp[i - 1][j - 1];
-        } else {
-          dp[i][j] = Math.min(
-            dp[i - 1][j] + 1,
-            dp[i][j - 1] + 1,
-            dp[i - 1][j - 1] + 1
-          );
-        }
-      }
-    }
-
-    return dp[m][n];
-  };
-
-  const calculateMatchScore = (destination, query) => {
-    const destText = `${destination.name}, ${destination.country}`.toLowerCase().replace(/[^a-z]/g, "");
-    const queryText = query.toLowerCase().replace(/[^a-z]/g, "");
-    if (!queryText) return 0;
-
-    const levDist = levenshteinDistance(queryText, destText);
-    const maxLen = Math.max(destText.length, queryText.length);
-    const levScore = Math.max(0, 100 - (levDist / maxLen) * 100);
-
-    const destFreq = {};
-    const queryFreq = {};
-    for (const char of destText) destFreq[char] = (destFreq[char] || 0) + 1;
-    for (const char of queryText) queryFreq[char] = (queryFreq[char] || 0) + 1;
-
-    let matchScore = 0;
-    let totalPossible = 0;
-    for (const char in destFreq) {
-      const matchCount = Math.min(destFreq[char], queryFreq[char] || 0);
-      matchScore += matchCount;
-      totalPossible += destFreq[char];
-    }
-
-    const overlapScore = (matchScore / totalPossible) * 100;
-    return Math.round(0.6 * levScore + 0.4 * overlapScore);
   };
 
   const highlightMatches = (text, query) => {
@@ -141,49 +271,6 @@ const ShipsSearch = () => {
     );
   };
 
-  const updateSuggestions = (query) => {
-    if (!query) {
-      setSuggestions(destinations);
-      return;
-    }
-
-    const scored = destinations.map(dest => ({
-      ...dest,
-      score: calculateMatchScore(dest, query)
-    }));
-
-    const matched = scored
-      .filter(dest => dest.score > 0)
-      .sort((a, b) => b.score - a.score);
-
-    setSuggestions(matched);
-  };
-
-  const handleSearchChange = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    updateSuggestions(query);
-    if (!query) setSelectedLocationId("");
-  };
-
-  const handleSearchFocus = () => {
-    if (isFirstInputInteraction) {
-      setIsFirstInputInteraction(false);
-      setSearchQuery("");
-      setSelectedLocationId("");
-      setSuggestions(destinations);
-    } else {
-      updateSuggestions(searchQuery);
-    }
-    setShowSuggestions(true);
-  };
-
-  const selectDestination = (destination) => {
-    setSearchQuery(`${destination.name}, ${destination.country}`);
-    setSelectedLocationId(destination.id);
-    setShowSuggestions(false);
-  };
-
   const slugify = (str) =>
     str
       .toLowerCase()
@@ -191,7 +278,6 @@ const ShipsSearch = () => {
       .replace(/\s+/g, '-')
       .replace(/[^\w\u0980-\u09FF\-]+/g, '')
       .replace(/\-\-+/g, '-');
-
 
   if (error) {
     return (
@@ -223,27 +309,25 @@ const ShipsSearch = () => {
                 value={searchQuery}
                 onClick={handleClick}
                 onChange={handleSearchChange}
-                onFocus={(e) => {
-                  handleSearchFocus(e);
-                }}
-
-                placeholder="Search destinations..."
+                onFocus={handleSearchFocus}
+                placeholder={placeholder}
                 className="p-3 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg pl-10"
               />
             </div>
+            
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                {suggestions.map((destination, idx) => (
+                {suggestions.map((item, idx) => (
                   <div
-                    key={destination.id}
+                    key={item.id}
                     className="p-3 hover:bg-blue-50 cursor-pointer text-sm sm:text-base flex justify-between items-center"
-                    onClick={() => selectDestination(destination)}
+                    onClick={() => selectItem(item)}
                   >
                     <div>
-                      {highlightMatches(destination.name, searchQuery)},{" "}
-                      {highlightMatches(destination.country, searchQuery)}
+                      {highlightMatches(item.name, searchQuery)},{" "}
+                      {highlightMatches(item.country, searchQuery)}
                     </div>
-                    {idx === 0 && (
+                    {idx === 0 && item.score > 50 && (
                       <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded whitespace-nowrap">
                         Best match
                       </span>

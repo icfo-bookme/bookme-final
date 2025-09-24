@@ -17,8 +17,8 @@ const HotelCTA = () => {
         style={{ background: "linear-gradient(90deg, #313881, #1678B4)" }}
       >
         Contact Our Travel Experts
-         <MdAddIcCall size={20} className="ml-2 text-green-200 " />
-         <RiWhatsappFill size={20} className="ml-2 text-green-200 " />
+         <MdAddIcCall size={30} className="ml-2 text-green-200 " />
+         <RiWhatsappFill size={30} className="ml-2 text-green-200 " />
         
       </Link>
     </section>

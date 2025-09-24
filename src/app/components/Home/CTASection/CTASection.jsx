@@ -27,7 +27,7 @@ const SimpleCTA = () => {
             rel="noopener noreferrer"
             className="bg-green-600 text-white font-medium py-3 px-6 rounded-lg inline-flex items-center justify-center hover:bg-green-700 transition-colors"
           >
-            <FaWhatsapp className="mr-2" />
+            <FaWhatsapp size={25} className="mr-2" />
             WhatsApp Us
           </a>
         </div>

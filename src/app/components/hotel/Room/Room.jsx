@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import getRooms from "@/services/room/getroom";
 import RoomList from './RoomList';
 import RoomDetailsModal from './RoomDetailsModal';
@@ -19,7 +20,19 @@ const RoomComponent = ({ hotel_id, checkin, checkout }) => {
     const [showCart, setShowCart] = useState(false);
     const [isLargeScreen, setIsLargeScreen] = useState(false);
 
+    const router = useRouter();
+
     useEffect(() => {
+        const savedCart = localStorage.getItem('bookingCart');
+        if (savedCart) {
+            try {
+                setCart(JSON.parse(savedCart));
+            } catch (error) {
+                console.error('Error loading cart from localStorage:', error);
+                localStorage.removeItem('bookingCart');
+            }
+        }
+
         const handleResize = () => {
             setIsLargeScreen(window.innerWidth >= 1024);
         };
@@ -29,6 +42,12 @@ const RoomComponent = ({ hotel_id, checkin, checkout }) => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    // Save cart to localStorage whenever cart changes
+    useEffect(() => {
+        localStorage.setItem('bookingCart', JSON.stringify(cart));
+    }, [cart]);
+
+    // Fetch room data
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -45,6 +64,7 @@ const RoomComponent = ({ hotel_id, checkin, checkout }) => {
         fetchData();
     }, [hotel_id]);
 
+    // Open Room Details Modal
     const openRoomDetails = (room) => {
         setSelectedRoom(room);
         setIsModalOpen(true);
@@ -55,6 +75,7 @@ const RoomComponent = ({ hotel_id, checkin, checkout }) => {
         setSelectedRoom(null);
     };
 
+    // Add room to cart
     const addToCart = (room) => {
         const discountedPrice = Math.round(room.price - (room.price * room.discount / 100));
         const taxes = Math.round(discountedPrice * 0.265);
@@ -70,10 +91,14 @@ const RoomComponent = ({ hotel_id, checkin, checkout }) => {
             taxes: taxes,
             total: totalPrice,
             breakfast: room.breakfast_status === 'included' ? 'Included' : 'Not Included',
-            image: room.images?.[0]?.url || ''
+            image: room.images?.[0]?.url || '',
+            originalPrice: room.price,
+            discount: room.discount
         };
 
-        setCart([...cart, cartItem]);
+        const newCart = [...cart, cartItem];
+        setCart(newCart);
+
         if (!isLargeScreen) {
             setShowCart(true);
         }
@@ -88,14 +113,33 @@ const RoomComponent = ({ hotel_id, checkin, checkout }) => {
         }
     };
 
+    const handleProceedToBooking = () => {
+        if (cart.length === 0) {
+            alert("Please add at least one room to proceed.");
+            return;
+        }
+        console.log(cart)
+        const bookingData = {
+            cart,
+            hotel_id,
+            checkin,
+            checkout
+        };
+
+        // Save data in localStorage
+        localStorage.setItem('bookingReviewData', JSON.stringify(bookingData));
+
+        router.push('/booking-review');
+    };
+
     if (loading) return <LoadingSpinner />;
     if (error) return <ErrorMessage error={error} />;
     if (!rooms?.length) return <NoRoomsAvailable />;
 
     return (
-        <div className="md:container w-[98%] lg:w-[100%] mx-auto text-blue-950 grid grid-cols-1 md:grid-cols-6 md:gap-4  relative">
+        <div className="md:container w-[98%] lg:w-[100%] mx-auto text-blue-950 grid grid-cols-1 md:grid-cols-6 md:gap-4 relative">
             {/* Floating Cart Button */}
-            {(cart.length > 0 && (isLargeScreen || window.innerWidth < 768)) && (
+            {cart.length > 0 && (
                 <CartButton
                     cartCount={cart.length}
                     isLargeScreen={isLargeScreen}
@@ -108,10 +152,12 @@ const RoomComponent = ({ hotel_id, checkin, checkout }) => {
                 <RoomDetailsModal
                     room={selectedRoom}
                     onClose={closeModal}
+                    onAddToCart={addToCart}
+                    cart={cart}
                 />
             )}
 
-            {/* Main Room Listing */}
+            {/* Room Listing */}
             <RoomList
                 rooms={rooms}
                 cart={cart}
@@ -121,15 +167,17 @@ const RoomComponent = ({ hotel_id, checkin, checkout }) => {
                 onAddToCart={addToCart}
             />
 
-
-            {(showCart && cart.length > 0) && (
+            {/* Cart Component */}
+            {showCart && cart.length > 0 && (
                 <Cart
+                    hotel_id={hotel_id}
                     cart={cart}
                     isLargeScreen={isLargeScreen}
                     onClose={() => setShowCart(false)}
                     onRemoveItem={removeFromCart}
                     checkin={checkin}
                     checkout={checkout}
+                    onProceedToCheckout={handleProceedToBooking}
                 />
             )}
         </div>

@@ -248,10 +248,16 @@ export default function VisaDetailsPage({ params }) {
                   </h1>
                   <div className="text-sm space-y-1 my-2">
                     <div className="flex mb-4">
-                      <div className="flex-1">
-                        <div className="text-sm text-gray-500 mb-1">Validity</div>
-                        <div className="text-base font-bold">{unit?.Validity} Days</div>
-                      </div>
+                      {
+                        unit?.Validity > 0 ? (
+                          <div className="flex-1">
+                            <div className="text-sm text-gray-500 mb-1">Validity</div>
+                            <div className="text-base font-bold">{unit?.Validity} Days</div>
+                          </div>
+                        ) : null
+                      }
+
+
                       {
                         unit?.Max_Stay > 0 ? (
                           <div className="flex-1">
@@ -273,6 +279,12 @@ export default function VisaDetailsPage({ params }) {
                           <>
                             BDT {Math.ceil(unit?.price[0]?.price).toLocaleString()}
                             <span className="text-base font-light">/person</span>
+                            {unit.fee_type  ? (
+                              <span className="text-sm"> ({unit.fee_type}) </span>
+                            ) : (
+                              ''
+                            )}
+
                           </>
                         )
                       }

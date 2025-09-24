@@ -15,17 +15,18 @@ const VisaSearch = () => {
   const [error, setError] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
-  const [isFirst, setIsFirst] = useState(true);
-  const ref = useRef(null);
+  const [isFirstInputInteraction, setIsFirstInputInteraction] = useState(true);
+  const [placeholder, setPlaceholder] = useState("Search visa destinations...");
+  const [stopTypewriter, setStopTypewriter] = useState(false);
+  const searchRef = useRef(null);
   const [inputRef, handleClick] = useScrollOnClick(150);
+
   useEffect(() => {
     (async () => {
       try {
         const res = await getCountries();
         if (res?.data?.length) {
           setDestinations(res.data);
-          setSearchQuery(res.data[0].name);
-          setSelectedLocationId(res.data[0].id);
         } else {
           setError("No destinations available");
         }
@@ -35,15 +36,238 @@ const VisaSearch = () => {
     })();
   }, []);
 
+  // Typewriter effect for placeholder with "Search visa For" prefix
   useEffect(() => {
-    const handle = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setShowSuggestions(false);
+    if (!destinations.length) return;
+
+    const typewriterItems = destinations.map(dest => dest.name);
+    const prefix = "Search visa For ";
+
+    let currentIndex = 0;    
+    let charIndex = 0;     
+    let isDeleting = false;  
+    let currentText = "";
+
+    const typingSpeed = 100;    
+    const deletingSpeed = 100;    
+    const pauseBetweenWords = 3500; 
+
+    const typeWriter = () => {
+      if (stopTypewriter) return; 
+
+      currentText = typewriterItems[currentIndex];
+
+      if (!isDeleting) {
+        // Typing characters forward - always show prefix + current text
+        const displayText = prefix + currentText.slice(0, charIndex + 1);
+        setPlaceholder(displayText);
+        charIndex++;
+
+        // If full text is typed, start deleting after pause
+        if (charIndex === currentText.length) {
+          isDeleting = true;
+          setTimeout(typeWriter, pauseBetweenWords);
+          return;
+        }
+      } else {
+        // Deleting characters - always keep prefix
+        const displayText = prefix + currentText.slice(0, charIndex - 1);
+        setPlaceholder(displayText);
+        charIndex--;
+
+        // When fully deleted, move to the next item
+        if (charIndex === 0) {
+          isDeleting = false;
+          currentIndex = (currentIndex + 1) % typewriterItems.length;
+        }
+      }
+
+      // Adjust speed for typing or deleting
+      const delay = isDeleting ? deletingSpeed : typingSpeed;
+      setTimeout(typeWriter, delay);
     };
-    document.addEventListener("mousedown", handle);
-    return () => document.removeEventListener("mousedown", handle);
+
+    const startTyping = setTimeout(typeWriter, typingSpeed);
+
+    return () => clearTimeout(startTyping);
+  }, [destinations, stopTypewriter]);
+
+  // Handle click outside to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
-  // Slugify function to create URL-friendly strings
+  const calculateMatchScore = (item, query) => {
+    if (!query) return 0;
+
+    const itemName = item?.name?.toLowerCase();
+    const itemFullText = itemName;
+    const queryText = query.toLowerCase().trim();
+
+    if (itemName === queryText) return 1000;
+    if (itemFullText === queryText) return 950;
+
+    if (itemFullText.includes(queryText)) {
+      const matchPos = itemFullText.indexOf(queryText);
+      return 900 + (matchPos === 0 ? 50 : 0);
+    }
+
+    if (itemName.startsWith(queryText)) return 850;
+
+    if (itemName.includes(queryText)) {
+      const matchPos = itemName.indexOf(queryText);
+      return 800 + (50 - Math.min(matchPos, 50));
+    }
+
+    const queryWords = queryText.split(/\s+/);
+    const allWordsMatch = queryWords.every(word =>
+      (itemName || '').includes(word)
+    );
+    if (allWordsMatch) {
+      const matchedWordsCount = queryWords.filter(word =>
+        itemName.includes(word)
+      ).length;
+      return 700 + (matchedWordsCount * 50);
+    }
+
+    let partialMatchScore = 0;
+    for (let i = 0; i <= queryText.length - 3; i++) {
+      const substring = queryText.substring(i, i + 3);
+      if (itemName.includes(substring)) {
+        const pos = itemName.indexOf(substring);
+        partialMatchScore += 100 +
+          (substring.length * 20) +
+          (pos === 0 ? 50 : (pos < 3 ? 30 : 0));
+      }
+    }
+
+    if (partialMatchScore > 0) return Math.min(partialMatchScore, 699);
+
+    let charMatchScore = 0;
+    let queryIndex = 0;
+    for (let i = 0; i < itemName.length && queryIndex < queryText.length; i++) {
+      if (itemName[i] === queryText[queryIndex]) {
+        charMatchScore += 10;
+        queryIndex++;
+      }
+    }
+
+    return Math.min((charMatchScore / queryText.length) * 100, 600);
+  };
+
+  const updateSuggestions = (query) => {
+    if (!query) {
+      const defaultSuggestions = destinations.map(dest => ({
+        ...dest,
+        type: 'destination',
+        score: 0,
+        displayName: dest.name
+      }));
+      setSuggestions(defaultSuggestions);
+      return;
+    }
+
+    const scoredItems = destinations.map(dest => ({
+      ...dest,
+      type: 'destination',
+      score: calculateMatchScore(dest, query),
+      displayName: dest.name
+    }));
+
+    const sorted = scoredItems
+      .filter(item => item.score > 50)
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        const aNameMatch = a.name.toLowerCase().includes(query.toLowerCase());
+        const bNameMatch = b.name.toLowerCase().includes(query.toLowerCase());
+
+        if (aNameMatch && !bNameMatch) return -1;
+        if (!aNameMatch && bNameMatch) return 1;
+
+        const aNameLength = a.name.length;
+        const bNameLength = b.name.length;
+        if (aNameLength !== bNameLength) return aNameLength - bNameLength;
+
+        return a.displayName.localeCompare(b.displayName);
+      });
+
+    setSuggestions(sorted);
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    setStopTypewriter(true); // Stop typewriter once user types
+    updateSuggestions(query);
+
+    if (!query) {
+      setSelectedLocationId("");
+    }
+  };
+
+  const handleSearchFocus = () => {
+    setStopTypewriter(true); // Stop typewriter when input is focused
+    if (isFirstInputInteraction) {
+      setIsFirstInputInteraction(false);
+      setSearchQuery("");
+      setSelectedLocationId("");
+      setSuggestions(destinations.map(d => ({ ...d, type: 'destination' })));
+    } else {
+      updateSuggestions(searchQuery);
+    }
+    setShowSuggestions(true);
+  };
+
+  const selectItem = (item) => {
+    setStopTypewriter(true); // Stop typewriter when selecting an item
+    setSearchQuery(item.name);
+    setSelectedLocationId(item.id);
+    setShowSuggestions(false);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!selectedLocationId) {
+      alert("Please select a valid destination");
+      return;
+    }
+
+    const selectedDestination = destinations.find(dest => dest.id === selectedLocationId);
+
+    if (selectedDestination) {
+      const countrySlug = slugify(selectedDestination.name);
+      router.push(`/visa/${countrySlug}/${selectedLocationId}`);
+    } else {
+      router.push(`/visa/${selectedLocationId}`);
+    }
+  };
+
+  const highlightMatches = (text, query) => {
+    if (!query) return text;
+
+    const queryChars = new Set(query.toLowerCase());
+    return (
+      <>
+        {text.split("").map((char, idx) => (
+          queryChars.has(char.toLowerCase()) ? (
+            <span key={idx} className="font-bold text-blue-600">{char}</span>
+          ) : (
+            <span key={idx}>{char}</span>
+          )
+        ))}
+      </>
+    );
+  };
+
   const slugify = (str) => {
     if (!str) return '';
     return str
@@ -56,118 +280,11 @@ const VisaSearch = () => {
       .replace(/-+$/, '');                     
   };
 
-  const coachLeven = (a, b) => {
-    const m = a.length, n = b.length;
-    const dp = Array(m + 1).fill().map(() => Array(n + 1).fill(0));
-    for (let i = 0; i <= m; i++) dp[i][0] = i;
-    for (let j = 0; j <= n; j++) dp[0][j] = j;
-    for (let i = 1; i <= m; i++) {
-      for (let j = 1; j <= n; j++) {
-        dp[i][j] = a[i - 1] === b[j - 1]
-          ? dp[i - 1][j - 1]
-          : Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + 1);
-      }
-    }
-    return dp[m][n];
-  };
-
-  const score = (dest, query) => {
-    const q = query.toLowerCase().replace(/[^a-z]/g, "");
-    const d = dest.name.toLowerCase().replace(/[^a-z]/g, "");
-    if (!q) return 0;
-    if (d.startsWith(q)) return 100;
-    const dist = coachLeven(q, d);
-    const ratio = dist / Math.max(d.length, q.length);
-    const levenScore = Math.max(0, 100 - ratio * 100);
-
-    let overlap = 0;
-    const df = d.split("").reduce((a, c) => ({ ...a, [c]: (a[c] || 0) + 1 }), {});
-    const qf = q.split("").reduce((a, c) => ({ ...a, [c]: (a[c] || 0) + 1 }), {});
-    let total = 0;
-    for (const ch in df) {
-      const m = Math.min(df[ch], qf[ch] || 0);
-      overlap += m;
-      total += df[ch];
-    }
-    const overlapScore = total ? (overlap / total) * 100 : 0;
-
-    return Math.round(0.7 * levenScore + 0.3 * overlapScore);
-  };
-
-  const highlight = (text, query) => {
-    if (!query) return text;
-    const q = query.toLowerCase();
-    const t = text;
-    const res = [];
-    let last = 0;
-    for (let i = 0; i < t.length; i++) {
-      const ch = t[i].toLowerCase();
-      if (q.includes(ch)) {
-        if (i > last) res.push(t.substring(last, i));
-        res.push(<span key={i} className="font-bold text-blue-600">{t[i]}</span>);
-        last = i + 1;
-      }
-    }
-    if (last < t.length) res.push(t.substring(last));
-    return res.length ? res : text;
-  };
-
-  const update = (q) => {
-    setSearchQuery(q);
-    if (!q) {
-      setSuggestions(destinations);
-      return;
-    }
-    const scored = destinations.map(d => ({ ...d, scoreValue: score(d, q) }));
-    const filtered = scored.filter(d => d.scoreValue > 0);
-    const sorted = filtered.sort((a, b) => b.scoreValue - a.scoreValue).slice(0, 8);
-    setSuggestions(sorted);
-  };
-
-  const onChange = (e) => {
-    update(e.target.value);
-    setSelectedLocationId("");
-  };
-
-  const onFocus = () => {
-    if (isFirst) {
-      setIsFirst(false);
-      setSuggestions(destinations);
-      setSearchQuery("");
-      setSelectedLocationId("");
-    } else {
-      update(searchQuery);
-    }
-    setShowSuggestions(true);
-  };
-
-  const select = (d) => {
-    setSearchQuery(d.name);
-    setSelectedLocationId(d.id);
-    setShowSuggestions(false);
-  };
-
-  const onSubmit = (e) => {
-    e.preventDefault();
-    if (!selectedLocationId) {
-      alert("Please select a valid destination");
-    } else {
-      
-      const selectedDestination = destinations.find(dest => dest.id === selectedLocationId);
-      if (selectedDestination) {
-        const countrySlug = slugify(selectedDestination.name);
-        router.push(`/visa/${countrySlug}/${selectedLocationId}`);
-      } else {
-        router.push(`/visa/${selectedLocationId}`);
-      }
-    }
-  };
-
   if (error) return <div className="text-red-500 p-4">{error}</div>;
 
   return (
-    <div className="max-w-5xl mx-auto pb-6 relative" ref={ref}>
-      <form onSubmit={onSubmit}>
+    <div className="max-w-5xl mx-auto pb-6 relative" ref={searchRef}>
+      <form onSubmit={handleSearch}>
         <div className="space-y-1">
           <label className="block text-sm text-blue-950 font-medium">DESTINATION COUNTRY</label>
           <div className="relative">
@@ -179,31 +296,35 @@ const VisaSearch = () => {
               ref={inputRef}
               onClick={handleClick}
               value={searchQuery}
-              onChange={onChange}
-              onFocus={onFocus}
-              placeholder="Search visa destinations..."
+              onChange={handleSearchChange}
+              onFocus={handleSearchFocus}
+              placeholder={placeholder}
               className="p-2 h-12 border border-gray-300 rounded-lg hover:border-blue-900 focus:border-blue-900 focus:ring-0 transition-colors w-full font-bold text-blue-950 text-lg pl-10"
               aria-autocomplete="list"
               aria-controls="visa-suggestions"
             />
           </div>
+          
           {showSuggestions && suggestions.length > 0 && (
             <div
               id="visa-suggestions"
               className="absolute w-full bg-white border rounded-lg shadow-lg mt-1 max-h-60 overflow-auto z-30"
               role="listbox"
             >
-              {suggestions.map((d, idx) => (
+              {suggestions.map((item, idx) => (
                 <div
-                  key={d.id}
+                  key={item.id}
                   role="option"
-                  aria-selected={d.id === selectedLocationId}
-                  className={`p-2 hover:bg-blue-50 cursor-pointer flex justify-between ${idx === 0 ? "font-semibold" : ""
-                    }`}
-                  onClick={() => select(d)}
+                  aria-selected={item.id === selectedLocationId}
+                  className="p-2 hover:bg-blue-50 cursor-pointer flex justify-between items-center"
+                  onClick={() => selectItem(item)}
                 >
-                  <div>{highlight(d.name, searchQuery)}</div>
-                  {idx === 0 && <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Best match</span>}
+                  <div>{highlightMatches(item.name, searchQuery)}</div>
+                  {idx === 0 && item.score > 50 && (
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded whitespace-nowrap">
+                      Best match
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
